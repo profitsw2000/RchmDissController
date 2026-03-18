@@ -1,4 +1,4 @@
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.LibraryExtension
 import gradleplugins.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -9,13 +9,13 @@ class MainLibraryGradlePlugin: Plugin<Project> {
         with(project) {
             with(project.pluginManager) {
                 apply("com.android.library")
-                apply("org.jetbrains.kotlin.android")
-                apply("org.jetbrains.kotlin.kapt")
-                apply("kotlin-parcelize")
+                apply("com.google.devtools.ksp")
+                apply("org.jetbrains.kotlin.plugin.parcelize")
             }
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
+                buildFeatures.buildConfig = true
                 defaultConfig { consumerProguardFile("consumer-rules.pro")}
             }
         }
