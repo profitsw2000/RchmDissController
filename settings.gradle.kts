@@ -22,4 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "RchmDissController"
 include(":app")
- 
+include(":core")
