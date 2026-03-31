@@ -9,6 +9,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import androidx.navigation.ui.setupWithNavController
 import ru.profitsw2000.rchmdisscontroller.databinding.ActivityMainBinding
 
 class  MainActivity : AppCompatActivity() {
@@ -22,22 +23,17 @@ class  MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
+        setSupportActionBar(binding.topAppBar)
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
+        binding.bottomNavigationView.setupWithNavController(navController)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
-
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
+        menuInflater.inflate(ru.profitsw2000.core.R.menu.menu_main, menu)
         return true
     }
 
@@ -46,7 +42,7 @@ class  MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            //R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
