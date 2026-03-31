@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -15,6 +17,7 @@ import ru.profitsw2000.rchmdisscontroller.databinding.ActivityMainBinding
 class  MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +28,12 @@ class  MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.topAppBar)
 
-        val navController = findNavController(R.id.fragment_container_view)
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.fragment_container_view
+        ) as NavHostFragment
+
+        navController = navHostFragment.navController
+
         binding.bottomNavigationView.setupWithNavController(navController)
         appBarConfiguration = AppBarConfiguration(
             setOf(R.id.main, R.id.registers, R.id.history)
