@@ -20,6 +20,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/top_app_bar_background_color"
             app:title="@string/app_name"
             style="@style/Widget.MaterialComponents.Toolbar.Primary"/>
         
@@ -29,7 +30,6 @@
         android:id="@+id/fragment_container_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:name="androidx.navigation.fragment.NavHostFragment"
         app:layout_constraintTop_toBottomOf="@id/top_app_bar_layout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -41,6 +41,7 @@
         android:id="@+id/bottom_navigation_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bottom_navigation_background_color"
         app:layout_constraintTop_toBottomOf="@+id/fragment_container_view"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
