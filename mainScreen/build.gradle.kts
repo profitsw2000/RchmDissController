@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.profitsw2000.data"
+    namespace = "ru.profitsw2000.mainscreen"
 }
 
 dependencies {
