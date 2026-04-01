@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TxNumberIconView">
+        <attr name="txNumber" format="string"/>
+        <attr name="txIconColor" format="color"/>
+    </declare-styleable>
+</resources>
