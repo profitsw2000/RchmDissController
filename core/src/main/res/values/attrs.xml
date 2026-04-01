@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="TxNumberIconView">
-        <attr name="txNumber" format="string"/>
-        <attr name="txIconColor" format="color"/>
+    <declare-styleable name="RfChannelNumberIconView">
+        <attr name="rfChannelNumber" format="string"/>
+        <attr name="rfIconColor" format="color"/>
+        <attr name="rfChannelIcon" format="reference"/>
     </declare-styleable>
 </resources>

@@ -1,12 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_constraint_layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainFragment">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/transmitter_constraint_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <include
+                android:id="@+id/transmitter_top_ornament"
+                layout="@layout/module_part_title_top_ornament"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/transmitter_title_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ПЕРЕДАТЧИК"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/module_part_title_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/transmitter_top_ornament" />
+
+            <include
+                android:id="@+id/transmitter_bottom_ornament"
+                layout="@layout/module_part_title_bottom_ornament"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/transmitter_title_text_view" />
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/rx_first_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/transmitter_bottom_ornament"
+                app:rfChannelNumber="1"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/rx_second_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
+                app:rfChannelNumber="2"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
