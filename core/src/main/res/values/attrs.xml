@@ -3,6 +3,8 @@
     <declare-styleable name="RfChannelNumberIconView">
         <attr name="rfChannelNumber" format="string"/>
         <attr name="rfIconColor" format="color"/>
+        <attr name="rfCrossColor" format="color"/>
+        <attr name="rfCrossIsVisible" format="boolean"/>
         <attr name="rfChannelIcon" format="reference"/>
     </declare-styleable>
 

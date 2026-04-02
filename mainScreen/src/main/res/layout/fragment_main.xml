@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="@dimen/root_layout_standart_padding"
     tools:context=".MainFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -50,16 +51,130 @@
                 app:layout_constraintTop_toBottomOf="@+id/transmitter_title_text_view" />
 
             <ru.profitsw2000.core.drawable.RfChannelNumberIconView
-                android:id="@+id/rx_first_channel_icon_view"
+                android:id="@+id/tx_first_channel_icon_view"
                 android:layout_width="@dimen/channel_icon_width"
                 android:layout_height="@dimen/channel_icon_height"
                 android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/transmitter_bottom_ornament"
-                app:layout_constraintEnd_toStartOf="@id/rx_second_channel_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/tx_second_channel_icon_view"
                 app:rfChannelNumber="1"
                 app:rfIconColor="?attr/colorOnSurfaceVariant"
                 app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/tx_second_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/tx_third_channel_icon_view"
+                app:rfChannelNumber="2"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/tx_third_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/tx_second_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/tx_fourth_channel_icon_view"
+                app:rfChannelNumber="3"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/tx_fourth_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/tx_third_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/tx_fifth_channel_icon_view"
+                app:rfChannelNumber="4"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/tx_fifth_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/tx_fourth_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintEnd_toEndOf="@+id/transmitter_state_icon_view"
+                app:rfChannelNumber="5"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfStateIndicatorIconView
+                android:id="@+id/transmitter_state_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/channel_icon_height"
+                app:rfStateText="ПРД"
+                app:rfStateIconColor="?attr/colorOnSurfaceVariant"
+                app:rfStateIconPadding="8dp"
+                app:layout_constraintStart_toEndOf="@+id/tx_fifth_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/tx_first_channel_icon_view"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/receiver_constraint_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/transmitter_constraint_layout">
+
+            <include
+                android:id="@+id/receiver_top_ornament"
+                layout="@layout/module_part_title_top_ornament"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/receiver_title_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ПРИЁМНИК"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/module_part_title_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/receiver_top_ornament" />
+
+            <include
+                android:id="@+id/receiver_bottom_ornament"
+                layout="@layout/module_part_title_bottom_ornament"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/receiver_title_text_view" />
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/rx_first_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/receiver_bottom_ornament"
+                app:layout_constraintEnd_toStartOf="@id/rx_second_channel_icon_view"
+                app:rfCrossIsVisible="true"
+                app:rfCrossColor="@color/guardsman_red"
+                app:rfChannelNumber="1"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/rx_icon"/>
 
             <ru.profitsw2000.core.drawable.RfChannelNumberIconView
                 android:id="@+id/rx_second_channel_icon_view"
@@ -69,9 +184,11 @@
                 app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
                 app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
                 app:layout_constraintEnd_toStartOf="@id/rx_third_channel_icon_view"
+                app:rfCrossIsVisible="true"
+                app:rfCrossColor="@color/guardsman_red"
                 app:rfChannelNumber="2"
                 app:rfIconColor="?attr/colorOnSurfaceVariant"
-                app:rfChannelIcon="@drawable/tx_icon"/>
+                app:rfChannelIcon="@drawable/rx_icon"/>
 
             <ru.profitsw2000.core.drawable.RfChannelNumberIconView
                 android:id="@+id/rx_third_channel_icon_view"
@@ -83,7 +200,7 @@
                 app:layout_constraintEnd_toStartOf="@id/rx_fourth_channel_icon_view"
                 app:rfChannelNumber="3"
                 app:rfIconColor="?attr/colorOnSurfaceVariant"
-                app:rfChannelIcon="@drawable/tx_icon"/>
+                app:rfChannelIcon="@drawable/rx_icon"/>
 
             <ru.profitsw2000.core.drawable.RfChannelNumberIconView
                 android:id="@+id/rx_fourth_channel_icon_view"
@@ -95,7 +212,7 @@
                 app:layout_constraintEnd_toStartOf="@id/rx_fifth_channel_icon_view"
                 app:rfChannelNumber="4"
                 app:rfIconColor="?attr/colorOnSurfaceVariant"
-                app:rfChannelIcon="@drawable/tx_icon"/>
+                app:rfChannelIcon="@drawable/rx_icon"/>
 
             <ru.profitsw2000.core.drawable.RfChannelNumberIconView
                 android:id="@+id/rx_fifth_channel_icon_view"
@@ -104,16 +221,16 @@
                 app:layout_constraintStart_toEndOf="@id/rx_fourth_channel_icon_view"
                 app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
                 app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
-                app:layout_constraintEnd_toEndOf="@+id/transmitter_state_icon_view"
+                app:layout_constraintEnd_toEndOf="@+id/receiver_test_signal_state_icon_view"
                 app:rfChannelNumber="5"
                 app:rfIconColor="?attr/colorOnSurfaceVariant"
-                app:rfChannelIcon="@drawable/tx_icon"/>
+                app:rfChannelIcon="@drawable/rx_icon"/>
 
             <ru.profitsw2000.core.drawable.RfStateIndicatorIconView
-                android:id="@+id/transmitter_state_icon_view"
+                android:id="@+id/receiver_test_signal_state_icon_view"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/channel_icon_height"
-                app:rfStateText="ПРД"
+                app:rfStateText="ПС"
                 app:rfStateIconColor="?attr/colorOnSurfaceVariant"
                 app:rfStateIconPadding="8dp"
                 app:layout_constraintStart_toEndOf="@+id/rx_fifth_channel_icon_view"

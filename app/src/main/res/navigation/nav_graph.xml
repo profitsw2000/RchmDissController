@@ -7,9 +7,8 @@
 
     <fragment
         android:id="@+id/main"
-        android:name="ru.profitsw2000.rchmdisscontroller.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        android:name="ru.profitsw2000.mainscreen.MainFragment"
+        tools:layout="@layout/fragment_main">
     </fragment>
 
     <fragment

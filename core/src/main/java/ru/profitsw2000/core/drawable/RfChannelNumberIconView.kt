@@ -15,6 +15,8 @@ class RfChannelNumberIconView @JvmOverloads constructor(
 ) : androidx.appcompat.widget.AppCompatImageView(context, attrs, defStyleAttr) {
     private var rfChannelNumber: String = "0"
     private var rfChannelIconColor: Int = Color.BLACK
+    private var crossColor: Int = Color.RED // Цвет крестика по умолчанию
+    private var showCross: Boolean = false   // Флаг отображения
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = rfChannelIconColor
@@ -22,10 +24,18 @@ class RfChannelNumberIconView @JvmOverloads constructor(
         typeface = Typeface.DEFAULT_BOLD
     }
 
+    private val crossPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
+
     init {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.RfChannelNumberIconView)
         rfChannelNumber = typedArray.getString(R.styleable.RfChannelNumberIconView_rfChannelNumber) ?: "0"
         rfChannelIconColor = typedArray.getColor(R.styleable.RfChannelNumberIconView_rfIconColor, Color.GRAY)
+        crossColor = typedArray.getColor(R.styleable.RfChannelNumberIconView_rfCrossColor, Color.RED)
+        showCross = typedArray.getBoolean(R.styleable.RfChannelNumberIconView_rfCrossColor, false)
+
         val iconRes = typedArray.getResourceId(
             R.styleable.RfChannelNumberIconView_rfChannelIcon,
             R.drawable.tx_icon
@@ -47,6 +57,16 @@ class RfChannelNumberIconView @JvmOverloads constructor(
         invalidate()
     }
 
+    fun setCrossVisible(isVisible: Boolean) {
+        showCross = isVisible
+        invalidate()
+    }
+
+    fun setCrossColor(color: Int) {
+        crossColor = color
+        invalidate()
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -57,5 +77,22 @@ class RfChannelNumberIconView @JvmOverloads constructor(
         val y = height/2f - (textPaint.descent() + textPaint.ascent())/2f
 
         canvas.drawText(rfChannelNumber, x, y, textPaint)
+
+        if (showCross) {
+            drawCross(canvas)
+        }
+    }
+
+    private fun drawCross(canvas: Canvas) {
+        crossPaint.color = crossColor
+        crossPaint.strokeWidth = height * 0.075f // Толщина линий крестика
+
+        val size = height * 0.075f // Размер крестика
+        val centerX = width * 0.45f // Смещение влево (противоположно цифре)
+        val centerY = height * 0.5f
+
+        // Рисуем две линии крестика
+        canvas.drawLine(centerX - size, centerY - size, centerX + size, centerY + size, crossPaint)
+        canvas.drawLine(centerX + size, centerY - size, centerX - size, centerY + size, crossPaint)
     }
 }

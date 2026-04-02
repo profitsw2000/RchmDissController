@@ -9,6 +9,7 @@ android {
 dependencies {
     implementation(project(":core"))
     implementation(project(":navigator"))
+    implementation(project(":mainScreen"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
