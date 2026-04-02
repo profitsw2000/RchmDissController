@@ -56,6 +56,7 @@
                 android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/transmitter_bottom_ornament"
+                app:layout_constraintEnd_toStartOf="@id/rx_second_channel_icon_view"
                 app:rfChannelNumber="1"
                 app:rfIconColor="?attr/colorOnSurfaceVariant"
                 app:rfChannelIcon="@drawable/tx_icon"/>
@@ -67,9 +68,58 @@
                 app:layout_constraintStart_toEndOf="@id/rx_first_channel_icon_view"
                 app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
                 app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/rx_third_channel_icon_view"
                 app:rfChannelNumber="2"
                 app:rfIconColor="?attr/colorOnSurfaceVariant"
                 app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/rx_third_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/rx_second_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/rx_fourth_channel_icon_view"
+                app:rfChannelNumber="3"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/rx_fourth_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/rx_third_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintEnd_toStartOf="@id/rx_fifth_channel_icon_view"
+                app:rfChannelNumber="4"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfChannelNumberIconView
+                android:id="@+id/rx_fifth_channel_icon_view"
+                android:layout_width="@dimen/channel_icon_width"
+                android:layout_height="@dimen/channel_icon_height"
+                app:layout_constraintStart_toEndOf="@id/rx_fourth_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintEnd_toEndOf="@+id/transmitter_state_icon_view"
+                app:rfChannelNumber="5"
+                app:rfIconColor="?attr/colorOnSurfaceVariant"
+                app:rfChannelIcon="@drawable/tx_icon"/>
+
+            <ru.profitsw2000.core.drawable.RfStateIndicatorIconView
+                android:id="@+id/transmitter_state_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/channel_icon_height"
+                app:rfStateText="ПРД"
+                app:rfStateIconColor="?attr/colorOnSurfaceVariant"
+                app:rfStateIconPadding="8dp"
+                app:layout_constraintStart_toEndOf="@+id/rx_fifth_channel_icon_view"
+                app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
