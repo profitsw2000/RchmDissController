@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/white_marble"
     android:padding="@dimen/root_layout_standart_padding"
-    tools:context=".MainFragment">
+    tools:context=".presentation.view.MainFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_constraint_layout"
@@ -336,7 +336,7 @@
                 app:rfStateText="@string/symmetric_lfm_icon_text" />
 
             <TextView
-                android:id="@+id/frequency_value_text_view"
+                android:id="@+id/period_value_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/lfm_parameter_text_margin_start"

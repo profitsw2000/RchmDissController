@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="moduleParameterChipStyle" parent="Widget.Material3.Chip.Suggestion">
+        <item name="chipStrokeColor">@color/citrusy_emerald</item>
+        <item name="chipStartPadding">4dp</item>
+        <item name="chipEndPadding">4dp</item>
+        <item name="chipCornerRadius">16dp</item>
+    </style>
+
+</resources>

@@ -17,4 +17,6 @@
     <string name="symmetric_lfm_icon_text">СИМ</string>
     <string name="non_symmetric_lfm_icon_text">НСМ</string>
     <string name="lfm_period_value_text">%1$f мс</string>
+    <string name="transmitter_switch_check_box_text">ВКЛ_ПРД</string>
+    <string name="send_button_text">ОТПРАВИТЬ</string>
 </resources>

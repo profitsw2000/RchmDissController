@@ -1,10 +1,11 @@
-package ru.profitsw2000.mainscreen
+package ru.profitsw2000.mainscreen.presentation.view
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import ru.profitsw2000.mainscreen.R
 
 class MainFragment : Fragment() {
 
