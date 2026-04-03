@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white_marble"
     android:padding="@dimen/root_layout_standart_padding"
     tools:context=".MainFragment">
 
@@ -34,7 +35,7 @@
                 android:id="@+id/transmitter_title_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ПЕРЕДАТЧИК"
+                android:text="@string/transmitter_part_title_text"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="@dimen/module_part_title_text_size"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -114,9 +115,9 @@
                 android:id="@+id/transmitter_state_icon_view"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/channel_icon_height"
-                app:rfStateText="ПРД"
+                app:rfStateText="@string/transmitter_state_icon_text"
                 app:rfStateIconColor="?attr/colorOnSurfaceVariant"
-                app:rfStateIconPadding="8dp"
+                app:rfStateIconPadding="@dimen/rf_state_icon_padding_size"
                 app:layout_constraintStart_toEndOf="@+id/tx_fifth_channel_icon_view"
                 app:layout_constraintTop_toTopOf="@id/tx_first_channel_icon_view"
                 app:layout_constraintBottom_toBottomOf="@id/tx_first_channel_icon_view"
@@ -128,7 +129,7 @@
             android:id="@+id/receiver_constraint_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="@dimen/margin_between_module_parts"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/transmitter_constraint_layout">
@@ -146,7 +147,7 @@
                 android:id="@+id/receiver_title_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ПРИЁМНИК"
+                android:text="@string/receiver_part_title_text"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="@dimen/module_part_title_text_size"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -230,13 +231,132 @@
                 android:id="@+id/receiver_test_signal_state_icon_view"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/channel_icon_height"
-                app:rfStateText="ПС"
+                app:rfStateText="@string/receiver_test_signal_icon_text"
                 app:rfStateIconColor="?attr/colorOnSurfaceVariant"
-                app:rfStateIconPadding="8dp"
+                app:rfStateIconPadding="@dimen/rf_state_icon_padding_size"
                 app:layout_constraintStart_toEndOf="@+id/rx_fifth_channel_icon_view"
                 app:layout_constraintTop_toTopOf="@id/rx_first_channel_icon_view"
                 app:layout_constraintBottom_toBottomOf="@id/rx_first_channel_icon_view"
                 app:layout_constraintEnd_toEndOf="parent"/>
+
+            <TextView
+                android:id="@+id/attenuation_value_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="@dimen/parameter_value_text_size"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rx_first_channel_icon_view"
+                tools:text="0 дБ" />
+
+            <ImageView
+                android:id="@+id/attenuator_image_view"
+                android:layout_width="@dimen/attenuator_image_view_width"
+                android:layout_height="@dimen/attenuator_image_view_height"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/attenuation_value_text_view"
+                android:src="@drawable/attenuator_icon"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/synthesizer_constraint_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_module_parts"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/receiver_constraint_layout">
+
+            <include
+                android:id="@+id/synthesizer_top_ornament"
+                layout="@layout/module_part_title_top_ornament"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/synthesizer_title_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/synthesizer_part_title_text"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/module_part_title_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/synthesizer_top_ornament" />
+
+            <include
+                android:id="@+id/synthesizer_bottom_ornament"
+                layout="@layout/module_part_title_bottom_ornament"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/synthesizer_title_text_view" />
+
+            <ru.profitsw2000.core.drawable.RfStateIndicatorIconView
+                android:id="@+id/synthesizer_mode_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/synthesizer_state_icon_view_height"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/synthesizer_bottom_ornament"
+                app:rfStateIconColor="?attr/colorOnSurfaceVariant"
+                app:rfStateIconPadding="@dimen/rf_state_icon_padding_size"
+                app:rfStateText="ЛЧМ" />
+
+            <TextView
+                android:id="@+id/frequency_value_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/lfm_parameter_text_margin_start"
+                app:layout_constraintStart_toEndOf="@+id/synthesizer_mode_icon_view"
+                app:layout_constraintTop_toTopOf="@id/synthesizer_mode_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/synthesizer_mode_icon_view"
+                tools:text="13250 - 13400 МГц"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textStyle="bold"
+                android:textSize="@dimen/parameter_value_text_size"/>
+
+            <ru.profitsw2000.core.drawable.RfStateIndicatorIconView
+                android:id="@+id/lfm_swing_type_icon_view"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/synthesizer_state_icon_view_height"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/synthesizer_mode_icon_view"
+                app:rfStateIconColor="?attr/colorOnSurfaceVariant"
+                app:rfStateIconPadding="@dimen/rf_state_icon_padding_size"
+                app:rfStateText="@string/symmetric_lfm_icon_text" />
+
+            <TextView
+                android:id="@+id/frequency_value_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/lfm_parameter_text_margin_start"
+                app:layout_constraintStart_toEndOf="@+id/lfm_swing_type_icon_view"
+                app:layout_constraintTop_toTopOf="@id/lfm_swing_type_icon_view"
+                app:layout_constraintBottom_toBottomOf="@id/lfm_swing_type_icon_view"
+                tools:text="0.5 мс"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textStyle="bold"
+                android:textSize="@dimen/parameter_value_text_size"/>
+
+            <ImageView
+                android:id="@+id/lfm_external_trigger_state_image_view"
+                android:layout_width="@dimen/lfm_ext_trigger_state_icon_width"
+                android:layout_height="@dimen/lfm_ext_trigger_state_icon_height"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                app:layout_constraintTop_toBottomOf="@id/lfm_swing_type_icon_view"
+                app:layout_constraintStart_toStartOf="parent"
+                android:src="@drawable/lfm_trig_icon"
+                android:tint="?attr/colorOnSurfaceVariant"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

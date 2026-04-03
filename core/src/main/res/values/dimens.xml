@@ -7,4 +7,13 @@
     <dimen name="channel_icon_height">48dp</dimen>
     <dimen name="margin_between_ch_icon_ornament">8dp</dimen>
     <dimen name="root_layout_standart_padding">12dp</dimen>
+    <dimen name="rf_state_icon_padding_size">8dp</dimen>
+    <dimen name="attenuator_image_view_width">96dp</dimen>
+    <dimen name="attenuator_image_view_height">36dp</dimen>
+    <dimen name="synthesizer_state_icon_view_height">36dp</dimen>
+    <dimen name="lfm_parameter_text_margin_start">24dp</dimen>
+    <dimen name="parameter_value_text_size">24sp</dimen>
+    <dimen name="margin_between_module_parts">24dp</dimen>
+    <dimen name="lfm_ext_trigger_state_icon_width">84dp</dimen>
+    <dimen name="lfm_ext_trigger_state_icon_height">48dp</dimen>
 </resources>
