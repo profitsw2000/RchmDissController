@@ -18,5 +18,24 @@
     <string name="non_symmetric_lfm_icon_text">НСМ</string>
     <string name="lfm_period_value_text">%1$f мс</string>
     <string name="transmitter_switch_check_box_text">ВКЛ_ПРД</string>
+    <string name="receiver_test_signal_switch_check_box_text">Вкл. пилот-сигнал</string>
     <string name="send_button_text">ОТПРАВИТЬ</string>
+    <string name="attenuator_settings_title_text">Аттенюатор</string>
+    <string name="receiver_lock_settings_title_text">Запирание входа приёмника</string>
+    <string name="rf_channel1_selection_text">Канал 1</string>
+    <string name="rf_channel2_selection_text">Канал 2</string>
+    <string name="rf_channel3_selection_text">Канал 3</string>
+    <string name="rf_channel4_selection_text">Канал 4</string>
+    <string name="rf_channel5_selection_text">Канал 5</string>
+    <string name="attenuator_selection_2_decibels_value_text">2 дБ</string>
+    <string name="attenuator_selection_4_decibels_value_text">4 дБ</string>
+    <string name="attenuator_selection_8_decibels_value_text">8 дБ</string>
+    <string name="attenuator_selection_16_decibels_value_text">16 дБ</string>
+    <string name="attenuator_selection_32_decibels_value_text">32 дБ</string>
+    <string name="attenuator_selection_extra_4_decibels_value_text">4 дБ доп</string>
+    <string name="rf_channel1_lock_selection_text">Зап. кан. 1</string>
+    <string name="rf_channel2_lock_selection_text">Зап. кан. 2</string>
+    <string name="rf_channel3_lock_selection_text">Зап. кан. 3</string>
+    <string name="rf_channel4_lock_selection_text">Зап. кан. 4</string>
+    <string name="rf_channel5_lock_selection_text">Зап. кан. 5</string>
 </resources>

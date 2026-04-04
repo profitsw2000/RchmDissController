@@ -16,4 +16,7 @@
     <dimen name="margin_between_module_parts">24dp</dimen>
     <dimen name="lfm_ext_trigger_state_icon_width">84dp</dimen>
     <dimen name="lfm_ext_trigger_state_icon_height">48dp</dimen>
+    <dimen name="chip_group_horizontal_spacing">4dp</dimen>
+    <dimen name="chip_group_vertical_spacing">2dp</dimen>
+    <dimen name="module_parameter_title_text_size">24sp</dimen>
 </resources>
