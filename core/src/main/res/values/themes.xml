@@ -1,0 +1,24 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.RchmDissController" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:statusBarColor">@color/white_marble</item>
+        <item name="android:navigationBarColor">@color/white_marble</item>
+        <item name="colorOnSurface">@color/eucaliptus</item>
+        <item name="colorOnSurfaceVariant">@color/super_grey</item>
+        <item name="colorSecondaryContainer">@color/citrusy_emerald</item>
+        <item name="colorOnSecondaryContainer">@color/white_parakeet</item>
+        <item name="colorSurfaceContainerLow">@color/white_parakeet</item>
+        <item name="errorTextColor">@color/guardsman_red</item>
+        <item name="colorOutline">@color/super_grey</item>
+        <item name="colorPrimary">@color/eucaliptus</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/white_parakeet</item>
+
+        <item name="chipStyle">@style/moduleParameterChipStyle</item>
+        <item name="textInputOutlinedStyle">@style/outlinedBoxStyle</item>
+    </style>
+
+    <style name="Theme.RchmDissController" parent="Base.Theme.RchmDissController" />
+</resources>
