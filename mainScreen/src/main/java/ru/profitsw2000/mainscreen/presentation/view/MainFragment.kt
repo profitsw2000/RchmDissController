@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentMainBinding
+import ru.profitsw2000.navigator.Navigator
 
 class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
+    private val navigator: Navigator by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

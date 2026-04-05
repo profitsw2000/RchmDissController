@@ -11,8 +11,12 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import org.koin.core.context.loadKoinModules
+import org.koin.dsl.module
+import ru.profitsw2000.navigator.Navigator
 import ru.profitsw2000.rchmdisscontroller.R
 import ru.profitsw2000.rchmdisscontroller.databinding.ActivityMainBinding
+import ru.profitsw2000.rchmdisscontroller.navigator.NavigatorImpl
 
 class  MainActivity : AppCompatActivity() {
 
@@ -33,6 +37,9 @@ class  MainActivity : AppCompatActivity() {
         ) as NavHostFragment
 
         navController = navHostFragment.navController
+
+
+        loadKoinModules( module { single<Navigator> { NavigatorImpl(navController) } })
 
         binding.bottomNavigationView.setupWithNavController(navController)
         appBarConfiguration = AppBarConfiguration(
