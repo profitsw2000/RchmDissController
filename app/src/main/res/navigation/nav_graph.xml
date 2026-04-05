@@ -9,20 +9,51 @@
         android:id="@+id/main"
         android:name="ru.profitsw2000.mainscreen.presentation.view.MainFragment"
         tools:layout="@layout/fragment_main">
+
+        <action
+            android:id="@+id/action_main_to_transmitter_settings_dialog_fragment"
+            app:destination="@+id/transmitter_settings_bottom_sheet"/>
+
+        <action
+            android:id="@+id/action_main_to_receiver_settings_dialog_fragment"
+            app:destination="@+id/receiver_settings_bottom_sheet"/>
+
+        <action
+            android:id="@+id/action_main_to_synthesizer_settings_dialog_fragment"
+            app:destination="@+id/synthesizer_settings_bottom_sheet"/>
     </fragment>
 
     <fragment
         android:id="@+id/registers"
-        android:name="ru.profitsw2000.rchmdisscontroller.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        android:name="ru.profitsw2000.rchmdisscontroller.FirstFragment"
+        tools:layout="@layout/fragment_first">
     </fragment>
 
     <fragment
         android:id="@+id/history"
         android:name="ru.profitsw2000.rchmdisscontroller.SecondFragment"
-        android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_second">
     </fragment>
+
+    <dialog
+        android:id="@+id/transmitter_settings_bottom_sheet"
+        android:name="ru.profitsw2000.mainscreen.presentation.view.bottomsheet.TransmitterBottomSheetDialogFragment"
+        android:label="@string/transmitter_part_title_text"
+        tools:layout="@layout/fragment_transmitter_bottom_sheet_dialog">
+    </dialog>
+
+    <dialog
+        android:id="@+id/receiver_settings_bottom_sheet"
+        android:name="ru.profitsw2000.mainscreen.presentation.view.bottomsheet.ReceiverBottomSheetDialogFragment"
+        android:label="@string/receiver_part_title_text"
+        tools:layout="@layout/fragment_receiver_bottom_sheet_dialog">
+    </dialog>
+
+    <dialog
+        android:id="@+id/synthesizer_settings_bottom_sheet"
+        android:name="ru.profitsw2000.mainscreen.presentation.view.bottomsheet.SynthesizerBottomSheetDialogFragment"
+        android:label="@string/synthesizer_part_title_text"
+        tools:layout="@layout/fragment_synthesizer_bottom_sheet_dialog">
+    </dialog>
 
 </navigation>

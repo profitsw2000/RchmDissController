@@ -7,11 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
 
-class SynthesizerBottomSheetDialogFragment : Fragment() {
+class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentSynthesizerBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
