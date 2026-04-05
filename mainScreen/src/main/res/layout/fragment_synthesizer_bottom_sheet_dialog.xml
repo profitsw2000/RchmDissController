@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_coordinator_layout"
     android:layout_width="match_parent"
@@ -13,12 +14,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:id="@+id/drag_handle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <TextView
             android:id="@+id/bottom_sheet_title_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/synthesizer_part_title_text"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/drag_handle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:textSize="@dimen/module_part_title_text_size"
@@ -51,6 +60,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="number"
                     />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -73,6 +83,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="number"
                     />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -81,13 +92,14 @@
                 android:id="@+id/lfm_high_frequency_text_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
                 android:visibility="gone"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
                 android:hint="@string/lfm_high_frequency_text_input_layout_hint_text">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="number"
                     />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -96,13 +108,14 @@
                 android:id="@+id/lfm_period_text_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
                 android:visibility="gone"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
                 android:hint="@string/lfm_period_text_input_layout_hint_text">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
                     />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -115,19 +128,12 @@
                 android:visibility="gone"
                 android:text="@string/lfm_ext_trig_switch_check_box_text"
                 android:textColor="@color/checkbox_text_color_selector" />
-
-            <androidx.constraintlayout.widget.Group
-                android:id="@+id/lfm_params_group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:constraint_referenced_ids="lfm_low_frequency_text_input_layout,
-            lfm_high_frequency_text_input_layout, lfm_period_text_input_layout,
-            lfm_ext_trigger_switch_check_box"/>
             
         </RadioGroup>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/synthesizer_params_send_button"
+            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -138,6 +144,3 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-
-    <!--app:expandedHintEnabled="false"->

@@ -13,12 +13,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:id="@+id/drag_handle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <TextView
             android:id="@+id/bottom_sheet_title_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/transmitter_part_title_text"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/drag_handle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:textSize="@dimen/module_part_title_text_size"
@@ -43,32 +51,31 @@
                 android:id="@+id/first_channel_selection_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="Канал 1"/>
+                android:text="@string/rf_channel1_selection_text"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/second_channel_selection_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Канал 2"/>
+                android:text="@string/rf_channel2_selection_text"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/third_channel_selection_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Канал 3"/>
+                android:text="@string/rf_channel3_selection_text"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/fourth_channel_selection_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Канал 4"/>
+                android:text="@string/rf_channel4_selection_text"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/fifth_channel_selection_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Канал 5"/>
+                android:text="@string/rf_channel5_selection_text"/>
 
         </com.google.android.material.chip.ChipGroup>
 
@@ -84,6 +91,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/transmitter_params_send_button"
+            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"

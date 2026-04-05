@@ -32,13 +32,13 @@ class MainFragment : Fragment() {
 
     private fun initViews() = with(binding) {
         transmitterConstraintLayout.setOnClickListener {
-
+            navigator.navigateToTransmitterSettingsDialog()
         }
         receiverConstraintLayout.setOnClickListener {
-
+            navigator.navigateToReceiverSettingsDialog()
         }
         synthesizerConstraintLayout.setOnClickListener {
-
+            navigator.navigateToSynthesizerSettingsDialog()
         }
     }
 }
