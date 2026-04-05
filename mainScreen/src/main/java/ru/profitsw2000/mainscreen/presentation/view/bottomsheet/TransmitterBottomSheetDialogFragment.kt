@@ -5,20 +5,33 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.profitsw2000.mainscreen.R
+import ru.profitsw2000.mainscreen.databinding.FragmentTransmitterBottomSheetDialogBinding
 
 class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private var _binding: FragmentTransmitterBottomSheetDialogBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_transmitter_bottom_sheet_dialog, container, false)
+        _binding = FragmentTransmitterBottomSheetDialogBinding.inflate(inflater, container, false)
+        return binding.root
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val bottomSheetBehavior = BottomSheetBehavior.from(view.parent as View)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        val layout: CoordinatorLayout = binding.rootCoordinatorLayout
+        layout.minimumHeight = 1500
+    }
+
 }
