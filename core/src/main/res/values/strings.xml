@@ -14,11 +14,14 @@
     <string name="synthesizer_part_title_text">СИНТЕЗАТОР</string>
     <string name="transmitter_state_icon_text">ПРД</string>
     <string name="receiver_test_signal_icon_text">ПС</string>
+    <string name="cw_synthesizer_mode_text">НГ</string>
+    <string name="lfm_synthesizer_mode_text">ЛЧМ</string>
     <string name="symmetric_lfm_icon_text">СИМ</string>
     <string name="non_symmetric_lfm_icon_text">НСМ</string>
     <string name="lfm_period_value_text">%1$f мс</string>
     <string name="transmitter_switch_check_box_text">ВКЛ_ПРД</string>
     <string name="receiver_test_signal_switch_check_box_text">Вкл. пилот-сигнал</string>
+    <string name="lfm_ext_trig_switch_check_box_text">Внешний запуск ЛЧМ</string>
     <string name="send_button_text">ОТПРАВИТЬ</string>
     <string name="attenuator_settings_title_text">Аттенюатор</string>
     <string name="receiver_lock_settings_title_text">Запирание входа приёмника</string>
@@ -38,4 +41,8 @@
     <string name="rf_channel3_lock_selection_text">Зап. кан. 3</string>
     <string name="rf_channel4_lock_selection_text">Зап. кан. 4</string>
     <string name="rf_channel5_lock_selection_text">Зап. кан. 5</string>
+    <string name="cw_frequency_text_input_layout_hint_text">Частота, МГц</string>
+    <string name="lfm_low_frequency_text_input_layout_hint_text">Нижн. знач. част., МГц</string>
+    <string name="lfm_high_frequency_text_input_layout_hint_text">Верхн. знач. част., МГц</string>
+    <string name="lfm_period_text_input_layout_hint_text">Период ЛЧМ, мс</string>
 </resources>
