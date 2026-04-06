@@ -1,0 +1,44 @@
+package ru.profitsw2000.mainscreen.presentation.view
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import ru.profitsw2000.mainscreen.R
+import ru.profitsw2000.mainscreen.databinding.FragmentMainBinding
+import ru.profitsw2000.navigator.Navigator
+
+class MainFragment : Fragment() {
+
+    private var _binding: FragmentMainBinding? = null
+    private val binding get() = _binding!!
+    private val navigator: Navigator by inject()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        // Inflate the layout for this fragment
+        _binding = FragmentMainBinding.bind(inflater.inflate(R.layout.fragment_main, container, false))
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initViews()
+    }
+
+    private fun initViews() = with(binding) {
+        transmitterConstraintLayout.setOnClickListener {
+            navigator.navigateToTransmitterSettingsDialog()
+        }
+        receiverConstraintLayout.setOnClickListener {
+            navigator.navigateToReceiverSettingsDialog()
+        }
+        synthesizerConstraintLayout.setOnClickListener {
+            navigator.navigateToSynthesizerSettingsDialog()
+        }
+    }
+}

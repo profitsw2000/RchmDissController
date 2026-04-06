@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ru.profitsw2000.rchmdisscontroller.presentation.view.MainActivity">
+
+    <item
+        android:id="@+id/bluetooth_state"
+        android:icon="@drawable/bluetooth_state_icon"
+        android:title="@string/bluetooth_state_menu_item_title"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/bluetooth_connection_status"
+        android:icon="@drawable/bt_disconnected_icon"
+        android:title="@string/bluetooth_connection_status_menu_item_title"
+        app:showAsAction="always" />
+</menu>
