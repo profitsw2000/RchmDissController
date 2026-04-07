@@ -13,11 +13,15 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import ru.profitsw2000.core.drawable.utils.bluetooth.BluetoothStateBroadcastReceiver
 import ru.profitsw2000.core.drawable.utils.bluetooth.OnBluetoothStateListener
@@ -33,6 +37,9 @@ class BluetoothRepositoryImpl(
     override val bluetoothStateBroadcastReceiver: BluetoothStateBroadcastReceiver
         get() = BluetoothStateBroadcastReceiver(this)
 
+    private val _permissionIsDenied = MutableSharedFlow<Boolean>(replay = 0, extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    override val permissionIsDenied = _permissionIsDenied.asSharedFlow()
+
     private val bluetoothManager: BluetoothManager by lazy {
         context.getSystemService(BluetoothManager::class.java)
     }
@@ -47,6 +54,7 @@ class BluetoothRepositoryImpl(
             _bluetoothIsEnabled.value = bluetoothAdapter.isEnabled
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun setupRegistry(registry: ActivityResultRegistry, owner: LifecycleOwner) {
         setupPermissionLauncher(registry, owner)
         setupBluetoothEnableLauncher(registry, owner)
@@ -55,7 +63,11 @@ class BluetoothRepositoryImpl(
 
     override fun switchBluetooth() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            permissionLauncher?.launch(android.Manifest.permission.BLUETOOTH_CONNECT)
+            when {
+                checkPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED -> switchBluetooth()
+                //checkPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_DENIED -> _permissionIsDenied.tryEmit(true)
+                else -> permissionLauncher?.launch(Manifest.permission.BLUETOOTH_CONNECT)
+            }
         } else
             launchBluetoothEnableIntent()
     }
@@ -100,26 +112,34 @@ class BluetoothRepositoryImpl(
             owner,
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) _bluetoothIsEnabled.value = true
-            else _bluetoothIsEnabled.value = false
+            _bluetoothIsEnabled.value = result.resultCode == Activity.RESULT_OK
         }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun switchBluetoothState() {
-        if (bluetoothAdapter.isEnabled)
-            bluetoothAdapter.disable()
+        if (bluetoothAdapter.isEnabled){
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.S) bluetoothAdapter.disable()
+        }
         else
-            TODO()
+            launchBluetoothEnableIntent()
     }
 
     private fun permissionIsGranted(): Boolean {
-        return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             ContextCompat.checkSelfPermission(
                 context,
-                android.Manifest.permission.BLUETOOTH_CONNECT
+                Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
         } else true
+    }
+
+    private fun checkPermission(permission: String): Int {
+        val a = ContextCompat.checkSelfPermission(
+            context,
+            permission
+        )
+        return a
     }
 
     private fun launchBluetoothEnableIntent() {

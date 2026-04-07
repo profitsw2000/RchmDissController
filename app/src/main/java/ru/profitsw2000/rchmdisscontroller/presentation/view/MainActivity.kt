@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +17,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.loadKoinModules
@@ -32,21 +34,23 @@ class  MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
     private val mainActivityViewModel: MainActivityViewModel by viewModel()
-    private var bluetoothStateIconColor = MaterialColors.getColor(
-        this,
-        com.google.android.material.R.attr.colorOnSurfaceVariant,
-        Color.GRAY
-    )
+    private var bluetoothStateIconColor: Int = Color.GRAY
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        bluetoothStateIconColor = MaterialColors.getColor(
+            this,
+            com.google.android.material.R.attr.colorOnSurfaceVariant,
+            Color.GRAY
+        )
 
         setSupportActionBar(binding.topAppBar)
         initBottomNavigationView()
         initBluetooth()
-
+        observeBluetoothEnableData()
+        observePermissionDeniedData()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -56,17 +60,19 @@ class  MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            ru.profitsw2000.core.R.id.bluetooth_state -> true
+            ru.profitsw2000.core.R.id.bluetooth_state -> {
+                Toast.makeText(this, "Clicked menu item", Toast.LENGTH_SHORT).show()
+                mainActivityViewModel.switchBluetooth()
+                true
+            }
             ru.profitsw2000.core.R.id.bluetooth_connection_status -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(ru.profitsw2000.core.R.id.bluetooth_state)?.icon?.setTint(bluetoothStateIconColor)
         return super.onPrepareOptionsMenu(menu)
-        menu?.findItem(ru.profitsw2000.core.R.id.bluetooth_state)?.icon?.let { icon ->
-            icon.setTint(bluetoothStateIconColor)
-        }
     }
 
     private fun initBottomNavigationView() {
@@ -88,7 +94,7 @@ class  MainActivity : AppCompatActivity() {
         mainActivityViewModel.setupRegistry(activityResultRegistry, this)
     }
 
-    private fun observeData() {
+    private fun observeBluetoothEnableData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainActivityViewModel.bluetoothIsEnabled.collect { isEnabled ->
@@ -99,17 +105,44 @@ class  MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun observePermissionDeniedData() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainActivityViewModel.permissionIsDenied.collect { event ->
+                    if (event && shouldShowRequestPermissionRationale(android.Manifest.permission.BLUETOOTH_CONNECT)) showRationaleDialog()
+                }
+            }
+        }
+    }
+
+    private fun showRationaleDialog() {
+        showSimpleDialog(messageTitle = "Разрешение Bluetooth",
+            messageText = "Для обмена информацией с РЧМ-ДИСС необходимо включить Bluetooth",
+            buttonText = "OK")
+    }
+
+    private fun showSimpleDialog(messageTitle: String,
+                                 messageText: String,
+                                 buttonText: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(messageTitle)
+            .setMessage(messageText)
+            .setNeutralButton(buttonText) { dialog, _ -> dialog.dismiss()}
+            .create()
+            .show()
+    }
+
     private fun setBluetoothStateIconColor(isEnabled: Boolean) {
         bluetoothStateIconColor = if (isEnabled)
             MaterialColors.getColor(
                 this,
-                com.google.android.material.R.attr.colorOnSurfaceVariant,
+                com.google.android.material.R.attr.colorOnSurface,
                 Color.GRAY
             )
         else
             MaterialColors.getColor(
                 this,
-                com.google.android.material.R.attr.colorOnSurface,
+                com.google.android.material.R.attr.colorOnSurfaceVariant,
                 Color.GRAY
             )
     }
