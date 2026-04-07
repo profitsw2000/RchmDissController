@@ -61,10 +61,11 @@ class BluetoothRepositoryImpl(
         owner.lifecycle.addObserver(this)
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun switchBluetooth() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             when {
-                checkPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED -> switchBluetooth()
+                checkPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED -> switchBluetoothState()
                 //checkPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_DENIED -> _permissionIsDenied.tryEmit(true)
                 else -> permissionLauncher?.launch(Manifest.permission.BLUETOOTH_CONNECT)
             }
