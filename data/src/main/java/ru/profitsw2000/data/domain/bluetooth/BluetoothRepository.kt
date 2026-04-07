@@ -13,4 +13,6 @@ interface BluetoothRepository {
     fun checkBluetoothState()
 
     fun setupRegistry(registry: ActivityResultRegistry, owner: LifecycleOwner)
+
+    fun switchBluetooth()
 }
