@@ -140,10 +140,10 @@ class  MainActivity : AppCompatActivity() {
 
     private fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.fromParts("package", this.`package`, null)
+            data = Uri.fromParts("package", packageName, null)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        this.startActivity(intent)
+        startActivity(intent)
     }
 
     private fun setBluetoothStateIconColor(isEnabled: Boolean) {
