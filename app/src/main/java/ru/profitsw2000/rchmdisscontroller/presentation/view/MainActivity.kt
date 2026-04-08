@@ -1,19 +1,20 @@
 package ru.profitsw2000.rchmdisscontroller.presentation.view
 
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.color.MaterialColors
@@ -35,6 +36,7 @@ class  MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val mainActivityViewModel: MainActivityViewModel by viewModel()
     private var bluetoothStateIconColor: Int = Color.GRAY
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,11 +63,16 @@ class  MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             ru.profitsw2000.core.R.id.bluetooth_state -> {
-                Toast.makeText(this, "Clicked menu item", Toast.LENGTH_SHORT).show()
-                mainActivityViewModel.switchBluetooth()
+                mainActivityViewModel.switchBluetooth(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                        shouldShowRequestPermissionRationale(android.Manifest.permission.BLUETOOTH_CONNECT)
+                    else false
+                )
                 true
             }
-            ru.profitsw2000.core.R.id.bluetooth_connection_status -> true
+            ru.profitsw2000.core.R.id.bluetooth_connection_status -> {
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -108,28 +115,35 @@ class  MainActivity : AppCompatActivity() {
     private fun observePermissionDeniedData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainActivityViewModel.permissionIsDenied.collect { event ->
-                    if (event && shouldShowRequestPermissionRationale(android.Manifest.permission.BLUETOOTH_CONNECT)) showRationaleDialog()
+                mainActivityViewModel.shouldShowRationale.collect { isShow ->
+                    if (isShow) showRationaleDialog()
+                    mainActivityViewModel.rationaleIsShowed()
                 }
             }
         }
     }
 
     private fun showRationaleDialog() {
-        showSimpleDialog(messageTitle = "Разрешение Bluetooth",
-            messageText = "Для обмена информацией с РЧМ-ДИСС необходимо включить Bluetooth",
-            buttonText = "OK")
-    }
-
-    private fun showSimpleDialog(messageTitle: String,
-                                 messageText: String,
-                                 buttonText: String) {
         MaterialAlertDialogBuilder(this)
-            .setTitle(messageTitle)
-            .setMessage(messageText)
-            .setNeutralButton(buttonText) { dialog, _ -> dialog.dismiss()}
+            .setTitle(getString(ru.profitsw2000.core.R.string.bluetooth_permission_rationale_dialog_title))
+            .setMessage(getString(ru.profitsw2000.core.R.string.bluetooth_permission_rationale_dialog_text))
+            .setPositiveButton(getString(ru.profitsw2000.core.R.string.yes_button_text)) { dialog, _ ->
+                openAppSettings()
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(ru.profitsw2000.core.R.string.no_button_text)) {
+                dialog, _ -> dialog.dismiss()
+            }
             .create()
             .show()
+    }
+
+    private fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", this.`package`, null)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        this.startActivity(intent)
     }
 
     private fun setBluetoothStateIconColor(isEnabled: Boolean) {

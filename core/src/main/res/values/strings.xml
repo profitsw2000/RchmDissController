@@ -47,4 +47,8 @@
     <string name="lfm_period_text_input_layout_hint_text">Период ЛЧМ, мс</string>
     <string name="bluetooth_state_menu_item_title">Состояние Bluetooth</string>
     <string name="bluetooth_connection_status_menu_item_title">Подключение по Bluetooth</string>
+    <string name="bluetooth_permission_rationale_dialog_title">Разрешение Bluetooth</string>
+    <string name="bluetooth_permission_rationale_dialog_text">Для обмена информацией с РЧМ-ДИСС необходимо разрешить этому приложению работать с Bluetooth. Перейти в настройки приложения?</string>
+    <string name="yes_button_text">Да</string>
+    <string name="no_button_text">Нет</string>
 </resources>

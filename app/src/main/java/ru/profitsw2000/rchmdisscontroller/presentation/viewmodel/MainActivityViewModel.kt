@@ -11,7 +11,7 @@ class MainActivityViewModel(
 ) : ViewModel() {
 
     val bluetoothIsEnabled = bluetoothRepository.bluetoothIsEnabled
-    val permissionIsDenied = bluetoothRepository.permissionIsDenied
+    val shouldShowRationale = bluetoothRepository.shouldShowRationale
 
     fun checkBluetoothState() = bluetoothRepository.checkBluetoothState()
 
@@ -19,7 +19,11 @@ class MainActivityViewModel(
         bluetoothRepository.setupRegistry(registry, owner)
     }
 
-    fun switchBluetooth() {
-        bluetoothRepository.switchBluetooth()
+    fun switchBluetooth(shouldShowRationale: Boolean) {
+        bluetoothRepository.switchBluetooth(shouldShowRationale)
+    }
+
+    fun rationaleIsShowed() {
+        bluetoothRepository.clearShouldShowRationale()
     }
 }

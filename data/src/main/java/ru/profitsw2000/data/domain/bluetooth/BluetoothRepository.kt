@@ -10,11 +10,13 @@ interface BluetoothRepository {
 
     val bluetoothIsEnabled: StateFlow<Boolean>
     val bluetoothStateBroadcastReceiver: BluetoothStateBroadcastReceiver
-    val permissionIsDenied: SharedFlow<Boolean>
+    val shouldShowRationale: StateFlow<Boolean>
 
     fun checkBluetoothState()
 
     fun setupRegistry(registry: ActivityResultRegistry, owner: LifecycleOwner)
 
-    fun switchBluetooth()
+    fun switchBluetooth(shouldShowPermissionRationale: Boolean)
+
+    fun clearShouldShowRationale()
 }
