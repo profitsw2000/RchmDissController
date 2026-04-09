@@ -24,7 +24,8 @@ import ru.profitsw2000.core.drawable.utils.bluetooth.OnBluetoothStateListener
 import ru.profitsw2000.data.domain.bluetooth.BluetoothStateRepository
 
 class BluetoothStateRepositoryImpl(
-    private val context: Context
+    private val context: Context,
+    private val bluetoothAdapter: BluetoothAdapter
 ) : BluetoothStateRepository, DefaultLifecycleObserver, OnBluetoothStateListener {
     private val _bluetoothIsEnabled = MutableStateFlow(false)
     override val bluetoothIsEnabled: StateFlow<Boolean>
@@ -35,12 +36,6 @@ class BluetoothStateRepositoryImpl(
     private val _shouldShowRationale = MutableStateFlow(false)
     override val shouldShowRationale = _shouldShowRationale.asStateFlow()
 
-    private val bluetoothManager: BluetoothManager by lazy {
-        context.getSystemService(BluetoothManager::class.java)
-    }
-    private val bluetoothAdapter: BluetoothAdapter? by lazy {
-        bluetoothManager.adapter
-    }
     private var permissionLauncher: ActivityResultLauncher<String>? = null
     private var bluetoothEnableLauncher: ActivityResultLauncher<Intent>? = null
 

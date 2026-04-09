@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -36,6 +37,13 @@ class BluetoothRepositoryImpl(
     private val _bluetoothIsEnabled = MutableStateFlow(false)
     override val bluetoothIsEnabled: StateFlow<Boolean>
         get() = _bluetoothIsEnabled.asStateFlow()
-    override val bluetoothStateRepository = BluetoothStateRepositoryImpl(context)
+    private val bluetoothManager: BluetoothManager by lazy {
+        context.getSystemService(BluetoothManager::class.java)
+    }
+    override val bluetoothAdapter: BluetoothAdapter by lazy {
+        bluetoothManager.adapter
+    }
+    override lateinit var bluetoothSocket: BluetoothSocket
+    override val bluetoothStateRepository = BluetoothStateRepositoryImpl(context, bluetoothAdapter)
 
 }
