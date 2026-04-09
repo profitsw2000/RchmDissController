@@ -9,14 +9,6 @@ import ru.profitsw2000.core.drawable.utils.bluetooth.BluetoothStateBroadcastRece
 interface BluetoothRepository {
 
     val bluetoothIsEnabled: StateFlow<Boolean>
-    val bluetoothStateBroadcastReceiver: BluetoothStateBroadcastReceiver
-    val shouldShowRationale: StateFlow<Boolean>
+    val bluetoothStateRepository: BluetoothStateRepository
 
-    fun checkBluetoothState()
-
-    fun setupRegistry(registry: ActivityResultRegistry, owner: LifecycleOwner)
-
-    fun switchBluetooth(shouldShowPermissionRationale: Boolean)
-
-    fun clearShouldShowRationale()
 }

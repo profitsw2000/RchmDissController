@@ -11,19 +11,19 @@ class MainActivityViewModel(
 ) : ViewModel() {
 
     val bluetoothIsEnabled = bluetoothRepository.bluetoothIsEnabled
-    val shouldShowRationale = bluetoothRepository.shouldShowRationale
+    val shouldShowRationale = bluetoothRepository.bluetoothStateRepository.shouldShowRationale
 
-    fun checkBluetoothState() = bluetoothRepository.checkBluetoothState()
+    fun checkBluetoothState() = bluetoothRepository.bluetoothStateRepository.checkBluetoothState()
 
     fun setupRegistry(registry: ActivityResultRegistry, owner: LifecycleOwner) {
-        bluetoothRepository.setupRegistry(registry, owner)
+        bluetoothRepository.bluetoothStateRepository.setupRegistry(registry, owner)
     }
 
     fun switchBluetooth(shouldShowRationale: Boolean) {
-        bluetoothRepository.switchBluetooth(shouldShowRationale)
+        bluetoothRepository.bluetoothStateRepository.switchBluetooth(shouldShowRationale)
     }
 
     fun rationaleIsShowed() {
-        bluetoothRepository.clearShouldShowRationale()
+        bluetoothRepository.bluetoothStateRepository.clearShouldShowRationale()
     }
 }
