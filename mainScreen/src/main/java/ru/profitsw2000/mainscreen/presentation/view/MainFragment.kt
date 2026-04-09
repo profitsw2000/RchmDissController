@@ -42,3 +42,43 @@ class MainFragment : Fragment() {
         }
     }
 }
+
+
+/*private fun List<View>.setInteractions(enabled: Boolean) {
+    forEach {
+        it.isEnabled = enabled
+        it.alpha = if (enabled) 1f else 0.5f // визуальный отклик
+    }
+}
+
+// Теперь в коде это выглядит очень просто:
+val myLayouts = listOf(binding.layout1, binding.layout2, binding.layout3)
+
+// Когда началось подключение:
+myLayouts.setInteractions(false)
+
+// Когда подключение завершилось:
+myLayouts.setInteractions(true)
+Используйте код с осторожностью.
+
+Важный момент:
+Если вы используете Coroutines (корутины) для подключения, не забудьте поместить включение обратно в блок finally. Это гарантирует, что лэйауты разблокируются, даже если произойдет ошибка сети:
+kotlin
+viewLifecycleOwner.lifecycleScope.launch {
+    try {
+        myLayouts.setInteractions(false)
+        // Логика подключения...
+    } catch (e: Exception) {
+        // Обработка ошибки
+    } finally {
+        // Выполнится в любом случае (успех или ошибка)
+        myLayouts.setInteractions(true)
+    }
+}
+Используйте код с осторожностью.
+
+Вы используете Coroutines или Callbacks (слушатели) для обработки процесса подключения?*/
+
+
+
+

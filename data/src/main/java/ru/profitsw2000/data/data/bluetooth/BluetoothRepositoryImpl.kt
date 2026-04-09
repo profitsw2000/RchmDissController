@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import ru.profitsw2000.core.drawable.utils.bluetooth.BluetoothStateBroadcastReceiver
 import ru.profitsw2000.core.drawable.utils.bluetooth.OnBluetoothStateListener
+import ru.profitsw2000.data.domain.bluetooth.BluetoothConnectionRepository
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 import ru.profitsw2000.data.domain.bluetooth.BluetoothStateRepository
 
@@ -34,16 +35,11 @@ class BluetoothRepositoryImpl(
     private val context: Context
 ) : BluetoothRepository {
 
-    private val _bluetoothIsEnabled = MutableStateFlow(false)
-    override val bluetoothIsEnabled: StateFlow<Boolean>
-        get() = _bluetoothIsEnabled.asStateFlow()
-    private val bluetoothManager: BluetoothManager by lazy {
-        context.getSystemService(BluetoothManager::class.java)
-    }
-    override val bluetoothAdapter: BluetoothAdapter by lazy {
-        bluetoothManager.adapter
-    }
-    override lateinit var bluetoothSocket: BluetoothSocket
+    private val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
+    override val bluetoothAdapter: BluetoothAdapter = bluetoothManager.adapter
+    override var bluetoothSocket: BluetoothSocket? = null
     override val bluetoothStateRepository = BluetoothStateRepositoryImpl(context, bluetoothAdapter)
+    override val bluetoothConnectionRepository = BluetoothConnectionRepositoryImpl(bluetoothSocket, bluetoothAdapter)
+    override val bluetoothIsEnabled = bluetoothStateRepository.bluetoothIsEnabled
 
 }

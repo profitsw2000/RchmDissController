@@ -23,6 +23,8 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
+import ru.profitsw2000.data.model.bluetooth.BluetoothDeviceModel
+import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 import ru.profitsw2000.navigator.Navigator
 import ru.profitsw2000.rchmdisscontroller.R
 import ru.profitsw2000.rchmdisscontroller.databinding.ActivityMainBinding
@@ -123,6 +125,27 @@ class  MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun observeBluetoothConnectionStatus() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainActivityViewModel.bluetoothConnectionStatus.collect { status ->
+                    renderBluetoothConnectionStatusData(status)
+                }
+            }
+        }
+    }
+
+    private fun renderBluetoothConnectionStatusData(bluetoothConnectionStatus: BluetoothConnectionStatus) {
+        when(bluetoothConnectionStatus) {
+            is BluetoothConnectionStatus.DeviceSelection -> startDeviceSelectionDialog()
+            else -> setBluetoothConnectionIcon(bluetoothConnectionStatus)
+        }
+    }
+
+    private fun startDeviceSelectionDialog() {
+
+    }
+
     private fun showRationaleDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle(getString(ru.profitsw2000.core.R.string.bluetooth_permission_rationale_dialog_title))
@@ -160,4 +183,9 @@ class  MainActivity : AppCompatActivity() {
                 Color.GRAY
             )
     }
+
+    private fun setBluetoothConnectionIcon(bluetoothConnectionStatus: BluetoothConnectionStatus) {
+
+    }
+
 }

@@ -15,7 +15,7 @@ import java.io.IOException
 import java.util.UUID
 
 class BluetoothConnectionRepositoryImpl(
-    private var bluetoothSocket: BluetoothSocket,
+    private var bluetoothSocket: BluetoothSocket?,
     private val bluetoothAdapter: BluetoothAdapter
 ) : BluetoothConnectionRepository {
 
@@ -50,10 +50,10 @@ class BluetoothConnectionRepositoryImpl(
         withContext(Dispatchers.IO) {
             try {
                 bluetoothSocket = bluetoothAdapter.getRemoteDevice(address).createRfcommSocketToServiceRecord(uuid)
-                bluetoothSocket.connect()
+                bluetoothSocket?.connect()
                 _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connected
             } catch (ioException: IOException) {
-                bluetoothSocket.close()
+                bluetoothSocket?.close()
                 _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
             }
         }
@@ -62,7 +62,7 @@ class BluetoothConnectionRepositoryImpl(
     override suspend fun disconnectBluetoothDevice() {
         withContext(Dispatchers.IO) {
             try {
-                bluetoothSocket.close()
+                bluetoothSocket?.close()
                 _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Disconnected
             } catch (ioException: IOException) {
                 ioException.printStackTrace()
