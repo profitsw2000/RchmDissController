@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
-import ru.profitsw2000.data.model.bluetooth.BluetoothDeviceModel
 import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 import ru.profitsw2000.navigator.Navigator
 import ru.profitsw2000.rchmdisscontroller.R
@@ -37,23 +36,21 @@ class  MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
     private val mainActivityViewModel: MainActivityViewModel by viewModel()
-    private var bluetoothStateIconColor: Int = Color.GRAY
+    private var bluetoothStateIconColor: Int = MaterialColors.getColor(
+        this,
+        com.google.android.material.R.attr.colorOnSurfaceVariant,
+        Color.GRAY
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        bluetoothStateIconColor = MaterialColors.getColor(
-            this,
-            com.google.android.material.R.attr.colorOnSurfaceVariant,
-            Color.GRAY
-        )
 
         setSupportActionBar(binding.topAppBar)
         initBottomNavigationView()
         initBluetooth()
-        observeBluetoothEnableData()
-        observePermissionDeniedData()
+        observeFlows()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -72,6 +69,7 @@ class  MainActivity : AppCompatActivity() {
                 true
             }
             ru.profitsw2000.core.R.id.bluetooth_connection_status -> {
+                mainActivityViewModel.initBluetoothConnection()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -80,6 +78,7 @@ class  MainActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menu?.findItem(ru.profitsw2000.core.R.id.bluetooth_state)?.icon?.setTint(bluetoothStateIconColor)
+        menu?.findItem(ru.profitsw2000.core.R.id.bluetooth_connection_status)?.setIcon(getIconResourceId(mainActivityViewModel.bluetoothConnectionStatus.value))
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -100,6 +99,12 @@ class  MainActivity : AppCompatActivity() {
     private fun initBluetooth() {
         mainActivityViewModel.checkBluetoothState()
         mainActivityViewModel.setupRegistry(activityResultRegistry, this)
+    }
+
+    private fun observeFlows() {
+        observeBluetoothEnableData()
+        observePermissionDeniedData()
+        observeBluetoothConnectionStatus()
     }
 
     private fun observeBluetoothEnableData() {
@@ -128,21 +133,12 @@ class  MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainActivityViewModel.bluetoothConnectionStatus.collect { status ->
-                    renderBluetoothConnectionStatusData(status)
+                    if (status is BluetoothConnectionStatus.DeviceSelection)
+                        BluetoothDeviceSelectionDialogFragment().show(supportFragmentManager, "devices list")
+                    invalidateOptionsMenu()
                 }
             }
         }
-    }
-
-    private fun renderBluetoothConnectionStatusData(bluetoothConnectionStatus: BluetoothConnectionStatus) {
-        when(bluetoothConnectionStatus) {
-            is BluetoothConnectionStatus.DeviceSelection -> startDeviceSelectionDialog()
-            else -> setBluetoothConnectionIcon(bluetoothConnectionStatus)
-        }
-    }
-
-    private fun startDeviceSelectionDialog() {
-
     }
 
     private fun showRationaleDialog() {
@@ -183,8 +179,14 @@ class  MainActivity : AppCompatActivity() {
             )
     }
 
-    private fun setBluetoothConnectionIcon(bluetoothConnectionStatus: BluetoothConnectionStatus) {
-
+    private fun getIconResourceId(bluetoothConnectionStatus: BluetoothConnectionStatus): Int {
+        return when(bluetoothConnectionStatus) {
+            BluetoothConnectionStatus.Connected -> ru.profitsw2000.core.R.drawable.bt_connected_icon
+            BluetoothConnectionStatus.Connecting -> ru.profitsw2000.core.R.drawable.bt_connecting_icon
+            is BluetoothConnectionStatus.DeviceSelection -> ru.profitsw2000.core.R.drawable.bt_disconnected_icon
+            BluetoothConnectionStatus.Disconnected -> ru.profitsw2000.core.R.drawable.bt_disconnected_icon
+            BluetoothConnectionStatus.Failed -> ru.profitsw2000.core.R.drawable.bt_connection_failed_icon
+        }
     }
 
 }

@@ -41,7 +41,7 @@ class BluetoothStateRepositoryImpl(
 
     override fun checkBluetoothState() {
         if (permissionIsGranted())
-            _bluetoothIsEnabled.value = bluetoothAdapter?.isEnabled ?: false
+            _bluetoothIsEnabled.value = bluetoothAdapter.isEnabled
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
