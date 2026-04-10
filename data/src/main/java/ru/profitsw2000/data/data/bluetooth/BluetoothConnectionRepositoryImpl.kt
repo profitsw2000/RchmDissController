@@ -47,6 +47,7 @@ class BluetoothConnectionRepositoryImpl(
     }
 
     override suspend fun connectBluetoothDevice(address: String) {
+        _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connecting
         withContext(Dispatchers.IO) {
             try {
                 bluetoothSocket = bluetoothAdapter.getRemoteDevice(address).createRfcommSocketToServiceRecord(uuid)

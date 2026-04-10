@@ -39,7 +39,6 @@ class  MainActivity : AppCompatActivity() {
     private val mainActivityViewModel: MainActivityViewModel by viewModel()
     private var bluetoothStateIconColor: Int = Color.GRAY
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
