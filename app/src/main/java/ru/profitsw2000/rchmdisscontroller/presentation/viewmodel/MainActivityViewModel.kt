@@ -21,6 +21,10 @@ class MainActivityViewModel(
         bluetoothRepository.bluetoothStateRepository.setupRegistry(registry, owner)
     }
 
+    fun setupLifecycleOwner(lifecycleOwner: LifecycleOwner) {
+        bluetoothRepository.bluetoothConnectionRepository.setupLifecycleOwner(lifecycleOwner)
+    }
+
     fun switchBluetooth(shouldShowRationale: Boolean) {
         bluetoothRepository.bluetoothStateRepository.switchBluetooth(shouldShowRationale)
     }

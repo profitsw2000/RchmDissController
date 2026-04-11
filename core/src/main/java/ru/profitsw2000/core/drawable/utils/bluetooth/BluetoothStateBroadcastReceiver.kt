@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import ru.profitsw2000.core.drawable.utils.listeners.OnBluetoothStateListener
 
 class BluetoothStateBroadcastReceiver(
     private val onBluetoothStateListener: OnBluetoothStateListener

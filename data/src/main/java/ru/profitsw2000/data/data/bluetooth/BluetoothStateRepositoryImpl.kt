@@ -3,7 +3,6 @@ package ru.profitsw2000.data.data.bluetooth
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -20,7 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import ru.profitsw2000.core.drawable.utils.bluetooth.BluetoothStateBroadcastReceiver
-import ru.profitsw2000.core.drawable.utils.bluetooth.OnBluetoothStateListener
+import ru.profitsw2000.core.drawable.utils.listeners.OnBluetoothStateListener
 import ru.profitsw2000.data.domain.bluetooth.BluetoothStateRepository
 
 class BluetoothStateRepositoryImpl(

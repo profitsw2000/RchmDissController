@@ -1,5 +1,6 @@
 package ru.profitsw2000.rchmdisscontroller.presentation.view
 
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -70,6 +71,11 @@ class BluetoothDeviceSelectionDialogFragment : BottomSheetDialogFragment() {
                 }
             }
         }
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        mainActivityViewModel.initBluetoothConnection()
     }
 
     override fun onDestroyView() {

@@ -36,11 +36,7 @@ class  MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
     private val mainActivityViewModel: MainActivityViewModel by viewModel()
-    private var bluetoothStateIconColor: Int = MaterialColors.getColor(
-        this,
-        com.google.android.material.R.attr.colorOnSurfaceVariant,
-        Color.GRAY
-    )
+    private var bluetoothStateIconColor: Int = Color.GRAY
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,6 +95,7 @@ class  MainActivity : AppCompatActivity() {
     private fun initBluetooth() {
         mainActivityViewModel.checkBluetoothState()
         mainActivityViewModel.setupRegistry(activityResultRegistry, this)
+        mainActivityViewModel.setupLifecycleOwner(this)
     }
 
     private fun observeFlows() {
@@ -112,6 +109,7 @@ class  MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainActivityViewModel.bluetoothIsEnabled.collect { isEnabled ->
                     setBluetoothStateIconColor(isEnabled)
+                    if (!isEnabled) mainActivityViewModel.initBluetoothConnection()
                     invalidateOptionsMenu()
                 }
             }
