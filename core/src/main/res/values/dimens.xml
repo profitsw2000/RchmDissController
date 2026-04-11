@@ -19,4 +19,7 @@
     <dimen name="chip_group_horizontal_spacing">4dp</dimen>
     <dimen name="chip_group_vertical_spacing">2dp</dimen>
     <dimen name="module_parameter_title_text_size">24sp</dimen>
+    <dimen name="bluetooth_device_name">24sp</dimen>
+    <dimen name="field_title_divider_height_size">2dp</dimen>
+    <dimen name="paired_devices_list_item_margin_between_views">4dp</dimen>
 </resources>
