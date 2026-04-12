@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import ru.profitsw2000.data.domain.bluetooth.BluetoothDataRepository
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 
 class BluetoothRepositoryImpl(
@@ -15,6 +16,7 @@ class BluetoothRepositoryImpl(
     override var bluetoothSocket: BluetoothSocket? = null
     override val bluetoothStateRepository = BluetoothStateRepositoryImpl(context, bluetoothAdapter)
     override val bluetoothConnectionRepository = BluetoothConnectionRepositoryImpl(context, bluetoothSocket, bluetoothAdapter)
+    override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket)
     override val bluetoothIsEnabled = bluetoothStateRepository.bluetoothIsEnabled
 
 }

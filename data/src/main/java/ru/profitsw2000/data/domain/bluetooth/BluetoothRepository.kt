@@ -20,4 +20,6 @@ interface BluetoothRepository {
 
     val bluetoothConnectionRepository: BluetoothConnectionRepository
 
+    val bluetoothDataRepository: BluetoothDataRepository
+
 }
