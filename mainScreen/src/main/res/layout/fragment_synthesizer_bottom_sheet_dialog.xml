@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_coordinator_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/root_layout_standart_padding"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".presentation.view.bottomsheet.SynthesizerBottomSheetDialogFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:id="@+id/drag_handle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/bottom_sheet_title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/synthesizer_part_title_text"
+            app:layout_constraintTop_toBottomOf="@id/drag_handle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="@dimen/module_part_title_text_size"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold"/>
+
+
+        <RadioGroup
+            android:id="@+id/synthesizer_mode_selection_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/bottom_sheet_title_text_view"
+            app:layout_constraintStart_toStartOf="parent">
+            
+            <RadioButton
+                android:id="@+id/cw_mode_radio_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/checkbox_text_color_selector"
+                android:checked="true"
+                android:text="@string/cw_synthesizer_mode_text"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/cw_frequency_text_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                android:hint="@string/cw_frequency_text_input_layout_hint_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <RadioButton
+                android:id="@+id/lfm_mode_radio_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                android:textColor="@color/checkbox_text_color_selector"
+                android:text="@string/lfm_synthesizer_mode_text"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/lfm_low_frequency_text_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:hint="@string/lfm_low_frequency_text_input_layout_hint_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/lfm_high_frequency_text_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                android:hint="@string/lfm_high_frequency_text_input_layout_hint_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/lfm_period_text_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+                android:hint="@string/lfm_period_text_input_layout_hint_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <CheckBox
+                android:id="@+id/lfm_ext_trigger_switch_check_box"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:visibility="gone"
+                android:text="@string/lfm_ext_trig_switch_check_box_text"
+                android:textColor="@color/checkbox_text_color_selector" />
+            
+        </RadioGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/synthesizer_params_send_button"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="@string/send_button_text"
+            app:layout_constraintTop_toBottomOf="@+id/synthesizer_mode_selection_radio_group" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

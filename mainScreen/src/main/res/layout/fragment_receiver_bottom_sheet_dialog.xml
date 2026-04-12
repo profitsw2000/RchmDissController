@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_coordinator_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/root_layout_standart_padding"
+    tools:context=".presentation.view.bottomsheet.ReceiverBottomSheetDialogFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:id="@+id/drag_handle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/bottom_sheet_title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/receiver_part_title_text"
+            app:layout_constraintTop_toBottomOf="@id/drag_handle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="@dimen/module_part_title_text_size"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold"
+            />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/rx_channel_selection_chip_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+            app:chipSpacingHorizontal="@dimen/chip_group_horizontal_spacing"
+            app:chipSpacingVertical="@dimen/chip_group_vertical_spacing"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/bottom_sheet_title_text_view"
+            app:selectionRequired="false"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/first_channel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel1_selection_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/second_channel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel2_selection_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/third_channel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel3_selection_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/fourth_channel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel4_selection_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/fifth_channel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel5_selection_text" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <TextView
+            android:id="@+id/attenuator_settings_part_title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+            android:text="@string/attenuator_settings_title_text"
+            android:textSize="@dimen/module_parameter_title_text_size"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rx_channel_selection_chip_group" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/rx_attenuation_settings_chip_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+            app:chipSpacingHorizontal="@dimen/chip_group_horizontal_spacing"
+            app:chipSpacingVertical="@dimen/chip_group_vertical_spacing"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/attenuator_settings_part_title_text_view">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/two_decibel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/attenuator_selection_2_decibels_value_text"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/four_decibel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/attenuator_selection_4_decibels_value_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eight_decibel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/attenuator_selection_8_decibels_value_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/sixteen_decibel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/attenuator_selection_16_decibels_value_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/thirty_two_decibel_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/attenuator_selection_32_decibels_value_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/extra_four_decibel_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/attenuator_selection_extra_4_decibels_value_text" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <TextView
+            android:id="@+id/receiver_input_lock_settings_part_title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+            android:text="@string/receiver_lock_settings_title_text"
+            android:textSize="@dimen/module_parameter_title_text_size"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rx_attenuation_settings_chip_group" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/rx_input_lock_settings_chip_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_ch_icon_ornament"
+            app:chipSpacingHorizontal="@dimen/chip_group_horizontal_spacing"
+            app:chipSpacingVertical="@dimen/chip_group_vertical_spacing"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/receiver_input_lock_settings_part_title_text_view">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/channel_1_lock_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel1_lock_selection_text"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/channel_2_lock_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel2_lock_selection_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/channel_3_lock_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel3_lock_selection_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/channel_4_lock_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel4_lock_selection_text" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/channel_5_lock_selection_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rf_channel5_lock_selection_text" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <CheckBox
+            android:id="@+id/receiver_test_signal_switch_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/receiver_test_signal_switch_check_box_text"
+            android:textColor="@color/checkbox_text_color_selector"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rx_input_lock_settings_chip_group" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/transmitter_params_send_button"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="@string/send_button_text"
+            app:layout_constraintTop_toBottomOf="@+id/receiver_test_signal_switch_check_box" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
