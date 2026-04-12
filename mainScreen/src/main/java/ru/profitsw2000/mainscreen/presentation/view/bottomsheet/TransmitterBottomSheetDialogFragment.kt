@@ -29,9 +29,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val bottomSheetBehavior = BottomSheetBehavior.from(view.parent as View)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-        val layout: CoordinatorLayout = binding.rootCoordinatorLayout
-        layout.minimumHeight = 1500
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
 }
