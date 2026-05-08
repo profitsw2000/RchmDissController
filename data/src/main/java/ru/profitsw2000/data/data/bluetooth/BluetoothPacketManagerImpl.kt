@@ -28,7 +28,11 @@ class BluetoothPacketManagerImpl() : BluetoothPacketManager {
         set(value) {}
 
     override fun insertBytes(byteArray: ByteArray) {
-
+        byteArray.forEach { byte ->
+            ringBuffer.add(byte)
+            bufferTail++
+            bufferTail %= RING_BUFFER_SIZE
+        }
     }
 
     override fun parseBuffer() {

@@ -35,7 +35,7 @@ class BluetoothDataRepositoryImpl(
     }
 
     override fun readData(inputStream: InputStream): Flow<ByteArray> = flow<ByteArray> {
-        val buffer = ByteArray(1024)
+        val buffer = ByteArray(256)
 
         while (true) {
             try {
