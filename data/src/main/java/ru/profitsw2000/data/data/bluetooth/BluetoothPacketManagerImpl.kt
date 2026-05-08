@@ -3,8 +3,7 @@ package ru.profitsw2000.data.data.bluetooth
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 
 class BluetoothPacketManagerImpl() : BluetoothPacketManager {
-    override val RING_BUFFER_SIZE: Int
-        get() = TODO("Not yet implemented")
+    override val RING_BUFFER_SIZE: Int = 256
     override val ringBuffer: MutableList<Byte>
         get() = TODO("Not yet implemented")
     override val packetBuffer: MutableList<Byte>
@@ -29,7 +28,7 @@ class BluetoothPacketManagerImpl() : BluetoothPacketManager {
         set(value) {}
 
     override fun insertBytes(byteArray: ByteArray) {
-        TODO("Not yet implemented")
+
     }
 
     override fun parseBuffer() {
