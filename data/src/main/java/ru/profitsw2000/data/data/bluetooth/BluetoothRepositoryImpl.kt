@@ -4,8 +4,12 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import ru.profitsw2000.data.domain.bluetooth.BluetoothDataRepository
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
+import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 
 class BluetoothRepositoryImpl(
     private val context: Context
@@ -19,4 +23,10 @@ class BluetoothRepositoryImpl(
     override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket)
     override val bluetoothIsEnabled = bluetoothStateRepository.bluetoothIsEnabled
 
+    override fun observeBluetoothData(): Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
+        .flatMapLatest { status ->
+            if (status is BluetoothConnectionStatus.Connected) {
+                bluetoothSocket?.inputStream?.let {bluetoothDataRepository.readData(it)} ?: emptyFlow()
+            } else emptyFlow()
+        }
 }
