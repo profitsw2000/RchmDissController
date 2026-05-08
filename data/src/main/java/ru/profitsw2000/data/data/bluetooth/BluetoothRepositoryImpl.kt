@@ -7,12 +7,16 @@ import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.transform
 import ru.profitsw2000.data.domain.bluetooth.BluetoothDataRepository
+import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 
 class BluetoothRepositoryImpl(
-    private val context: Context
+    private val context: Context,
+    private val bluetoothPacketManager: BluetoothPacketManager
 ) : BluetoothRepository {
 
     private val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
@@ -28,5 +32,8 @@ class BluetoothRepositoryImpl(
             if (status is BluetoothConnectionStatus.Connected) {
                 bluetoothSocket?.inputStream?.let {bluetoothDataRepository.readData(it)} ?: emptyFlow()
             } else emptyFlow()
+        }
+        .onEach { bytes ->
+            bluetoothPacketManager.insertBytes(bytes)
         }
 }
