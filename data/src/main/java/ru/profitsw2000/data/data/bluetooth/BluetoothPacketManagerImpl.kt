@@ -1,19 +1,15 @@
 package ru.profitsw2000.data.data.bluetooth
 
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
+import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 
-class BluetoothPacketManagerImpl() : BluetoothPacketManager {
-    override val RING_BUFFER_SIZE: Int = 256
-    override val ringBuffer: MutableList<Byte>
+class BluetoothPacketManagerImpl(
+    bluetoothRepository: BluetoothRepository
+) : BluetoothPacketManager {
+    override val BUFFER_SIZE: Int
         get() = TODO("Not yet implemented")
     override val packetBuffer: MutableList<Byte>
         get() = TODO("Not yet implemented")
-    override var bufferTail: Int
-        get() = TODO("Not yet implemented")
-        set(value) {}
-    override var bufferHead: Int
-        get() = TODO("Not yet implemented")
-        set(value) {}
     override var packetState: Int
         get() = TODO("Not yet implemented")
         set(value) {}
@@ -27,15 +23,27 @@ class BluetoothPacketManagerImpl() : BluetoothPacketManager {
         get() = TODO("Not yet implemented")
         set(value) {}
 
-    override fun insertBytes(byteArray: ByteArray) {
-        byteArray.forEach { byte ->
-            ringBuffer.add(byte)
-            bufferTail++
-            bufferTail %= RING_BUFFER_SIZE
-        }
+    override fun observeBluetoothDataBytesFlow() {
+        TODO("Not yet implemented")
     }
 
-    override fun parseBuffer() {
+    override fun parseIncomingFlow(byteArray: ByteArray) {
+        TODO("Not yet implemented")
+    }
+
+    override fun checkStartByte(byte: Byte) {
+        TODO("Not yet implemented")
+    }
+
+    override fun checkPacketSize(byte: Byte) {
+        TODO("Not yet implemented")
+    }
+
+    override fun checkPacketId(byte: Byte) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPacketData(byte: Byte) {
         TODO("Not yet implemented")
     }
 }

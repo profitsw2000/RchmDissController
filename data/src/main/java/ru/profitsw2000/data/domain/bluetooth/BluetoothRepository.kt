@@ -23,6 +23,6 @@ interface BluetoothRepository {
 
     val bluetoothDataRepository: BluetoothDataRepository
 
-    fun observeBluetoothData(): Flow<ByteArray>
+    val bluetoothBytesDataFlow: Flow<ByteArray>
 
 }

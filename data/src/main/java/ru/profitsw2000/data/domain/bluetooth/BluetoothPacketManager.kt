@@ -2,18 +2,23 @@ package ru.profitsw2000.data.domain.bluetooth
 
 interface BluetoothPacketManager {
 
-    val RING_BUFFER_SIZE: Int
-    val ringBuffer: MutableList<Byte>
+    val BUFFER_SIZE: Int
     val packetBuffer: MutableList<Byte>
-    var bufferTail: Int
-    var bufferHead: Int
 
     var packetState: Int
     var packetNumber: Int
     var packetSize: Int
     var packetCheckSum: Int
 
-    fun insertBytes(byteArray: ByteArray)
-    fun parseBuffer()
+    fun observeBluetoothDataBytesFlow()
 
+    fun parseIncomingFlow(byteArray: ByteArray)
+
+    fun checkStartByte(byte: Byte)
+
+    fun checkPacketSize(byte: Byte)
+
+    fun checkPacketId(byte: Byte)
+
+    fun getPacketData(byte: Byte)
 }

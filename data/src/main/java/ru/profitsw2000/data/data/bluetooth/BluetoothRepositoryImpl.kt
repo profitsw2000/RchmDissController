@@ -15,8 +15,7 @@ import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 
 class BluetoothRepositoryImpl(
-    private val context: Context,
-    private val bluetoothPacketManager: BluetoothPacketManager
+    private val context: Context
 ) : BluetoothRepository {
 
     private val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
@@ -25,15 +24,11 @@ class BluetoothRepositoryImpl(
     override val bluetoothStateRepository = BluetoothStateRepositoryImpl(context, bluetoothAdapter)
     override val bluetoothConnectionRepository = BluetoothConnectionRepositoryImpl(context, bluetoothSocket, bluetoothAdapter)
     override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket)
+    override val bluetoothBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
+    .flatMapLatest { status ->
+        if (status is BluetoothConnectionStatus.Connected) {
+            bluetoothSocket?.inputStream?.let {bluetoothDataRepository.readData(it)} ?: emptyFlow()
+        } else emptyFlow()
+    }
     override val bluetoothIsEnabled = bluetoothStateRepository.bluetoothIsEnabled
-
-    override fun observeBluetoothData(): Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
-        .flatMapLatest { status ->
-            if (status is BluetoothConnectionStatus.Connected) {
-                bluetoothSocket?.inputStream?.let {bluetoothDataRepository.readData(it)} ?: emptyFlow()
-            } else emptyFlow()
-        }
-        .onEach { bytes ->
-            bluetoothPacketManager.insertBytes(bytes)
-        }
 }
