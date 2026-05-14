@@ -4,6 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import ru.profitsw2000.core.drawable.utils.PACKET_SIZE_MAXIMUM
+import ru.profitsw2000.core.drawable.utils.toUnsignedInteger
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 
@@ -40,18 +42,35 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun checkStartByte(byte: Byte) {
-        TODO("Not yet implemented")
+        if (byte.toUnsignedInteger() == 0x53) {
+            packetState = 1
+            packetCheckSum = 0
+            packetBuffer.clear()
+        }
     }
 
     override fun checkPacketSize(byte: Byte) {
-        TODO("Not yet implemented")
+        packetSize = byte.toUnsignedInteger()
+        packetCheckSum += packetSize
+        packetState = if (packetSize < PACKET_SIZE_MAXIMUM) 2
+        else 0
     }
 
     override fun checkPacketId(byte: Byte) {
-        TODO("Not yet implemented")
+        packetNumber = byte.toUnsignedInteger()
+        packetCheckSum += packetNumber
+        packetState = if (packetNumber < 0x10) 3
+        else 0
     }
 
     override fun getPacketData(byte: Byte) {
-        TODO("Not yet implemented")
+        if (packetState < packetSize) {
+            packetBuffer.add(byte)
+            packetCheckSum += byte.toUnsignedInteger()
+            packetState++
+        } else {
+            if ((packetCheckSum and 0xFF) == byte.toUnsignedInteger()) TODO("Decode packet")
+            packetState = 0
+        }
     }
 }
