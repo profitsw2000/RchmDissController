@@ -21,4 +21,6 @@ interface BluetoothPacketManager {
     fun checkPacketId(byte: Byte)
 
     fun getPacketData(byte: Byte)
+
+    fun decodePacket(bytesList: List<Byte>, command: Int, packetSize: Int)
 }

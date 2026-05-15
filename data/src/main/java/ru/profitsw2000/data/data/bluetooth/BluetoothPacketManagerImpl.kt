@@ -5,6 +5,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.profitsw2000.core.drawable.utils.PACKET_SIZE_MAXIMUM
+import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.toUnsignedInteger
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
@@ -69,8 +72,21 @@ class BluetoothPacketManagerImpl(
             packetCheckSum += byte.toUnsignedInteger()
             packetState++
         } else {
-            if ((packetCheckSum and 0xFF) == byte.toUnsignedInteger()) TODO("Decode packet")
+            if ((packetCheckSum and 0xFF) == byte.toUnsignedInteger()) decodePacket(packetBuffer, packetNumber, packetSize)
             packetState = 0
+        }
+    }
+
+    override fun decodePacket(
+        bytesList: List<Byte>,
+        command: Int,
+        packetSize: Int
+    ) {
+        when(command) {
+            READ_FROM_TRANSMITTER_PACKET_ID -> TODO()
+            READ_FROM_RECEIVER_PACKET_ID -> TODO()
+            READ_FROM_SYNTHESIZER_PACKET_ID -> TODO()
+            else -> {}
         }
     }
 }
