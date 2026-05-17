@@ -9,9 +9,9 @@ interface RchmDissStateRepository {
     val rchmDissState: StateFlow<RchmDissState>
     val lastPacket: SharedFlow<RcdInputPacketType>
 
-    fun updateTransmitterModuleState(byteArray: ByteArray)
+    fun updateTransmitterModuleState(byte: Byte)
 
-    fun updateReceiverModuleState(byteArray: ByteArray)
+    fun updateReceiverModuleState(lowByte: Byte, highByte: Byte)
 
     fun updateSynthesizerModuleState(byteArray: ByteArray)
 }
