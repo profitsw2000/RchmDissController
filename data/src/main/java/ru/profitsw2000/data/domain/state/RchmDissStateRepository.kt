@@ -13,5 +13,5 @@ interface RchmDissStateRepository {
 
     fun updateReceiverModuleState(lowByte: Byte, highByte: Byte)
 
-    fun updateSynthesizerModuleState(byteArray: ByteArray)
+    fun updateSynthesizerModuleState(lowByte: Byte, middleByte: Byte, highByte: Byte)
 }
