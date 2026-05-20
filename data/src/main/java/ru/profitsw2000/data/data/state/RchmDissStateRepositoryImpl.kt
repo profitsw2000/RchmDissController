@@ -21,19 +21,19 @@ class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
     override val lastPacket: SharedFlow<RcdInputPacketType>
         get() = _lastPacket
 
-    override fun updateTransmitterModuleState(byteArray: ByteArray) {
+    override fun updateTransmitterModuleState(byte: Byte) {
         repositoryScope.launch {
             _lastPacket.emit(RcdInputPacketType.TransmitterStateInputPacket)
         }
     }
 
-    override fun updateReceiverModuleState(byteArray: ByteArray) {
+    override fun updateReceiverModuleState(lowByte: Byte, highByte: Byte) {
         repositoryScope.launch {
             _lastPacket.emit(RcdInputPacketType.ReceiverStateInputPacket)
         }
     }
 
-    override fun updateSynthesizerModuleState(byteArray: ByteArray) {
+    override fun updateSynthesizerModuleState(lowByte: Byte, middleByte: Byte, highByte: Byte) {
         repositoryScope.launch {
             _lastPacket.emit(RcdInputPacketType.SynthesizerStateInputPacket)
         }

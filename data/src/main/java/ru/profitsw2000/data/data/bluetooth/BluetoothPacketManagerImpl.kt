@@ -11,9 +11,11 @@ import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.toUnsignedInteger
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
+import ru.profitsw2000.data.domain.state.RchmDissStateRepository
 
 class BluetoothPacketManagerImpl(
-    private val bluetoothRepository: BluetoothRepository
+    private val bluetoothRepository: BluetoothRepository,
+    private val rchmDissStateRepository: RchmDissStateRepository
 ) : BluetoothPacketManager {
 
     private val coroutineScope = CoroutineScope(Job() + Dispatchers.Default)
