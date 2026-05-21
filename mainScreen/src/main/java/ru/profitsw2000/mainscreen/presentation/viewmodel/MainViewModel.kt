@@ -5,10 +5,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 import ru.profitsw2000.data.domain.state.RchmDissStateRepository
+import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 import ru.profitsw2000.mainscreen.state.RchmDissUpdatingStatus
 
 class MainViewModel(
@@ -26,7 +29,17 @@ class MainViewModel(
             _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Updating
 
             try {
-                bluetoothRepository.bluetoothDataRepository.writeData(byte)
+                bluetoothRepository.bluetoothDataRepository.writeData(
+                    bluetoothPacketManager.getWriteToTransmitterPacket(byte)
+                )
+                withTimeout(5000L) {
+                    rchmDissStateRepository.lastPacket.first {
+                        it == RcdInputPacketType.TransmitterStateInputPacket
+                    }
+                }
+
+                _rchmDissUpdatingStatus.value =
+                    RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
             } catch (exc: TimeoutCancellationException) {
                 _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error")
             } catch (exc: Exception) {
