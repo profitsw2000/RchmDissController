@@ -47,4 +47,64 @@ class MainViewModel(
             }
         }
     }
+
+    fun updateReceiver(byteArray: ByteArray) {
+        viewModelScope.launch {
+            _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Updating
+
+            try {
+                bluetoothRepository.bluetoothDataRepository.writeData(
+                    bluetoothPacketManager.getWriteToReceiverPacket(byteArray)
+                )
+                withTimeout(5000L) {
+                    rchmDissStateRepository.lastPacket.first {
+                        it == RcdInputPacketType.ReceiverStateInputPacket
+                    }
+                }
+
+                _rchmDissUpdatingStatus.value =
+                    RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
+            } catch (exc: TimeoutCancellationException) {
+                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error")
+            } catch (exc: Exception) {
+                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(exc.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun updateSynthesizerCwMode(frequency: Long) {
+
+    }
+
+    fun updateSynthesizerLfmMode(
+        startFrequency: Long,
+        stopFrequency: Long,
+        lfmPeriod: Float
+    ) {
+
+    }
+
+    private fun updateSynthesizer(byteArray: ByteArray, expectedInputPacketType: RcdInputPacketType) {
+        viewModelScope.launch {
+            _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Updating
+
+            try {
+                bluetoothRepository.bluetoothDataRepository.writeData(
+                    bluetoothPacketManager.getWriteToSynthesizerPacket(byteArray)
+                )
+                withTimeout(5000L) {
+                    rchmDissStateRepository.lastPacket.first {
+                        it == expectedInputPacketType
+                    }
+                }
+
+                _rchmDissUpdatingStatus.value =
+                    RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
+            } catch (exc: TimeoutCancellationException) {
+                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error")
+            } catch (exc: Exception) {
+                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(exc.message ?: "Unknown error")
+            }
+        }
+    }
 }
