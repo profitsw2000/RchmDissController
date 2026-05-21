@@ -9,6 +9,12 @@ import ru.profitsw2000.core.drawable.utils.PACKET_START_BYTE
 import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_RECEIVER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_RECEIVER_PACKET_SIZE
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_SYNTHESIZER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_SYNTHESIZER_PACKET_SIZE
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_TRANSMITTER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_TRANSMITTER_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.toUnsignedInteger
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
@@ -75,7 +81,7 @@ class BluetoothPacketManagerImpl(
             packetCheckSum += byte.toUnsignedInteger()
             packetState++
         } else {
-            if ((packetCheckSum and 0xFF) == byte.toUnsignedInteger()) decodePacket(packetBuffer, packetNumber, packetSize)
+            if ((packetCheckSum and 0xFF) == byte.toUnsignedInteger()) decodePacket(packetBuffer, packetNumber, (packetSize - 4))
             packetState = 0
         }
     }
@@ -86,22 +92,79 @@ class BluetoothPacketManagerImpl(
         packetSize: Int
     ) {
         when(command) {
-            READ_FROM_TRANSMITTER_PACKET_ID -> TODO()
-            READ_FROM_RECEIVER_PACKET_ID -> TODO()
-            READ_FROM_SYNTHESIZER_PACKET_ID -> TODO()
+            READ_FROM_TRANSMITTER_PACKET_ID -> rchmDissStateRepository.updateTransmitterModuleState(bytesList[0])
+            READ_FROM_RECEIVER_PACKET_ID -> receiverPacket(bytesList)
+            READ_FROM_SYNTHESIZER_PACKET_ID -> synthesizerPacket(bytesList)
             else -> {}
         }
     }
 
     override fun getWriteToTransmitterPacket(dataByte: Byte): ByteArray {
-        TODO("Not yet implemented")
+        val checkSum = ((PACKET_START_BYTE +
+                WRITE_TO_TRANSMITTER_PACKET_SIZE +
+                WRITE_TO_TRANSMITTER_PACKET_ID +
+                dataByte.toUnsignedInteger()) and 0xFF).toByte()
+
+        return byteArrayOf(
+            PACKET_START_BYTE.toByte(),
+            WRITE_TO_TRANSMITTER_PACKET_SIZE.toByte(),
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(),
+            dataByte,
+            checkSum
+        )
     }
 
     override fun getWriteToReceiverPacket(dataByteArray: ByteArray): ByteArray {
-        TODO("Not yet implemented")
+        return getWriteByteArrayPacket(
+            WRITE_TO_RECEIVER_PACKET_SIZE,
+            WRITE_TO_RECEIVER_PACKET_ID,
+            dataByteArray
+        )
     }
 
     override fun getWriteToSynthesizerPacket(dataByteArray: ByteArray): ByteArray {
-        TODO("Not yet implemented")
+        return getWriteByteArrayPacket(
+            WRITE_TO_SYNTHESIZER_PACKET_SIZE,
+            WRITE_TO_SYNTHESIZER_PACKET_ID,
+            dataByteArray
+        )
+    }
+
+    private fun receiverPacket(bytesList: List<Byte>) {
+        rchmDissStateRepository.updateReceiverModuleState(
+            bytesList[1],
+            bytesList[0]
+        )
+    }
+
+    private fun synthesizerPacket(bytesList: List<Byte>) {
+        rchmDissStateRepository.updateSynthesizerModuleState(
+            bytesList[2],
+            bytesList[1],
+            bytesList[0]
+        )
+    }
+
+    private fun getWriteByteArrayPacket(packetSize: Int, packetId: Int, byteArray: ByteArray): ByteArray {
+        val checkSum = ((PACKET_START_BYTE +
+                packetSize +
+                packetId +
+                getByteArrayCheckSum(byteArray)) and 0xFF).toByte()
+
+        return byteArrayOf(
+                PACKET_START_BYTE.toByte(),
+                packetSize.toByte(),
+                packetId.toByte()
+            ) +
+            byteArray +
+            byteArrayOf(checkSum)
+    }
+
+    private fun getByteArrayCheckSum(byteArray: ByteArray): Int {
+        var sum = 0
+        for (byte in byteArray) {
+            sum += byte.toUnsignedInteger()
+        }
+        return sum
     }
 }
