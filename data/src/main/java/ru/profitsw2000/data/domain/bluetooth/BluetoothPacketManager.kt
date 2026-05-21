@@ -23,4 +23,10 @@ interface BluetoothPacketManager {
     fun getPacketData(byte: Byte)
 
     fun decodePacket(bytesList: List<Byte>, command: Int, packetSize: Int)
+
+    fun getWriteToTransmitterPacket(dataByte: Byte): ByteArray
+
+    fun getWriteToReceiverPacket(dataByteArray: ByteArray): ByteArray
+
+    fun getWriteToSynthesizerPacket(dataByteArray: ByteArray): ByteArray
 }

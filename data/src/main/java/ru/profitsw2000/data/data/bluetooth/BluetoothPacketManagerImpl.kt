@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.profitsw2000.core.drawable.utils.PACKET_SIZE_MAXIMUM
+import ru.profitsw2000.core.drawable.utils.PACKET_START_BYTE
 import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
@@ -47,7 +48,7 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun checkStartByte(byte: Byte) {
-        if (byte.toUnsignedInteger() == 0x53) {
+        if (byte.toUnsignedInteger() == PACKET_START_BYTE) {
             packetState = 1
             packetCheckSum = 0
             packetBuffer.clear()
@@ -90,5 +91,17 @@ class BluetoothPacketManagerImpl(
             READ_FROM_SYNTHESIZER_PACKET_ID -> TODO()
             else -> {}
         }
+    }
+
+    override fun getWriteToTransmitterPacket(dataByte: Byte): ByteArray {
+        TODO("Not yet implemented")
+    }
+
+    override fun getWriteToReceiverPacket(dataByteArray: ByteArray): ByteArray {
+        TODO("Not yet implemented")
+    }
+
+    override fun getWriteToSynthesizerPacket(dataByteArray: ByteArray): ByteArray {
+        TODO("Not yet implemented")
     }
 }
