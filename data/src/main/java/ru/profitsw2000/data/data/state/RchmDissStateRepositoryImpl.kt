@@ -32,7 +32,7 @@ class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
     private val _rchmDissState: MutableStateFlow<RchmDissState> = MutableStateFlow(RchmDissState())
     override val rchmDissState: StateFlow<RchmDissState>
         get() = _rchmDissState
-    private val _lastPacket: MutableSharedFlow<RcdInputPacketType> = MutableStateFlow(RcdInputPacketType.InvalidInputPacket)
+    private val _lastPacket: MutableSharedFlow<RcdInputPacketType> = MutableSharedFlow(replay = 0)
     override val lastPacket: SharedFlow<RcdInputPacketType>
         get() = _lastPacket
     private val packetBytesConverter = PacketBytesConverter()

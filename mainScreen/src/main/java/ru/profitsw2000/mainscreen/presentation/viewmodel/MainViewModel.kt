@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import ru.profitsw2000.core.drawable.utils.toRegisterByteArray
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 import ru.profitsw2000.data.domain.state.RchmDissStateRepository
@@ -84,17 +85,21 @@ class MainViewModel(
 
     }
 
-    private fun updateSynthesizer(byteArray: ByteArray, expectedInputPacketType: RcdInputPacketType) {
+    private fun updateSynthesizer(synthesizerRegisters: List<Int>) {
         viewModelScope.launch {
             _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Updating
 
             try {
-                bluetoothRepository.bluetoothDataRepository.writeData(
-                    bluetoothPacketManager.getWriteToSynthesizerPacket(byteArray)
-                )
-                withTimeout(5000L) {
-                    rchmDissStateRepository.lastPacket.first {
-                        it == expectedInputPacketType
+                for (register in synthesizerRegisters) {
+                    bluetoothRepository.bluetoothDataRepository.writeData(
+                        bluetoothPacketManager.getWriteToSynthesizerPacket(
+                            register.toRegisterByteArray()
+                        )
+                    )
+                    withTimeout(5000L) {
+                        rchmDissStateRepository.lastPacket.first {
+                            it == RcdInputPacketType.SynthesizerStateInputPacket
+                        }
                     }
                 }
 
