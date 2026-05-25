@@ -6,5 +6,5 @@ sealed class RchmDissUpdatingStatus {
     object Idle : RchmDissUpdatingStatus()
     object Updating : RchmDissUpdatingStatus()
     data class Success(val rchmDissState: RchmDissState) : RchmDissUpdatingStatus()
-    data class Error(val message: String) : RchmDissUpdatingStatus()
+    data class Error(val message: String, val errorCode: Int) : RchmDissUpdatingStatus()
 }
