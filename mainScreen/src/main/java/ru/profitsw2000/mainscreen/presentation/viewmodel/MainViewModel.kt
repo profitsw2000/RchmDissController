@@ -11,6 +11,7 @@ import kotlinx.coroutines.withTimeout
 import ru.profitsw2000.core.drawable.utils.toRegisterByteArray
 import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
+import ru.profitsw2000.data.domain.pll.PLLRegisters1208PL1URepository
 import ru.profitsw2000.data.domain.state.RchmDissStateRepository
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 import ru.profitsw2000.mainscreen.state.RchmDissUpdatingStatus
@@ -18,7 +19,8 @@ import ru.profitsw2000.mainscreen.state.RchmDissUpdatingStatus
 class MainViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
     private val bluetoothRepository: BluetoothRepository,
-    private val bluetoothPacketManager: BluetoothPacketManager
+    private val bluetoothPacketManager: BluetoothPacketManager,
+    private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository
 ): ViewModel() {
 
     private val _rchmDissUpdatingStatus = MutableStateFlow<RchmDissUpdatingStatus>(
@@ -74,13 +76,14 @@ class MainViewModel(
     }
 
     fun updateSynthesizerCwMode(frequency: Long) {
-
+        updateSynthesizerCwMode(frequency)
     }
 
     fun updateSynthesizerLfmMode(
         startFrequency: Long,
         stopFrequency: Long,
-        lfmPeriod: Float
+        lfmPeriod: Double,
+        isSymmetricLfm: Boolean
     ) {
 
     }
@@ -112,4 +115,8 @@ class MainViewModel(
             }
         }
     }
+
+    private fun getLfmParametersModel(
+        lowFrequency:
+    )
 }
