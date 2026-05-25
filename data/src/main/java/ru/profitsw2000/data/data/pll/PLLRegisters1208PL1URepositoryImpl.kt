@@ -11,35 +11,62 @@ const val CTR2 = 0xA00002
 const val CTR3 = 0xC00001
 const val LFM3 = 0x500204
 const val LFM31 = 0x500006
+const val LFM3_NON_SYM = 0x500004
 const val INT_REG = 0x200000
 const val FRAC_REG = 0x400000
 const val LFM1_REG = 0x100000
 const val LFM2_REG = 0x300000
 const val MOD_REG = 0x607D00
+const val PRW0_REG = 0x700000
+const val PRA0_REG = 0x900000
+const val PRW1_REG = 0x704000
 
 class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
 
     override suspend fun getLfmRegisters(lfmInputParametersModel: LfmInputParametersModel): List<Int> {
-        val registersList = mutableListOf<Int>()
-
-        with(lfmInputParametersModel) {
-            registersList.add(getRefRegister(lfmDeviationPeriod, isSymmetricLfm))
-            registersList.add(getIntRegister(lowestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm))
-            registersList.add(getFracRegister(lowestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm))
-            registersList.add(MOD_REG)
-            registersList.add(CTR1_RST)
-            registersList.add(CTR1)
-            registersList.add(CTR2)
-            registersList.add(CTR3)
-            registersList.add(getLfm1Register(lowestLfmFrequency, highestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm))
-            registersList.add(getLfm3Register(isSymmetricLfm))
-            registersList.add(getLfm2Register(lfmDeviationPeriod, isSymmetricLfm))
+        return buildList {
+            addAll(getLfmRegistersFirstProfile(lfmInputParametersModel))
+            addAll(getLfmRegistersSecondProfile(lfmInputParametersModel))
+            add(PRA0_REG)
         }
-        return registersList
     }
 
     override suspend fun getCwRegisters(frequency: Long): List<Int> {
         TODO("Not yet implemented")
+    }
+
+    private fun getLfmRegistersFirstProfile(lfmInputParametersModel: LfmInputParametersModel): List<Int> = with(lfmInputParametersModel) {
+        return listOf(
+            PRW0_REG,
+            getRefRegister(lfmDeviationPeriod, isSymmetricLfm),
+            getIntRegister(lowestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm),
+            getFracRegister(lowestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm),
+            MOD_REG,
+            CTR1_RST,
+            CTR1,
+            CTR2,
+            CTR3,
+            getLfm1Register(lowestLfmFrequency, highestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm),
+            getLfm3Register(isSymmetricLfm),
+            getLfm2Register(lfmDeviationPeriod, isSymmetricLfm)
+        )
+    }
+
+    private fun getLfmRegistersSecondProfile(lfmInputParametersModel: LfmInputParametersModel): List<Int> = with(lfmInputParametersModel) {
+        return if (isSymmetricLfm) listOf(
+            PRW1_REG,
+            getRefRegister(lfmDeviationPeriod, isSymmetricLfm),
+            getInt1Register(lowestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm),
+            getFrac1Register(lowestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm),
+            MOD_REG,
+            CTR1_RST,
+            CTR1,
+            CTR2,
+            CTR3,
+            getLfm1Register(lowestLfmFrequency, highestLfmFrequency, lfmDeviationPeriod, isSymmetricLfm),
+            LFM31,
+            getLfm2Register(lfmDeviationPeriod, isSymmetricLfm)
+        ) else listOf()
     }
 
     private fun getRefRegister(
@@ -124,7 +151,7 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
 
     private fun getLfm3Register(isSymmetricLfm: Boolean): Int {
         return if (isSymmetricLfm) LFM3
-        else LFM31
+        else LFM3_NON_SYM
     }
 
 }
