@@ -3,10 +3,16 @@ package ru.profitsw2000.data.data.pll
 import ru.profitsw2000.data.domain.pll.PLLRegisters1208PL1URepository
 import ru.profitsw2000.data.model.pll.LfmInputParametersModel
 
+const val REF_REG_CW = 0x10
+const val FRAC_REG_CW = 0x4001F4
+const val MOD_REG_CW = 0x6001F4
 const val MOD = 32_000
 const val Fref = 20_000_000L
+const val CTR1_RST_CW = 0x890689
+const val CTR1_CW = 0x890688
 const val CTR1_RST = 0x840609
 const val CTR1 = 0x840608
+const val CTR2_CW = 0xA00005
 const val CTR2 = 0xA00002
 const val CTR3 = 0xC00001
 const val LFM3 = 0x500204
@@ -16,6 +22,7 @@ const val INT_REG = 0x200000
 const val FRAC_REG = 0x400000
 const val LFM1_REG = 0x100000
 const val LFM2_REG = 0x300000
+const val LFM3_REG = 0x500000
 const val MOD_REG = 0x607D00
 const val PRW0_REG = 0x700000
 const val PRA0_REG = 0x900000
@@ -32,7 +39,21 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
     }
 
     override suspend fun getCwRegisters(frequency: Long): List<Int> {
-        TODO("Not yet implemented")
+        return listOf(
+            PRW0_REG,
+            REF_REG_CW,
+            getIntRegisterCw(frequency),
+            FRAC_REG_CW,
+            MOD_REG_CW,
+            CTR1_RST_CW,
+            CTR1_CW,
+            CTR2_CW,
+            CTR3,
+            LFM1_REG,
+            LFM2_REG,
+            LFM3_REG,
+            PRA0_REG
+        )
     }
 
     private fun getLfmRegistersFirstProfile(lfmInputParametersModel: LfmInputParametersModel): List<Int> = with(lfmInputParametersModel) {
@@ -152,6 +173,10 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
     private fun getLfm3Register(isSymmetricLfm: Boolean): Int {
         return if (isSymmetricLfm) LFM3
         else LFM3_NON_SYM
+    }
+
+    private fun getIntRegisterCw(frequency: Long): Int {
+        return ((REF_REG_CW*frequency)/(4*Fref)).toInt()
     }
 
 }
