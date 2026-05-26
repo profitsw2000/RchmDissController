@@ -25,6 +25,7 @@ import ru.profitsw2000.data.domain.state.RchmDissStateRepository
 import ru.profitsw2000.data.mapper.PacketBytesConverter
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.updateRegister
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 
 class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
@@ -68,7 +69,7 @@ class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
 
     private fun getNewSynthesizerState(register: Int): SynthesizerModuleState {
         return when(register and SYNTHESIZER_REGISTERS_TYPE_MASK) {
-            REF_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(refRegister = register)
+            REF_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.refRegister}) {copy(refRegister = it)}
             INT_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(intRegister = register)
             FRAC_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(fracRegister = register)
             MOD_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(modRegister = register)
