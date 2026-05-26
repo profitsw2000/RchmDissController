@@ -20,6 +20,7 @@ import ru.profitsw2000.core.drawable.utils.MIN_LFM_PERIOD_MS
 import ru.profitsw2000.core.drawable.utils.MODULATION_PERIOD_ABOVE_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.MODULATION_PERIOD_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.NO_ERROR
+import ru.profitsw2000.core.drawable.utils.REGISTERS_CALCULATION_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.toRegisterByteArray
@@ -59,7 +60,7 @@ class MainViewModel(
                 _rchmDissUpdatingStatus.value =
                     RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
             } catch (exc: TimeoutCancellationException) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error",
+                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error. ${exc.message}",
                     RESPONSE_PACKET_TIMEOUT_ERROR_CODE
                 )
             } catch (exc: Exception) {
@@ -87,7 +88,7 @@ class MainViewModel(
                 _rchmDissUpdatingStatus.value =
                     RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
             } catch (exc: TimeoutCancellationException) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error", RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
+                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error. ${exc.message}", RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
                 _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(exc.message ?: "Unknown error", UNKNOWN_ERROR_CODE)
             }
@@ -95,8 +96,17 @@ class MainViewModel(
     }
 
     fun updateSynthesizerCwMode(frequency: Long) {
-        val errorCode = checkCwInputValues(frequency)
-        if (errorCode == NO_ERROR) updateSynthesizerCwMode(frequency)
+        val errorCode = checkCwInputValues(frequency * 1_000_000)
+        if (errorCode == NO_ERROR) {
+            viewModelScope.launch {
+                try {
+                    val registersList = pllRegisters1208PL1URepository.getCwRegisters(frequency)
+                    updateSynthesizer(registersList)
+                } catch (e: Exception) {
+                    _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(e.message ?: "Unknown error", REGISTERS_CALCULATION_ERROR_CODE)
+                }
+            }
+        }
         else _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("", errorCode)
     }
 
@@ -106,7 +116,31 @@ class MainViewModel(
         lfmPeriod: Double,
         isSymmetricLfm: Boolean
     ) {
-
+        val errorCode = checkLfmInputValues(
+            getLfmParametersModel(
+                startFrequency = startFrequency,
+                stopFrequency = stopFrequency,
+                lfmPeriod = lfmPeriod,
+                isSymmetricLfm = isSymmetricLfm
+            )
+        )
+        if (errorCode == NO_ERROR) {
+            viewModelScope.launch {
+                try {
+                    val registersList = pllRegisters1208PL1URepository.getLfmRegisters(
+                        getLfmParametersModel(
+                            startFrequency = startFrequency * 1_000_000,
+                            stopFrequency = stopFrequency * 1_000_000,
+                            lfmPeriod = lfmPeriod * 0.001,
+                            isSymmetricLfm = isSymmetricLfm
+                        )
+                    )
+                    updateSynthesizer(registersList)
+                } catch (e: Exception) {
+                    _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(e.message ?: "Unknown error", REGISTERS_CALCULATION_ERROR_CODE)
+                }
+            }
+        }
     }
 
     private fun updateSynthesizer(synthesizerRegisters: List<Int>) {
@@ -130,7 +164,7 @@ class MainViewModel(
                 _rchmDissUpdatingStatus.value =
                     RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
             } catch (exc: TimeoutCancellationException) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error", RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
+                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error. ${exc.message}", RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
                 _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(exc.message ?: "Unknown error", UNKNOWN_ERROR_CODE)
             }
