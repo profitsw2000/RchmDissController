@@ -42,6 +42,24 @@ class MainViewModel(
     private val _rchmDissUpdatingStatus = MutableStateFlow<RchmDissUpdatingStatus>(
         RchmDissUpdatingStatus.Idle)
     val rchmDissUpdatingStatus: StateFlow<RchmDissUpdatingStatus> = _rchmDissUpdatingStatus
+/*    val uiState: StateFlow<ScreenState> = repository1.sourceFlow
+        // mapLatest автоматически ОТМЕНИТ прошлый вызов asyncTransformation,
+        // если sourceFlow быстро эмитит новое значение
+        .mapLatest { dataFromRepo1 ->
+            try {
+                // Вызываем асинхронную suspend-функцию, которая возвращает одиночное значение
+                val result = repository2.asyncTransformation(dataFromRepo1)
+                ScreenState.Success(result)
+            } catch (e: Exception) {
+                ScreenState.Error(e.localizedMessage ?: "Unknown error")
+            }
+        }
+        // Превращаем в горячий StateFlow, привязанный к жизненному циклу ViewModel
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000), // Пауза 5 сек при повороте экрана
+            initialValue = ScreenState.Loading
+        )*/
 
     fun updateTransmitter(byte: Byte) {
         viewModelScope.launch {

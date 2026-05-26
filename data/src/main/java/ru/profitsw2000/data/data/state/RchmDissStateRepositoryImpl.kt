@@ -70,15 +70,15 @@ class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
     private fun getNewSynthesizerState(register: Int): SynthesizerModuleState {
         return when(register and SYNTHESIZER_REGISTERS_TYPE_MASK) {
             REF_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.refRegister}) {copy(refRegister = it)}
-            INT_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(intRegister = register)
-            FRAC_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(fracRegister = register)
-            MOD_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(modRegister = register)
-            CTR1_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(ctr1Register = register)
-            CTR2_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(ctr2Register = register)
-            CTR3_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(ctr3Register = register)
-            LFM1_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(lfm1Register = register)
-            LFM2_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(lfm2Register = register)
-            LFM3_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(lfm3Register = register)
+            INT_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.intRegister}) {copy(intRegister = it)}
+            FRAC_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.fracRegister}) {copy(fracRegister = it)}
+            MOD_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.modRegister}) {copy(modRegister = it)}
+            CTR1_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.ctr1Register}) {copy(ctr1Register = it)}
+            CTR2_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.ctr2Register}) {copy(ctr2Register = it)}
+            CTR3_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.ctr3Register}) {copy(ctr3Register = it)}
+            LFM1_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.lfm1Register}) {copy(lfm1Register = it)}
+            LFM2_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.lfm2Register}) {copy(lfm2Register = it)}
+            LFM3_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.lfm3Register}) {copy(lfm3Register = it)}
             PRW_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(prwRegister = register)
             PRA_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.copy(praRegister = register)
             else -> rchmDissState.value.synthesizerModuleState
