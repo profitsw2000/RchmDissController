@@ -8,9 +8,3 @@ data class SynthesizerModuleStateModel(
     val lfmPeriod: Double = 0.025,
     val isSymmetricLfm: Boolean = false
 )
-
-enum class RadiationMode {
-    NONE,
-    CW,
-    LFM
-}

@@ -1,6 +1,10 @@
 package ru.profitsw2000.data.data.pll
 
+import ru.profitsw2000.core.drawable.utils.LFM1_REGISTER_COMMAND
 import ru.profitsw2000.data.domain.pll.PLLRegisters1208PL1URepository
+import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
+import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.data.model.pll.LfmInputParametersModel
 
 const val REF_REG_CW = 0x10
@@ -54,6 +58,12 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
             LFM3_REG,
             PRA0_REG
         )
+    }
+
+    override suspend fun getLfmParameters(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
+        val radiationMode = getRadiationMode(synthesizerModuleState)
+        //val cwFrequency = if (radiationMode == RadiationMode.CW)
+        return TODO()
     }
 
     private fun getLfmRegistersFirstProfile(lfmInputParametersModel: LfmInputParametersModel): List<Int> = with(lfmInputParametersModel) {
@@ -177,6 +187,23 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
 
     private fun getIntRegisterCw(frequency: Long): Int {
         return ((REF_REG_CW*frequency)/(4*Fref)).toInt()
+    }
+
+    private fun getRadiationMode(synthesizerModuleState: SynthesizerModuleState): RadiationMode {
+        return when {
+            synthesizerModuleState.lfm1Register[0] and 0xFFFFF != 0
+                -> RadiationMode.LFM
+            synthesizerModuleState.intRegister[0] in 2649..<2680
+                -> RadiationMode.CW
+            else -> RadiationMode.NONE
+        }
+    }
+
+    private fun getCwRadiationFrequency(synthesizerModuleState: SynthesizerModuleState): Long {
+        val refReg = synthesizerModuleState.refRegister[0]
+        val intReg = synthesizerModuleState.intRegister[0]
+
+        return (4*Fref*intReg)/refReg
     }
 
 }
