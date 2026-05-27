@@ -42,6 +42,7 @@ class MainViewModel(
     private val _rchmDissUpdatingStatus = MutableStateFlow<RchmDissUpdatingStatus>(
         RchmDissUpdatingStatus.Idle)
     val rchmDissUpdatingStatus: StateFlow<RchmDissUpdatingStatus> = _rchmDissUpdatingStatus
+
 /*    val uiState: StateFlow<ScreenState> = repository1.sourceFlow
         // mapLatest автоматически ОТМЕНИТ прошлый вызов asyncTransformation,
         // если sourceFlow быстро эмитит новое значение
