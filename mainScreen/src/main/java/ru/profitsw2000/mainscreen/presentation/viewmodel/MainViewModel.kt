@@ -79,7 +79,7 @@ class MainViewModel(
 
     fun updateTransmitter(byte: Byte) {
         viewModelScope.launch {
-            _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Updating
+            _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Updating
 
             try {
                 bluetoothRepository.bluetoothDataRepository.writeData(
@@ -91,23 +91,19 @@ class MainViewModel(
                     }
                 }
 
-                _rchmDissUpdatingStatus.value =
-                    RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
+                _transmitterUpdatingStatusFlow.value =
+                    TransmitterUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value.transmitterModuleState)
             } catch (exc: TimeoutCancellationException) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error. ${exc.message}",
-                    RESPONSE_PACKET_TIMEOUT_ERROR_CODE
-                )
+                _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(exc.message ?: "Unknown error",
-                    UNKNOWN_ERROR_CODE
-                )
+                _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
             }
         }
     }
 
     fun updateReceiver(byteArray: ByteArray) {
         viewModelScope.launch {
-            _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Updating
+            _receiverUpdatingStatusFlow.value = ReceiverUpdatingStatus.Updating
 
             try {
                 bluetoothRepository.bluetoothDataRepository.writeData(
@@ -119,12 +115,12 @@ class MainViewModel(
                     }
                 }
 
-                _rchmDissUpdatingStatus.value =
-                    RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
+                _receiverUpdatingStatusFlow.value =
+                    ReceiverUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value.receiverModuleState)
             } catch (exc: TimeoutCancellationException) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error. ${exc.message}", RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
+                _receiverUpdatingStatusFlow.value = ReceiverUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(exc.message ?: "Unknown error", UNKNOWN_ERROR_CODE)
+                _receiverUpdatingStatusFlow.value = ReceiverUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
             }
         }
     }
@@ -132,16 +128,17 @@ class MainViewModel(
     fun updateSynthesizerCwMode(frequency: Long) {
         val errorCode = checkCwInputValues(frequency * 1_000_000)
         if (errorCode == NO_ERROR) {
+            _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Updating
             viewModelScope.launch {
                 try {
                     val registersList = pllRegisters1208PL1URepository.getCwRegisters(frequency)
                     updateSynthesizer(registersList)
                 } catch (e: Exception) {
-                    _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(e.message ?: "Unknown error", REGISTERS_CALCULATION_ERROR_CODE)
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(REGISTERS_CALCULATION_ERROR_CODE)
                 }
             }
         }
-        else _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("", errorCode)
+        else _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(errorCode)
     }
 
     fun updateSynthesizerLfmMode(
@@ -159,6 +156,7 @@ class MainViewModel(
             )
         )
         if (errorCode == NO_ERROR) {
+            _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Updating
             viewModelScope.launch {
                 try {
                     val registersList = pllRegisters1208PL1URepository.getLfmRegisters(
@@ -175,6 +173,7 @@ class MainViewModel(
                 }
             }
         }
+        else _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(errorCode)
     }
 
     private fun updateSynthesizer(synthesizerRegisters: List<Int>) {
