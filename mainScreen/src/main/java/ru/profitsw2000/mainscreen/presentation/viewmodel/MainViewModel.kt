@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_ABOVE_INPUT_ERROR
@@ -59,11 +61,19 @@ class MainViewModel(
         transmitterUpdatingStatusFlow,
         receiverUpdatingStatusFlow,
         synthesizerUpdatingStatusFlow
-    ) {
+    ) { transmitter, receiver, synthesizer ->
+
+        val
+
         RchmDissUpdatingStatus(
 
         )
     }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = RchmDissUpdatingStatus.Idle
+        )
 
 /*    val uiState: StateFlow<ScreenState> = repository1.sourceFlow
         // mapLatest автоматически ОТМЕНИТ прошлый вызов asyncTransformation,
