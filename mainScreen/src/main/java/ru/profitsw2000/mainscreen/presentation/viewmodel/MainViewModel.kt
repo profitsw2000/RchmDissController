@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -41,10 +42,6 @@ class MainViewModel(
     private val bluetoothPacketManager: BluetoothPacketManager,
     private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository
 ): ViewModel() {
-
-    private val _rchmDissUpdatingStatus = MutableStateFlow<RchmDissUpdatingStatus>(
-        RchmDissUpdatingStatus.Idle)
-    val rchmDissUpdatingStatus: StateFlow<RchmDissUpdatingStatus> = _rchmDissUpdatingStatus
     private val _transmitterUpdatingStatusFlow = MutableStateFlow<TransmitterUpdatingStatus>(
         TransmitterUpdatingStatus.Idle
     )
@@ -57,6 +54,16 @@ class MainViewModel(
         SynthesizerUpdatingStatus.Idle
     )
     val synthesizerUpdatingStatusFlow: StateFlow<SynthesizerUpdatingStatus> = _synthesizerUpdatingStatusFlow
+
+    val rchmDissUpdatingStatus: StateFlow<RchmDissUpdatingStatus> = combine(
+        transmitterUpdatingStatusFlow,
+        receiverUpdatingStatusFlow,
+        synthesizerUpdatingStatusFlow
+    ) {
+        RchmDissUpdatingStatus(
+
+        )
+    }
 
 /*    val uiState: StateFlow<ScreenState> = repository1.sourceFlow
         // mapLatest автоматически ОТМЕНИТ прошлый вызов asyncTransformation,
@@ -131,7 +138,7 @@ class MainViewModel(
             _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Updating
             viewModelScope.launch {
                 try {
-                    val registersList = pllRegisters1208PL1URepository.getCwRegisters(frequency)
+                    val registersList = pllRegisters1208PL1URepository.getCwRegisters(frequency * 1_000_000)
                     updateSynthesizer(registersList)
                 } catch (e: Exception) {
                     _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(REGISTERS_CALCULATION_ERROR_CODE)
@@ -169,7 +176,7 @@ class MainViewModel(
                     )
                     updateSynthesizer(registersList)
                 } catch (e: Exception) {
-                    _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(e.message ?: "Unknown error", REGISTERS_CALCULATION_ERROR_CODE)
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(REGISTERS_CALCULATION_ERROR_CODE)
                 }
             }
         }
@@ -178,8 +185,6 @@ class MainViewModel(
 
     private fun updateSynthesizer(synthesizerRegisters: List<Int>) {
         viewModelScope.launch {
-            _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Updating
-
             try {
                 for (register in synthesizerRegisters) {
                     bluetoothRepository.bluetoothDataRepository.writeData(
@@ -194,12 +199,16 @@ class MainViewModel(
                     }
                 }
 
-                _rchmDissUpdatingStatus.value =
-                    RchmDissUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value)
+                _synthesizerUpdatingStatusFlow.value =
+                    SynthesizerUpdatingStatus.Success(
+                        pllRegisters1208PL1URepository.getLfmParameters(
+                            rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
+                        )
+                    )
             } catch (exc: TimeoutCancellationException) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error("Timeout error. ${exc.message}", RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
+                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
-                _rchmDissUpdatingStatus.value = RchmDissUpdatingStatus.Error(exc.message ?: "Unknown error", UNKNOWN_ERROR_CODE)
+                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
             }
         }
     }
@@ -241,3 +250,44 @@ class MainViewModel(
         return errorCode
     }
 }
+/*
+
+class MyViewModel : ViewModel() {
+
+    // 1. Поток поискового запроса
+    val searchQuery = MutableStateFlow("")
+
+    // 2. Поток списка элементов из базы данных
+    val items = MutableStateFlow<List<Item>>(emptyList())
+
+    // 3. Поток статуса загрузки (True/False)
+    val isLoading = MutableStateFlow(false)
+
+    // Итоговый объединенный StateFlow для экрана
+    val uiState: StateFlow<MyUiState> = combine(
+        searchQuery,
+        items,
+        isLoading
+    ) { query, itemList, loading ->
+        // Здесь пишем логику фильтрации или сборки данных
+        val filteredItems = itemList.filter { it.name.contains(query, ignoreCase = true) }
+
+        // Возвращаем объект состояния экрана
+        MyUiState(
+            items = filteredItems,
+            isLoading = loading
+        )
+    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = MyUiState() // Стартовое состояние
+        )
+}
+
+// Data-класс для хранения общего состояния UI
+data class MyUiState(
+    val items: List<Item> = emptyList(),
+    val isLoading: Boolean = false
+)
+*/
