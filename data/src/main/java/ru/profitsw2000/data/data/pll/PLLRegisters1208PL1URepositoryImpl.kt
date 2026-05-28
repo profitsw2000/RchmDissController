@@ -31,6 +31,7 @@ const val MOD_REG = 0x607D00
 const val PRW0_REG = 0x700000
 const val PRA0_REG = 0x900000
 const val PRW1_REG = 0x704000
+const val REGISTERS_VALUE_MASK = 0xFFFFF
 
 class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
 
@@ -62,8 +63,12 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
 
     override suspend fun getLfmParameters(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
         val radiationMode = getRadiationMode(synthesizerModuleState)
-        //val cwFrequency = if (radiationMode == RadiationMode.CW)
-        return TODO()
+
+        return when(radiationMode) {
+            RadiationMode.NONE -> SynthesizerModuleStateModel()
+            RadiationMode.CW -> cwSynthesizerParametersModel(synthesizerModuleState)
+            RadiationMode.LFM -> lfmSynthesizerParametersModel(synthesizerModuleState)
+        }
     }
 
     private fun getLfmRegistersFirstProfile(lfmInputParametersModel: LfmInputParametersModel): List<Int> = with(lfmInputParametersModel) {
@@ -191,7 +196,7 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
 
     private fun getRadiationMode(synthesizerModuleState: SynthesizerModuleState): RadiationMode {
         return when {
-            synthesizerModuleState.lfm1Register[0] and 0xFFFFF != 0
+            synthesizerModuleState.lfm1Register[0] and REGISTERS_VALUE_MASK != 0
                 -> RadiationMode.LFM
             synthesizerModuleState.intRegister[0] in 2649..<2680
                 -> RadiationMode.CW
@@ -199,11 +204,66 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         }
     }
 
+    private fun cwSynthesizerParametersModel(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
+        return SynthesizerModuleStateModel(
+            radiationMode = RadiationMode.CW,
+            cwFrequency = getCwRadiationFrequency(synthesizerModuleState)
+        )
+    }
+
+    private fun lfmSynthesizerParametersModel(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
+        return SynthesizerModuleStateModel(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = getLfmLowestFrequency(synthesizerModuleState),
+            highestLfmFrequency = getLfmHighestFrequency(synthesizerModuleState),
+            lfmPeriod = getLfmDeviationPeriod(synthesizerModuleState),
+            isSymmetricLfm = isSymmetricLfm(synthesizerModuleState.lfm3Register[0])
+        )
+    }
+
     private fun getCwRadiationFrequency(synthesizerModuleState: SynthesizerModuleState): Long {
-        val refReg = synthesizerModuleState.refRegister[0]
-        val intReg = synthesizerModuleState.intRegister[0]
+        val refReg = (synthesizerModuleState.refRegister[0] and REGISTERS_VALUE_MASK).toLong()
+        val intReg = (synthesizerModuleState.intRegister[0] and REGISTERS_VALUE_MASK).toLong()
 
         return (4*Fref*intReg)/refReg
+    }
+
+    private fun isSymmetricLfm(register: Int): Boolean {
+        return (register.shr(9) and 0x1F) != 0
+    }
+
+    private fun getLfmLowestFrequency(
+        synthesizerModuleState: SynthesizerModuleState
+    ): Long {
+        val intReg = (synthesizerModuleState.intRegister[0] and REGISTERS_VALUE_MASK).toLong()
+        val fracReg = (synthesizerModuleState.fracRegister[0] and REGISTERS_VALUE_MASK).toLong()
+        val modReg = (synthesizerModuleState.modRegister[0] and REGISTERS_VALUE_MASK).toLong()
+        val refReg = (synthesizerModuleState.refRegister[0] and REGISTERS_VALUE_MASK).toLong()
+
+        return (4*Fref*(intReg + (fracReg/modReg)))/refReg
+    }
+
+    private fun getLfmHighestFrequency(
+        synthesizerModuleState: SynthesizerModuleState
+    ): Long {
+        val intReg = (synthesizerModuleState.intRegister[1] and REGISTERS_VALUE_MASK).toLong()
+        val fracReg = (synthesizerModuleState.fracRegister[1] and REGISTERS_VALUE_MASK).toLong()
+        val modReg = (synthesizerModuleState.modRegister[1] and REGISTERS_VALUE_MASK).toLong()
+        val refReg = (synthesizerModuleState.refRegister[1] and REGISTERS_VALUE_MASK).toLong()
+        val dFracReg = (synthesizerModuleState.lfm1Register[0] and REGISTERS_VALUE_MASK).toLong()
+
+        return if(isSymmetricLfm(synthesizerModuleState.lfm3Register[0])) (4*Fref*(intReg + (fracReg/modReg)))/refReg
+        else getLfmHighestFrequency(synthesizerModuleState) + ((dFracReg*Fref)/(16*modReg*refReg))
+    }
+
+    private fun getLfmDeviationPeriod(synthesizerModuleState: SynthesizerModuleState): Double {
+        val fracInc = ((synthesizerModuleState.lfm2Register[0] and REGISTERS_VALUE_MASK) and 0xFF).toDouble()
+        val sawStep = ((synthesizerModuleState.lfm2Register[0] and REGISTERS_VALUE_MASK).shr(8)).toLong()
+        val refReg = (synthesizerModuleState.refRegister[0] and REGISTERS_VALUE_MASK).toLong()
+        val deviationTime = fracInc*((refReg*sawStep)/Fref)
+
+        return if(isSymmetricLfm(synthesizerModuleState.lfm3Register[0])) deviationTime*2
+        else deviationTime
     }
 
 }
