@@ -31,6 +31,9 @@ import ru.profitsw2000.data.domain.state.RchmDissStateRepository
 import ru.profitsw2000.data.model.pll.LfmInputParametersModel
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 import ru.profitsw2000.mainscreen.state.RchmDissUpdatingStatus
+import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
+import ru.profitsw2000.mainscreen.state.SynthesizerUpdatingStatus
+import ru.profitsw2000.mainscreen.state.TransmitterUpdatingStatus
 
 class MainViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
@@ -42,6 +45,18 @@ class MainViewModel(
     private val _rchmDissUpdatingStatus = MutableStateFlow<RchmDissUpdatingStatus>(
         RchmDissUpdatingStatus.Idle)
     val rchmDissUpdatingStatus: StateFlow<RchmDissUpdatingStatus> = _rchmDissUpdatingStatus
+    private val _transmitterUpdatingStatusFlow = MutableStateFlow<TransmitterUpdatingStatus>(
+        TransmitterUpdatingStatus.Idle
+    )
+    val transmitterUpdatingStatusFlow: StateFlow<TransmitterUpdatingStatus> = _transmitterUpdatingStatusFlow
+    private val _receiverUpdatingStatusFlow = MutableStateFlow<ReceiverUpdatingStatus>(
+        ReceiverUpdatingStatus.Idle
+    )
+    val receiverUpdatingStatusFlow: StateFlow<ReceiverUpdatingStatus> = _receiverUpdatingStatusFlow
+    private val _synthesizerUpdatingStatusFlow = MutableStateFlow<SynthesizerUpdatingStatus>(
+        SynthesizerUpdatingStatus.Idle
+    )
+    val synthesizerUpdatingStatusFlow: StateFlow<SynthesizerUpdatingStatus> = _synthesizerUpdatingStatusFlow
 
 /*    val uiState: StateFlow<ScreenState> = repository1.sourceFlow
         // mapLatest автоматически ОТМЕНИТ прошлый вызов asyncTransformation,
