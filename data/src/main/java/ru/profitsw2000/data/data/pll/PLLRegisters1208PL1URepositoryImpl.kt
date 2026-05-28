@@ -35,6 +35,12 @@ const val REGISTERS_VALUE_MASK = 0xFFFFF
 
 class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
 
+    /**
+     * Асинхронная функция для получения списка типа Int для записи в регистры микросхемы 1288ПЛ1У
+     * @param lfmInputParametersModel - содержит в себе параметры необходимого сигнала ЛЧМ для генерации микросхемой (начальное
+     * значение частоты, конечное значение частоты, период девиации и т.д.)
+     * @return список с числами типа Int, где каждый элемент содержит значение регистра
+     */
     override suspend fun getLfmRegisters(lfmInputParametersModel: LfmInputParametersModel): List<Int> {
         return buildList {
             addAll(getLfmRegistersFirstProfile(lfmInputParametersModel))
@@ -43,6 +49,11 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         }
     }
 
+    /**
+     * Асинхронная функция для получения списка типа Int для записи в регистры микросхемы 1288ПЛ1У
+     * @param frequency - содержит в себе частоту немодулированного сигнал для генерации микросхемой
+     * @return список с числами типа Int, где каждый элемент содержит значение регистра
+     */
     override suspend fun getCwRegisters(frequency: Long): List<Int> {
         return listOf(
             PRW0_REG,
@@ -61,6 +72,12 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         )
     }
 
+    /**
+     * Функция для получения значений параметров синтезатора - тип генерации сигнала (НГ или ЛЧМ), частоты
+     * период и пр.
+     * @param synthesizerModuleState - содержит в себе текущее значение регистров микросхемы 1288ПЛ1У для двух профилей
+     * @return объект типа SynthesizerModuleStateModel с текущими параметрами сигнала, рассчитаными на основе значений регистров
+     */
     override suspend fun getLfmParameters(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
         val radiationMode = getRadiationMode(synthesizerModuleState)
 
@@ -71,6 +88,14 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         }
     }
 
+    /**
+     * Функция для получения списка со значениями регистров для первого профиля м/сх 1288ПЛ1У для генерации ЛЧМ сигнала.
+     * Элемент списка типа Int
+     * содержит 4 байта, регистр м/сх 1288ПЛ1У использует только 3 первых байта. Тип регистра закодирован в последних
+     * четырёх битах регистра.
+     * @param lfmInputParametersModel - содержит параметры ЛЧМ сигнала
+     * @return список из регистров микросхемы 1288ПЛ1У для записи в первый профиль
+     */
     private fun getLfmRegistersFirstProfile(lfmInputParametersModel: LfmInputParametersModel): List<Int> = with(lfmInputParametersModel) {
         return listOf(
             PRW0_REG,
@@ -88,6 +113,14 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         )
     }
 
+    /**
+     * Функция для получения списка со значениями регистров для второго профиля м/сх 1288ПЛ1У для генерации ЛЧМ сигнала.
+     * Элемент списка типа Int
+     * содержит 4 байта, регистр м/сх 1288ПЛ1У использует только 3 первых байта. Тип регистра закодирован в последних
+     * четырёх битах регистра.
+     * @param lfmInputParametersModel - содержит параметры ЛЧМ сигнала
+     * @return список из регистров микросхемы 1288ПЛ1У для записи во второй профиль
+     */
     private fun getLfmRegistersSecondProfile(lfmInputParametersModel: LfmInputParametersModel): List<Int> = with(lfmInputParametersModel) {
         return if (isSymmetricLfm) listOf(
             PRW1_REG,
@@ -105,6 +138,12 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         ) else listOf()
     }
 
+    /**
+     * Рассчитывает значение регистра Ref микросхемы ФАПЧ
+     * @param lfmDeviationPeriod - содержит период модуляции ЛЧМ сигнала
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Ref, находящийся в переменной Int (используются только 3 первых байта)
+     */
     private fun getRefRegister(
         lfmDeviationPeriod: Double,
         isSymmetricLfm: Boolean
@@ -113,6 +152,13 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         else 2
     }
 
+    /**
+     * Рассчитывает значение регистра Int микросхемы ФАПЧ для первого профиля
+     * @param lowestLfmFrequency - начальное значение частоты ЛЧМ сигнала
+     * @param lfmDeviationPeriod - содержит период модуляции ЛЧМ сигнала
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Int первого профиля, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getIntRegister(
         lowestLfmFrequency: Long,
         lfmDeviationPeriod: Double,
@@ -122,6 +168,13 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return (((lowestLfmFrequency*ref)/(4* Fref)).toInt()) or INT_REG
     }
 
+    /**
+     * Рассчитывает значение регистра Int микросхемы ФАПЧ для второго профиля
+     * @param highestLfmFrequency - конечное значение частоты ЛЧМ сигнала
+     * @param lfmDeviationPeriod - содержит период модуляции ЛЧМ сигнала
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Int второго профиля, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getInt1Register(
         highestLfmFrequency: Long,
         lfmDeviationPeriod: Double,
@@ -131,6 +184,13 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return (((highestLfmFrequency*ref)/(4* Fref)).toInt()) or INT_REG
     }
 
+    /**
+     * Рассчитывает значение регистра Frac микросхемы ФАПЧ для первого профиля
+     * @param lowestLfmFrequency - начальное значение частоты ЛЧМ сигнала
+     * @param lfmDeviationPeriod - содержит период модуляции ЛЧМ сигнала
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Frac первого профиля, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getFracRegister(
         lowestLfmFrequency: Long,
         lfmDeviationPeriod: Double,
@@ -141,6 +201,13 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return (((MOD *ref*fractionalMultPart)/(4* Fref)).toInt()) or FRAC_REG
     }
 
+    /**
+     * Рассчитывает значение регистра Frac микросхемы ФАПЧ для второго профиля
+     * @param highestLfmFrequency - конечное значение частоты ЛЧМ сигнала
+     * @param lfmDeviationPeriod - содержит период модуляции ЛЧМ сигнала
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Frac второго профиля, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getFrac1Register(
         highestLfmFrequency: Long,
         lfmDeviationPeriod: Double,
@@ -151,6 +218,12 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return (((MOD *ref*fractionalMultPart)/(4* Fref)).toInt()) or FRAC_REG
     }
 
+    /**
+     * Рассчитывает значение регистра Lfm2 микросхемы ФАПЧ для обоих профилей
+     * @param lfmDeviationPeriod - содержит период модуляции ЛЧМ сигнала
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Lfm2 обоих профилей, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getLfm2Register(
         lfmDeviationPeriod: Double,
         isSymmetricLfm: Boolean
@@ -171,6 +244,14 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return (sawStep shl 8) or fracInc or LFM2_REG
     }
 
+    /**
+     * Рассчитывает значение регистра Lfm1 микросхемы ФАПЧ для обоих профилей
+     * @param lowestLfmFrequency - начальное значение частоты ЛЧМ сигнала
+     * @param highestLfmFrequency - конечное значение частоты ЛЧМ сигнала
+     * @param lfmDeviationPeriod - содержит период модуляции ЛЧМ сигнала
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Lfm1 обоих профилей, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getLfm1Register(
         lowestLfmFrequency: Long,
         highestLfmFrequency: Long,
@@ -185,25 +266,46 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return dfrac or LFM1_REG
     }
 
+    /**
+     * Возвращает значение регистра Lfm3 микросхемы ФАПЧ для первого профиля
+     * @param isSymmetricLfm - булевая переменная по которой определяется тип сигнала ЛЧМ - симметричный или несимметричный
+     * @return Значение регистра Lfm3 первого профиля, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getLfm3Register(isSymmetricLfm: Boolean): Int {
         return if (isSymmetricLfm) LFM3
         else LFM3_NON_SYM
     }
 
+    /**
+     * Рассчитывает значение регистра Int микросхемы ФАПЧ для генерации немодулированного сигнала(НГ)
+     * @param frequency - значение частоты сигнала
+     * @return Значение регистра Int, находящийся в переменной типа Int (используются только 3 первых байта)
+     */
     private fun getIntRegisterCw(frequency: Long): Int {
         return ((REF_REG_CW*frequency)/(4*Fref)).toInt()
     }
 
+    /**
+     * Функция определяет по значениям регистров Lfm1 и Int первого профиля ФАПЧ какой тип сигнала будет
+     * генерироваться
+     * @param synthesizerModuleState - содержит в себе текущее значение регистров микросхемы 1288ПЛ1У для двух профилей
+     * @return объект типа RadiationMode, который содержит информацию о виде генерируемого сигнала(НГ или ЛЧМ)
+     */
     private fun getRadiationMode(synthesizerModuleState: SynthesizerModuleState): RadiationMode {
         return when {
-            synthesizerModuleState.lfm1Register[0] and REGISTERS_VALUE_MASK != 0
+            (synthesizerModuleState.lfm1Register[0] and REGISTERS_VALUE_MASK) != 0
                 -> RadiationMode.LFM
-            synthesizerModuleState.intRegister[0] in 2649..<2680
+            (synthesizerModuleState.intRegister[0] and REGISTERS_VALUE_MASK) in 2649..<2680
                 -> RadiationMode.CW
             else -> RadiationMode.NONE
         }
     }
 
+    /**
+     * Рассчитывает значение параметров НГ сигнала и помещает их в объект типа SynthesizerModuleStateModel
+     * @param synthesizerModuleState - переменная со значениями регистров микросхемы ФАПЧ
+     * @return объект типа SynthesizerModuleStateModel с параметрами НГ сигнала
+     */
     private fun cwSynthesizerParametersModel(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
         return SynthesizerModuleStateModel(
             radiationMode = RadiationMode.CW,
@@ -211,6 +313,11 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         )
     }
 
+    /**
+     * Рассчитывает значение параметров ЛЧМ сигнала и помещает их в объект типа SynthesizerModuleStateModel
+     * @param synthesizerModuleState - переменная со значениями регистров микросхемы ФАПЧ
+     * @return объект типа SynthesizerModuleStateModel с параметрами ЛЧМ сигнала
+     */
     private fun lfmSynthesizerParametersModel(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
         return SynthesizerModuleStateModel(
             radiationMode = RadiationMode.LFM,
@@ -221,6 +328,11 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         )
     }
 
+    /**
+     * Функция рассчитывает значение частоты НГ сигнала по значениям регистров
+     * @param synthesizerModuleState - аргумент, в котором содержаться значения регистров микросхемы ФАПЧ
+     * @return значение частоты в переменной типа Long
+     */
     private fun getCwRadiationFrequency(synthesizerModuleState: SynthesizerModuleState): Long {
         val refReg = (synthesizerModuleState.refRegister[0] and REGISTERS_VALUE_MASK).toLong()
         val intReg = (synthesizerModuleState.intRegister[0] and REGISTERS_VALUE_MASK).toLong()
@@ -228,10 +340,20 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return (4*Fref*intReg)/refReg
     }
 
+    /**
+     * Определение типа ЛЧМ-сигнала (симметричный или несимметричный) по значениям регистров микросхемы ФАПЧ
+     * @param register - аргумент, в котором содержится значение регистра микросхемы ФАПЧ по которому определяется тип сигнала
+     * @return булевая переменная - если true - сигнал, генерируемый микросхемой ФАПЧ - симметричный, false - несимметричный.
+     */
     private fun isSymmetricLfm(register: Int): Boolean {
         return (register.shr(9) and 0x1F) != 0
     }
 
+    /**
+     * Рассчитывает нижнее значение частоты ЛЧМ-сигнала по значениям регистров
+     * @param synthesizerModuleState - аргумент, в котором содержаться значения регистров микросхемы ФАПЧ
+     * @return нижнее значение частоты в переменной типа Long
+     */
     private fun getLfmLowestFrequency(
         synthesizerModuleState: SynthesizerModuleState
     ): Long {
@@ -243,6 +365,12 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         return (4*Fref*(intReg + (fracReg/modReg)))/refReg
     }
 
+    /**
+     * Рассчитывает верхнее значение частоты ЛЧМ-сигнала по значениям регистров. При этом
+     * для случаев симметричной и несимметричной ЛЧМ значение расчитывается по разному.
+     * @param synthesizerModuleState - аргумент, в котором содержаться значения регистров микросхемы ФАПЧ
+     * @return верхнее значение частоты в переменной типа Long
+     */
     private fun getLfmHighestFrequency(
         synthesizerModuleState: SynthesizerModuleState
     ): Long {
@@ -256,6 +384,12 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         else getLfmHighestFrequency(synthesizerModuleState) + ((dFracReg*Fref)/(16*modReg*refReg))
     }
 
+    /**
+     * Рассчитывает период модуляции частоты ЛЧМ-сигнала по значениям регистров. При этом
+     * для случаев симметричной и несимметричной ЛЧМ значение расчитывается по разному.
+     * @param synthesizerModuleState - аргумент, в котором содержаться значения регистров микросхемы ФАПЧ
+     * @return период модуляции в переменной типа Double
+     */
     private fun getLfmDeviationPeriod(synthesizerModuleState: SynthesizerModuleState): Double {
         val fracInc = ((synthesizerModuleState.lfm2Register[0] and REGISTERS_VALUE_MASK) and 0xFF).toDouble()
         val sawStep = ((synthesizerModuleState.lfm2Register[0] and REGISTERS_VALUE_MASK).shr(8)).toLong()
