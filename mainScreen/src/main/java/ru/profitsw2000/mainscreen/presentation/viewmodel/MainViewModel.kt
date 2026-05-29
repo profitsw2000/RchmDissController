@@ -41,6 +41,8 @@ import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
 import ru.profitsw2000.mainscreen.state.SynthesizerUpdatingStatus
 import ru.profitsw2000.mainscreen.state.TransmitterUpdatingStatus
+import kotlin.experimental.and
+import kotlin.experimental.or
 
 class MainViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
@@ -91,13 +93,13 @@ class MainViewModel(
             initialValue = RchmDissStateModel()
         )
 
-    fun updateTransmitter(byte: Byte) {
+    fun updateTransmitter(channelByte: Byte, turnTransmitterOn: Boolean) {
         viewModelScope.launch {
             _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Updating
 
             try {
                 bluetoothRepository.bluetoothDataRepository.writeData(
-                    bluetoothPacketManager.getWriteToTransmitterPacket(byte)
+                    bluetoothPacketManager.getWriteToTransmitterPacket(channelByte)
                 )
                 withTimeout(5000L) {
                     rchmDissStateRepository.lastPacket.first {
@@ -286,5 +288,14 @@ class MainViewModel(
             synthesizerModuleState = synthesizerData.first,
             isActualSynthesizerData = synthesizerData.second
         )
+    }
+
+    private fun getOutputModuleStateByte(turnTransmitterOn: Boolean): Byte {
+        val output = rchmDissStateRepository.rchmDissState.value.outputModuleState.rchmDissOutput
+        val mask = 0xFD.toByte()
+        val transmitterOutput = if (turnTransmitterOn) 0x2.toByte()
+        else 0.toByte()
+
+        return (output and mask) or transmitterOutput
     }
 }

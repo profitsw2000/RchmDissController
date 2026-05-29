@@ -4,4 +4,5 @@ data class RchmDissState(
     val receiverModuleState: ReceiverModuleState = ReceiverModuleState(),
     val transmitterModuleState: TransmitterModuleState = TransmitterModuleState(),
     val synthesizerModuleState: SynthesizerModuleState = SynthesizerModuleState(),
+    val outputModuleState: OutputModuleState = OutputModuleState()
 )
