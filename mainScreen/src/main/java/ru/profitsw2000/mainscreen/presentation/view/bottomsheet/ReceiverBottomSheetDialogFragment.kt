@@ -28,5 +28,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
         val bottomSheetBehavior = BottomSheetBehavior.from(view.parent as View)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+        initViews()
+    }
+
+    private fun initViews() {
+
     }
 }

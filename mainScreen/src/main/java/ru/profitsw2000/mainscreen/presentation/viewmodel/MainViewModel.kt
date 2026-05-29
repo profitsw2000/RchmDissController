@@ -91,25 +91,6 @@ class MainViewModel(
             initialValue = RchmDissStateModel()
         )
 
-/*    val uiState: StateFlow<ScreenState> = repository1.sourceFlow
-        // mapLatest автоматически ОТМЕНИТ прошлый вызов asyncTransformation,
-        // если sourceFlow быстро эмитит новое значение
-        .mapLatest { dataFromRepo1 ->
-            try {
-                // Вызываем асинхронную suspend-функцию, которая возвращает одиночное значение
-                val result = repository2.asyncTransformation(dataFromRepo1)
-                ScreenState.Success(result)
-            } catch (e: Exception) {
-                ScreenState.Error(e.localizedMessage ?: "Unknown error")
-            }
-        }
-        // Превращаем в горячий StateFlow, привязанный к жизненному циклу ViewModel
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000), // Пауза 5 сек при повороте экрана
-            initialValue = ScreenState.Loading
-        )*/
-
     fun updateTransmitter(byte: Byte) {
         viewModelScope.launch {
             _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Updating
@@ -307,44 +288,3 @@ class MainViewModel(
         )
     }
 }
-/*
-
-class MyViewModel : ViewModel() {
-
-    // 1. Поток поискового запроса
-    val searchQuery = MutableStateFlow("")
-
-    // 2. Поток списка элементов из базы данных
-    val items = MutableStateFlow<List<Item>>(emptyList())
-
-    // 3. Поток статуса загрузки (True/False)
-    val isLoading = MutableStateFlow(false)
-
-    // Итоговый объединенный StateFlow для экрана
-    val uiState: StateFlow<MyUiState> = combine(
-        searchQuery,
-        items,
-        isLoading
-    ) { query, itemList, loading ->
-        // Здесь пишем логику фильтрации или сборки данных
-        val filteredItems = itemList.filter { it.name.contains(query, ignoreCase = true) }
-
-        // Возвращаем объект состояния экрана
-        MyUiState(
-            items = filteredItems,
-            isLoading = loading
-        )
-    }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = MyUiState() // Стартовое состояние
-        )
-}
-
-// Data-класс для хранения общего состояния UI
-data class MyUiState(
-    val items: List<Item> = emptyList(),
-    val isLoading: Boolean = false
-)
-*/
