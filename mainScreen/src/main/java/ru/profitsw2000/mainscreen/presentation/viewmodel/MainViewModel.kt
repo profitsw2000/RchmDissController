@@ -105,6 +105,14 @@ class MainViewModel(
                     rchmDissStateRepository.lastPacket.first {
                         it == RcdInputPacketType.TransmitterStateInputPacket
                     }
+                    //Здесь отправляем пакет для установки сигнала Упр_ПРД
+                    launch {
+                        try {
+
+                        } catch (exc: Exception) {
+
+                        }
+                    }
                 }
 
                 _transmitterUpdatingStatusFlow.value =
