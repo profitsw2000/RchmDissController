@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -31,9 +32,12 @@ import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 import ru.profitsw2000.data.domain.pll.PLLRegisters1208PL1URepository
 import ru.profitsw2000.data.domain.state.RchmDissStateRepository
+import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissStateModel
+import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
+import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.data.model.pll.LfmInputParametersModel
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
-import ru.profitsw2000.mainscreen.state.RchmDissUpdatingStatus
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
 import ru.profitsw2000.mainscreen.state.SynthesizerUpdatingStatus
 import ru.profitsw2000.mainscreen.state.TransmitterUpdatingStatus
@@ -57,22 +61,34 @@ class MainViewModel(
     )
     val synthesizerUpdatingStatusFlow: StateFlow<SynthesizerUpdatingStatus> = _synthesizerUpdatingStatusFlow
 
-    val rchmDissUpdatingStatus: StateFlow<RchmDissUpdatingStatus> = combine(
+    val rchmDissState: StateFlow<RchmDissStateModel> = combine(
         transmitterUpdatingStatusFlow,
         receiverUpdatingStatusFlow,
         synthesizerUpdatingStatusFlow
     ) { transmitter, receiver, synthesizer ->
 
-        val
-
-        RchmDissUpdatingStatus(
-
+        getRchmDissStateModelFromSubModulesState(
+            transmitter, receiver, synthesizer
         )
     }
+        .scan(RchmDissStateModel()){ oldState, updatedState ->
+            RchmDissStateModel(
+                receiverModuleState = if (updatedState.isActualReceiverData) updatedState.receiverModuleState
+                else oldState.receiverModuleState,
+                isActualReceiverData = updatedState.isActualReceiverData,
+                transmitterModuleState = if (updatedState.isActualTransmitterData) updatedState.transmitterModuleState
+                else oldState.transmitterModuleState,
+                isActualTransmitterData = updatedState.isActualTransmitterData,
+                synthesizerModuleState = if (updatedState.isActualSynthesizerData) updatedState.synthesizerModuleState
+                else oldState.synthesizerModuleState,
+                isActualSynthesizerData = updatedState.isActualSynthesizerData
+
+            )
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = RchmDissUpdatingStatus.Idle
+            initialValue = RchmDissStateModel()
         )
 
 /*    val uiState: StateFlow<ScreenState> = repository1.sourceFlow
@@ -258,6 +274,37 @@ class MainViewModel(
         if (frequency > MAX_LFM_FREQ) errorCode = errorCode or LOW_FREQUENCY_ABOVE_INPUT_ERROR
 
         return errorCode
+    }
+
+    private fun getRchmDissStateModelFromSubModulesState(
+        transmitter: TransmitterUpdatingStatus,
+        receiver: ReceiverUpdatingStatus,
+        synthesizer: SynthesizerUpdatingStatus
+    ): RchmDissStateModel {
+        val transmitterData = when(transmitter) {
+            is TransmitterUpdatingStatus.Success ->
+                Pair(transmitter.transmitterModuleState, true)
+            else -> Pair(TransmitterModuleState(), false)
+        }
+        val receiverData = when(receiver) {
+            is ReceiverUpdatingStatus.Success ->
+                Pair(receiver.receiverModuleState, true)
+            else -> Pair(ReceiverModuleState(), false)
+        }
+        val synthesizerData = when(synthesizer) {
+            is SynthesizerUpdatingStatus.Success ->
+                Pair(synthesizer.synthesizerModuleStateModel, true)
+            else -> Pair(SynthesizerModuleStateModel(), false)
+        }
+
+        return RchmDissStateModel(
+            receiverModuleState = receiverData.first,
+            isActualReceiverData = receiverData.second,
+            transmitterModuleState = transmitterData.first,
+            isActualTransmitterData = transmitterData.second,
+            synthesizerModuleState = synthesizerData.first,
+            isActualSynthesizerData = synthesizerData.second
+        )
     }
 }
 /*
