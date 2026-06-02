@@ -6,6 +6,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.profitsw2000.core.drawable.utils.PACKET_SIZE_MAXIMUM
 import ru.profitsw2000.core.drawable.utils.PACKET_START_BYTE
+import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
@@ -126,6 +128,14 @@ class BluetoothPacketManagerImpl(
         return getWriteByteArrayPacket(
             WRITE_TO_SYNTHESIZER_PACKET_SIZE,
             WRITE_TO_SYNTHESIZER_PACKET_ID,
+            dataByteArray
+        )
+    }
+
+    override fun getModuleOutputSetPacket(dataByteArray: ByteArray): ByteArray {
+        return getWriteByteArrayPacket(
+            RCHM_DISS_OUTPUT_SET_PACKET_SIZE,
+            RCHM_DISS_OUTPUT_SET_PACKET_ID,
             dataByteArray
         )
     }
