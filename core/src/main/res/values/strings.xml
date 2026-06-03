@@ -52,4 +52,5 @@
     <string name="yes_button_text">Да</string>
     <string name="no_button_text">Нет</string>
     <string name="device_selection_dialog_title">Устройства</string>
+    <string name="packet_send_successfull_status_text">Успешная отправка</string>
 </resources>
