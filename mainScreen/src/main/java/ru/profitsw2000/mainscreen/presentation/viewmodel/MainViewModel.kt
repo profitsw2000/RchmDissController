@@ -107,11 +107,11 @@ class MainViewModel(
                     }
                     //Здесь отправляем пакет для установки сигнала Упр_ПРД
                     launch {
-                        try {
-
-                        } catch (exc: Exception) {
-
-                        }
+                        bluetoothRepository.bluetoothDataRepository.writeData(
+                            bluetoothPacketManager.getRchmDissOutputSetPacket(
+                                getOutputModuleStateByteArray(turnTransmitterOn)
+                            )
+                        )
                     }
                 }
 
@@ -298,12 +298,13 @@ class MainViewModel(
         )
     }
 
-    private fun getOutputModuleStateByte(turnTransmitterOn: Boolean): Byte {
-        val output = rchmDissStateRepository.rchmDissState.value.outputModuleState.rchmDissOutput
-        val mask = 0xFD.toByte()
-        val transmitterOutput = if (turnTransmitterOn) 0x2.toByte()
-        else 0.toByte()
+    private fun getOutputModuleStateByteArray(turnTransmitterOn: Boolean): ByteArray {
+        val currentOutput = rchmDissStateRepository.rchmDissState.value.outputModuleState.rchmDissDigitalOutput
+        val mask: UShort = 0xFFFDu
+        val transmitterOutput: UShort = if (turnTransmitterOn) 0x2u
+        else 0u
+        val newOutput = (currentOutput and mask) or transmitterOutput
 
-        return (output and mask) or transmitterOutput
+        return byteArrayOf(newOutput.toByte(), (newOutput.toUInt().shr(8)).toByte())
     }
 }

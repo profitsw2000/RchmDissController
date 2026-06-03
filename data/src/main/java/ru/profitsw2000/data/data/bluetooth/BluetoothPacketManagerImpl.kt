@@ -132,7 +132,7 @@ class BluetoothPacketManagerImpl(
         )
     }
 
-    override fun getModuleOutputSetPacket(dataByteArray: ByteArray): ByteArray {
+    override fun getRchmDissOutputSetPacket(dataByteArray: ByteArray): ByteArray {
         return getWriteByteArrayPacket(
             RCHM_DISS_OUTPUT_SET_PACKET_SIZE,
             RCHM_DISS_OUTPUT_SET_PACKET_ID,
