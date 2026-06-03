@@ -11,13 +11,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
+import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_1
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
+import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentTransmitterBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
@@ -28,6 +34,13 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentTransmitterBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
     private val mainViewModel: MainViewModel by activityViewModel()
+    private val spec = CircularProgressIndicatorSpec(requireContext(), null).apply {
+        indicatorSize = 24.dpToPx()
+        trackThickness = 3.dpToPx()
+
+        indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.splashed_white))
+    }
+    val progressIndicator = IndeterminateDrawable.createCircularDrawable(requireContext(), spec)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,26 +78,57 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainViewModel.transmitterUpdatingStatusFlow.collect { state ->
                     when(state) {
-                        is TransmitterUpdatingStatus.Error -> TODO()
-                        TransmitterUpdatingStatus.Idle -> TODO()
+                        is TransmitterUpdatingStatus.Error -> handleError(state.errorCode)
+                        is TransmitterUpdatingStatus.Idle -> setForms(state.transmitterModuleState, state.outputModuleState)
                         is TransmitterUpdatingStatus.Success -> TODO()
-                        TransmitterUpdatingStatus.Updating -> TODO()
+                        TransmitterUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
             }
         }
     }
 
-    private fun handleError(errorCode: Int) {
+    private fun handleError(errorCode: Int) = with(binding) {
+        setProgressBar(false)
+        updatingStatusResultTextView.visibility = View.VISIBLE
+        updatingStatusResultTextView.setTextColor(resources.getColor(ru.profitsw2000.core.R.color.scarlet))
 
+        updatingStatusResultTextView.text = when(errorCode) {
+            RESPONSE_PACKET_TIMEOUT_ERROR_CODE -> ru.profitsw2000.core.R.string.response_packet_timeout_error.toString()
+            else -> ru.profitsw2000.core.R.string.unknown_error.toString()
+        }
+        mainViewModel.idleTransmitterState()
     }
 
-    private fun setProgressBar(isUpdating: Boolean) {
-
+    private fun setProgressBar(isUpdating: Boolean) = with(binding.transmitterParamsSendButton) {
+        if (isUpdating) {
+            text = ""
+            icon = progressIndicator
+            progressIndicator.start()
+            isEnabled = false
+        } else {
+            progressIndicator.stop()
+            icon = null
+            text = resources.getString(ru.profitsw2000.core.R.string.send_button_text)
+            isEnabled = true
+        }
     }
 
-    private fun setForms() {
+    private fun setForms(
+        transmitterModuleState: TransmitterModuleState,
+        outputModuleState: OutputModuleState
+    ) = with(binding) {
 
+        setProgressBar(false)
+        when(transmitterModuleState.enabledChannelNumber) {
+            TX_CHANNEL_1 -> firstChannelSelectionChip.isChecked = true
+            TX_CHANNEL_2 -> secondChannelSelectionChip.isChecked = true
+            TX_CHANNEL_3 -> thirdChannelSelectionChip.isChecked = true
+            TX_CHANNEL_4 -> fourthChannelSelectionChip.isChecked = true
+            TX_CHANNEL_5 -> fifthChannelSelectionChip.isChecked = true
+            else -> rxChannelSelectionChipGroup.clearCheck()
+        }
+        switchTransmitterOnCheckBox.isChecked = outputModuleState.rchmDissDigitalOutput.toInt().and(0x2) == 0
     }
 
     private fun getTransmitterByteFromSelectedChip(selectedChipId: Int): Byte = with(binding) {
@@ -98,6 +142,9 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-
+    private fun Int.dpToPx(): Int {
+        val density = android.content.res.Resources.getSystem().displayMetrics.density
+        return (this * density).toInt()
+    }
 
 }

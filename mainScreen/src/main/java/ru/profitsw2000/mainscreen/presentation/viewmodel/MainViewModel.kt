@@ -51,7 +51,10 @@ class MainViewModel(
     private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository
 ): ViewModel() {
     private val _transmitterUpdatingStatusFlow = MutableStateFlow<TransmitterUpdatingStatus>(
-        TransmitterUpdatingStatus.Idle
+        TransmitterUpdatingStatus.Idle(
+            rchmDissStateRepository.rchmDissState.value.transmitterModuleState,
+            rchmDissStateRepository.rchmDissState.value.outputModuleState
+        )
     )
     val transmitterUpdatingStatusFlow: StateFlow<TransmitterUpdatingStatus> = _transmitterUpdatingStatusFlow
     private val _receiverUpdatingStatusFlow = MutableStateFlow<ReceiverUpdatingStatus>(
@@ -306,5 +309,9 @@ class MainViewModel(
         val newOutput = (currentOutput and mask) or transmitterOutput
 
         return byteArrayOf(newOutput.toByte(), (newOutput.toUInt().shr(8)).toByte())
+    }
+
+    fun idleTransmitterState() {
+        _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Idle(rchmDissStateRepository.rchmDissState.value.transmitterModuleState)
     }
 }
