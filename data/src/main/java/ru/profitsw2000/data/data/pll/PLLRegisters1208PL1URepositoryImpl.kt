@@ -232,8 +232,8 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         var sawStep = 4000
         val fracIncRemain = if(isSymmetricLfm) ((lfmDeviationPeriod*Fpfd)%(2*sawStep)).toInt()
         else ((lfmDeviationPeriod*Fpfd)%(sawStep)).toInt()
-        var fracInc = if(isSymmetricLfm) ((lfmDeviationPeriod*Fpfd)/(2*sawStep)).toInt()
-        else ((lfmDeviationPeriod*Fpfd)/sawStep).toInt()
+        var fracInc = if(isSymmetricLfm) ((lfmDeviationPeriod*Fpfd)/(2*sawStep)).toInt() - 1
+        else ((lfmDeviationPeriod*Fpfd)/sawStep).toInt() - 1
 
         if (fracIncRemain != 0) {
             fracInc += 1
