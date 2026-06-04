@@ -61,7 +61,7 @@ class MainViewModel(
     )
     val transmitterUpdatingStatusFlow: StateFlow<TransmitterUpdatingStatus> = _transmitterUpdatingStatusFlow
     private val _receiverUpdatingStatusFlow = MutableStateFlow<ReceiverUpdatingStatus>(
-        ReceiverUpdatingStatus.Idle
+        ReceiverUpdatingStatus.Idle(rchmDissStateRepository.rchmDissState.value.receiverModuleState)
     )
     val receiverUpdatingStatusFlow: StateFlow<ReceiverUpdatingStatus> = _receiverUpdatingStatusFlow
     private val _synthesizerUpdatingStatusFlow = MutableStateFlow<SynthesizerUpdatingStatus>(
@@ -110,6 +110,8 @@ class MainViewModel(
                     )
             }
         }.launchIn(viewModelScope)
+
+
     }
 
     fun updateTransmitter(channelByte: Byte, turnTransmitterOn: Boolean) {
@@ -159,7 +161,7 @@ class MainViewModel(
                 }
 
                 _receiverUpdatingStatusFlow.value =
-                    ReceiverUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value.receiverModuleState)
+                    ReceiverUpdatingStatus.Success
             } catch (exc: TimeoutCancellationException) {
                 _receiverUpdatingStatusFlow.value = ReceiverUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
@@ -297,7 +299,7 @@ class MainViewModel(
             else -> Pair(TransmitterModuleState(), false)
         }
         val receiverData = when(receiver) {
-            is ReceiverUpdatingStatus.Success ->
+            is ReceiverUpdatingStatus.Idle ->
                 Pair(receiver.receiverModuleState, true)
             else -> Pair(ReceiverModuleState(), false)
         }

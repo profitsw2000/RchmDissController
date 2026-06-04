@@ -64,7 +64,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 mainViewModel.receiverUpdatingStatusFlow.collect { state ->
                     when(state) {
                         is ReceiverUpdatingStatus.Error -> handleError(state.errorCode)
-                        ReceiverUpdatingStatus.Idle -> TODO()
+                        is ReceiverUpdatingStatus.Idle -> TODO()
                         is ReceiverUpdatingStatus.Success -> TODO()
                         ReceiverUpdatingStatus.Updating -> TODO()
                     }
