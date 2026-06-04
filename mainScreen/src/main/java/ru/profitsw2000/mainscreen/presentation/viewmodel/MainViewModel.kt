@@ -111,7 +111,15 @@ class MainViewModel(
             }
         }.launchIn(viewModelScope)
 
-
+        _receiverUpdatingStatusFlow.onEach { state ->
+            if (state is ReceiverUpdatingStatus.Success) {
+                delay(3000)
+                _receiverUpdatingStatusFlow.value =
+                    ReceiverUpdatingStatus.Idle(
+                        rchmDissStateRepository.rchmDissState.value.receiverModuleState
+                    )
+            }
+        }.launchIn(viewModelScope)
     }
 
     fun updateTransmitter(channelByte: Byte, turnTransmitterOn: Boolean) {
