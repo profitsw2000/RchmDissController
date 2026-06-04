@@ -15,6 +15,7 @@ import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
+import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
@@ -66,14 +67,14 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                         is ReceiverUpdatingStatus.Error -> handleError(state.errorCode)
                         is ReceiverUpdatingStatus.Idle -> TODO()
                         is ReceiverUpdatingStatus.Success -> TODO()
-                        ReceiverUpdatingStatus.Updating -> TODO()
+                        ReceiverUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
             }
         }
     }
 
-    private fun handleError(errorCode: Int) = with(binding) {
+    private fun handleError(errorCode: Int) {
         val statusText = when(errorCode) {
             RESPONSE_PACKET_TIMEOUT_ERROR_CODE -> ru.profitsw2000.core.R.string.response_packet_timeout_error.toString()
             else -> ru.profitsw2000.core.R.string.unknown_error.toString()
@@ -100,6 +101,10 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         visibility = View.VISIBLE
         setTextColor(color)
         text = statusText
+    }
+
+    private fun setForms(receiverModule: ReceiverModuleState) = with(binding) {
+        setProgressBar(false)
     }
 
     private fun Int.dpToPx(): Int {
