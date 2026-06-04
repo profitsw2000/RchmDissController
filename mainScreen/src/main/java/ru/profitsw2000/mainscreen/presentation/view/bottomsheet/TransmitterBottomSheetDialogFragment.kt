@@ -58,6 +58,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         initViews()
+        observeFlows()
     }
 
     private fun initViews() {
@@ -80,7 +81,10 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     when(state) {
                         is TransmitterUpdatingStatus.Error -> handleError(state.errorCode)
                         is TransmitterUpdatingStatus.Idle -> setForms(state.transmitterModuleState, state.outputModuleState)
-                        is TransmitterUpdatingStatus.Success -> TODO()
+                        is TransmitterUpdatingStatus.Success -> setStatusText(
+                            resources.getColor(ru.profitsw2000.core.R.color.scarlet),
+                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
+                        )
                         TransmitterUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
@@ -88,16 +92,14 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun handleError(errorCode: Int) = with(binding) {
-        setProgressBar(false)
-        updatingStatusResultTextView.visibility = View.VISIBLE
-        updatingStatusResultTextView.setTextColor(resources.getColor(ru.profitsw2000.core.R.color.scarlet))
-
-        updatingStatusResultTextView.text = when(errorCode) {
+    private fun handleError(errorCode: Int) = with(binding.updatingStatusResultTextView) {
+        val statusText = when(errorCode) {
             RESPONSE_PACKET_TIMEOUT_ERROR_CODE -> ru.profitsw2000.core.R.string.response_packet_timeout_error.toString()
             else -> ru.profitsw2000.core.R.string.unknown_error.toString()
         }
-        mainViewModel.idleTransmitterState()
+
+        setProgressBar(false)
+        setStatusText(resources.getColor(ru.profitsw2000.core.R.color.scarlet), statusText)
     }
 
     private fun setProgressBar(isUpdating: Boolean) = with(binding.transmitterParamsSendButton) {
@@ -129,6 +131,13 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
             else -> rxChannelSelectionChipGroup.clearCheck()
         }
         switchTransmitterOnCheckBox.isChecked = outputModuleState.rchmDissDigitalOutput.toInt().and(0x2) == 0
+        updatingStatusResultTextView.visibility = View.GONE
+    }
+
+    private fun setStatusText(color: Int, statusText: String) = with(binding.updatingStatusResultTextView) {
+        visibility = View.VISIBLE
+        setTextColor(color)
+        text = statusText
     }
 
     private fun getTransmitterByteFromSelectedChip(selectedChipId: Int): Byte = with(binding) {

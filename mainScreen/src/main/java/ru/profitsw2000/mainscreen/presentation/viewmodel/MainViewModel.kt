@@ -3,11 +3,14 @@ package ru.profitsw2000.mainscreen.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -95,6 +98,19 @@ class MainViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = RchmDissStateModel()
         )
+
+    init {
+        _transmitterUpdatingStatusFlow.onEach { state ->
+            if (state is TransmitterUpdatingStatus.Success) {
+                delay(3000)
+                _transmitterUpdatingStatusFlow.value =
+                    TransmitterUpdatingStatus.Idle(
+                        rchmDissStateRepository.rchmDissState.value.transmitterModuleState,
+                        rchmDissStateRepository.rchmDissState.value.outputModuleState
+                    )
+            }
+        }.launchIn(viewModelScope)
+    }
 
     fun updateTransmitter(channelByte: Byte, turnTransmitterOn: Boolean) {
         viewModelScope.launch {
@@ -309,9 +325,5 @@ class MainViewModel(
         val newOutput = (currentOutput and mask) or transmitterOutput
 
         return byteArrayOf(newOutput.toByte(), (newOutput.toUInt().shr(8)).toByte())
-    }
-
-    fun idleTransmitterState() {
-        _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Idle(rchmDissStateRepository.rchmDissState.value.transmitterModuleState)
     }
 }
