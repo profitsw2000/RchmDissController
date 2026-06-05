@@ -92,7 +92,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                         is ReceiverUpdatingStatus.Error -> handleError(state.errorCode)
                         is ReceiverUpdatingStatus.Idle -> setForms(state.receiverModuleState)
                         is ReceiverUpdatingStatus.Success -> setStatusText(
-                            resources.getColor(ru.profitsw2000.core.R.color.scarlet),
+                            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
                             ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
                         )
                         ReceiverUpdatingStatus.Updating -> setProgressBar(true)
@@ -198,6 +198,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun setReceiverIncludedChannelsChips(receiverModuleState: ReceiverModuleState) = with(binding) {
+        rxChannelSelectionChipGroup.clearCheck()
         when(receiverModuleState.enabledChannelNumber) {
             TX_CHANNEL_1 -> firstChannelSelectionChip.isChecked = true
             TX_CHANNEL_2 -> secondChannelSelectionChip.isChecked = true

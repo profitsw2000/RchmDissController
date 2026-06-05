@@ -1,17 +1,14 @@
 package ru.profitsw2000.mainscreen.presentation.view.bottomsheet
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
 import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
@@ -24,7 +21,6 @@ import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
 import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
-import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentTransmitterBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.mainscreen.state.TransmitterUpdatingStatus
@@ -122,6 +118,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
     ) = with(binding) {
 
         setProgressBar(false)
+        rxChannelSelectionChipGroup.clearCheck()
         when(transmitterModuleState.enabledChannelNumber) {
             TX_CHANNEL_1 -> firstChannelSelectionChip.isChecked = true
             TX_CHANNEL_2 -> secondChannelSelectionChip.isChecked = true
