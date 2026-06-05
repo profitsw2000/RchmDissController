@@ -31,6 +31,7 @@ import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_4
 import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_5
 import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_MASK
 import ru.profitsw2000.core.drawable.utils.SECOND_CHANNEL_LOCK_BIT
+import ru.profitsw2000.core.drawable.utils.TEST_SIGNAL_BIT
 import ru.profitsw2000.core.drawable.utils.THIRD_CHANNEL_LOCK_BIT
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
@@ -129,7 +130,10 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun getReceiverSettingsIntValueFromSelectedChips(): Int {
-
+        return getIncludedReceiverChannelCode() or
+                getLockedReceiverChannelsCode() or
+                getAttenuatorCode() or
+                getTestSignalCode()
     }
 
     private fun getIncludedReceiverChannelCode(): Int = with(binding) {
@@ -157,6 +161,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 attenuatorBitCode(eightDecibelSelectionChip, ATTENUATOR_8_DECIBELS_BIT) or
                 attenuatorBitCode(sixteenDecibelSelectionChip, ATTENUATOR_16_DECIBELS_BIT) or
                 attenuatorBitCode(thirtyTwoDecibelChip, ATTENUATOR_32_DECIBELS_BIT)
+    }
+
+    private fun getTestSignalCode(): Int = with(binding) {
+        return if(receiverTestSignalSwitchCheckBox.isChecked) 1.shl(TEST_SIGNAL_BIT)
+        else 0
     }
 
     private fun channelLockBitCode(chip: Chip, channelBitNumber: Int): Int {
