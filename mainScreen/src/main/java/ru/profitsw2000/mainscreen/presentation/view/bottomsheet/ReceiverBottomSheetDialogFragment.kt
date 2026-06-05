@@ -125,8 +125,12 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         setProgressBar(false)
     }
 
-    private fun getReceiverSettingsByteArray() {
-
+    private fun getReceiverSettingsByteArray(): ByteArray {
+        val receiverSettingsIntCode = getReceiverSettingsIntValueFromSelectedChips()
+        return byteArrayOf(
+                receiverSettingsIntCode.shr(8).toByte(),
+                receiverSettingsIntCode.toByte()
+            )
     }
 
     private fun getReceiverSettingsIntValueFromSelectedChips(): Int {
