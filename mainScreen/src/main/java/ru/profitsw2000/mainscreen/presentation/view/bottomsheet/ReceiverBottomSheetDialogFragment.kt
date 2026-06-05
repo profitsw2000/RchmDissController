@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -39,7 +38,6 @@ import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
-import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
@@ -75,11 +73,14 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         initViews()
+        observeFlows()
     }
 
     private fun initViews() = with(binding) {
         transmitterParamsSendButton.setOnClickListener {
-            //mainViewModel.updateReceiver()
+            mainViewModel.updateReceiver(
+                getReceiverSettingsByteArray()
+            )
         }
     }
 
@@ -89,8 +90,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 mainViewModel.receiverUpdatingStatusFlow.collect { state ->
                     when(state) {
                         is ReceiverUpdatingStatus.Error -> handleError(state.errorCode)
-                        is ReceiverUpdatingStatus.Idle -> TODO()
-                        is ReceiverUpdatingStatus.Success -> TODO()
+                        is ReceiverUpdatingStatus.Idle -> setForms(state.receiverModuleState)
+                        is ReceiverUpdatingStatus.Success -> setStatusText(
+                            resources.getColor(ru.profitsw2000.core.R.color.scarlet),
+                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
+                        )
                         ReceiverUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
@@ -129,8 +133,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun setForms(receiverModuleState: ReceiverModuleState) = with(binding) {
         setProgressBar(false)
-
-
+        setReceiverIncludedChannelsChips(receiverModuleState)
+        setReceiverLockedChannelsChips(receiverModuleState)
+        setAttenuatorsChips(receiverModuleState)
+        setTestSignalCheckBox(receiverModuleState)
+        updatingStatusResultTextView.visibility = View.GONE
     }
 
     private fun getReceiverSettingsByteArray(): ByteArray {
@@ -221,6 +228,10 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun setChipState(chip: Chip, isChecked: Boolean) {
         chip.isChecked = isChecked
+    }
+
+    private fun setTestSignalCheckBox(receiverModuleState: ReceiverModuleState) = with(binding) {
+        receiverTestSignalSwitchCheckBox.isChecked = receiverModuleState.testSignalIsEnabled
     }
 
     private fun Int.dpToPx(): Int {
