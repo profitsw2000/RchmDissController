@@ -209,6 +209,16 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         channel5LockSelectionChip.isChecked = receiverModuleState.lockedInputChannels[4]
     }
 
+    private fun setAttenuatorsChips(receiverModuleState: ReceiverModuleState) = with(binding) {
+        val attenuatorCode = receiverModuleState.inputAttenuatorsCode
+
+        setChipState(twoDecibelSelectionChip, attenuatorCode and 1.shl(ATTENUATOR_2_DECIBELS_BIT) != 0)
+        setChipState(fourDecibelSelectionChip, attenuatorCode and 1.shl(ATTENUATOR_4_DECIBELS_BIT) != 0)
+        setChipState(eightDecibelSelectionChip, attenuatorCode and 1.shl(ATTENUATOR_8_DECIBELS_BIT) != 0)
+        setChipState(sixteenDecibelSelectionChip, attenuatorCode and 1.shl(ATTENUATOR_16_DECIBELS_BIT) != 0)
+        setChipState(thirtyTwoDecibelChip, attenuatorCode and 1.shl(ATTENUATOR_32_DECIBELS_BIT) != 0)
+    }
+
     private fun setChipState(chip: Chip, isChecked: Boolean) {
         chip.isChecked = isChecked
     }
