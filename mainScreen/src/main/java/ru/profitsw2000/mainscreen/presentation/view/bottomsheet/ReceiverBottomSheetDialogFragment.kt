@@ -33,7 +33,13 @@ import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_MASK
 import ru.profitsw2000.core.drawable.utils.SECOND_CHANNEL_LOCK_BIT
 import ru.profitsw2000.core.drawable.utils.TEST_SIGNAL_BIT
 import ru.profitsw2000.core.drawable.utils.THIRD_CHANNEL_LOCK_BIT
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_1
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
@@ -121,8 +127,10 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         text = statusText
     }
 
-    private fun setForms(receiverModule: ReceiverModuleState) = with(binding) {
+    private fun setForms(receiverModuleState: ReceiverModuleState) = with(binding) {
         setProgressBar(false)
+
+
     }
 
     private fun getReceiverSettingsByteArray(): ByteArray {
@@ -180,6 +188,29 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun attenuatorBitCode(chip: Chip, attenuatorBitNumber: Int): Int {
         return if (chip.isChecked) 1.shl(attenuatorBitNumber)
         else 0
+    }
+
+    private fun setReceiverIncludedChannelsChips(receiverModuleState: ReceiverModuleState) = with(binding) {
+        when(receiverModuleState.enabledChannelNumber) {
+            TX_CHANNEL_1 -> firstChannelSelectionChip.isChecked = true
+            TX_CHANNEL_2 -> secondChannelSelectionChip.isChecked = true
+            TX_CHANNEL_3 -> thirdChannelSelectionChip.isChecked = true
+            TX_CHANNEL_4 -> fourthChannelSelectionChip.isChecked = true
+            TX_CHANNEL_5 -> fifthChannelSelectionChip.isChecked = true
+            else -> rxChannelSelectionChipGroup.clearCheck()
+        }
+    }
+
+    private fun setReceiverLockedChannelsChips(receiverModuleState: ReceiverModuleState) = with(binding) {
+        channel1LockSelectionChip.isChecked = receiverModuleState.lockedInputChannels[0]
+        channel2LockSelectionChip.isChecked = receiverModuleState.lockedInputChannels[1]
+        channel3LockSelectionChip.isChecked = receiverModuleState.lockedInputChannels[2]
+        channel4LockSelectionChip.isChecked = receiverModuleState.lockedInputChannels[3]
+        channel5LockSelectionChip.isChecked = receiverModuleState.lockedInputChannels[4]
+    }
+
+    private fun setChipState(chip: Chip, isChecked: Boolean) {
+        chip.isChecked = isChecked
     }
 
     private fun Int.dpToPx(): Int {

@@ -5,6 +5,7 @@ import ru.profitsw2000.core.drawable.utils.ATTENUATOR_2_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_32_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_4_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_8_DECIBELS_BIT
+import ru.profitsw2000.core.drawable.utils.ATTENUATOR_BIT_MASK
 import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_1
 import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_2
 import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_3
@@ -42,7 +43,8 @@ class PacketBytesConverter {
             enabledChannelNumber = getEnabledRxChannelNumber(receiverCommand),
             testSignalIsEnabled = getTestSignalState(receiverCommand),
             lockedInputChannels = getLockedRxChannelNumber(receiverCommand),
-            getAttenuationValue(receiverCommand)
+            inputAttenuationValue = getAttenuationValue(receiverCommand),
+            inputAttenuatorsCode = getAttenuatorCode(receiverCommand)
         )
     }
 
@@ -84,5 +86,9 @@ class PacketBytesConverter {
 
     private fun getTestSignalState(command: Int): Boolean {
         return (command.shr(TEST_SIGNAL_BIT) and 1) == 1
+    }
+
+    private fun getAttenuatorCode(command: Int): Int {
+        return command and ATTENUATOR_BIT_MASK
     }
 }
