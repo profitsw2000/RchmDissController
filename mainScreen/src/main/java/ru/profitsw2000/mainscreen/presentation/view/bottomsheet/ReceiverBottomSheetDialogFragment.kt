@@ -10,11 +10,28 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.chip.Chip
 import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
 import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import ru.profitsw2000.core.drawable.utils.ATTENUATOR_16_DECIBELS_BIT
+import ru.profitsw2000.core.drawable.utils.ATTENUATOR_2_DECIBELS_BIT
+import ru.profitsw2000.core.drawable.utils.ATTENUATOR_32_DECIBELS_BIT
+import ru.profitsw2000.core.drawable.utils.ATTENUATOR_4_DECIBELS_BIT
+import ru.profitsw2000.core.drawable.utils.ATTENUATOR_8_DECIBELS_BIT
+import ru.profitsw2000.core.drawable.utils.FIFTH_CHANNEL_LOCK_BIT
+import ru.profitsw2000.core.drawable.utils.FIRST_CHANNEL_LOCK_BIT
+import ru.profitsw2000.core.drawable.utils.FOURTH_CHANNEL_LOCK_BIT
 import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
+import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_1
+import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_2
+import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_3
+import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_4
+import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_5
+import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_MASK
+import ru.profitsw2000.core.drawable.utils.SECOND_CHANNEL_LOCK_BIT
+import ru.profitsw2000.core.drawable.utils.THIRD_CHANNEL_LOCK_BIT
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
@@ -105,6 +122,51 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun setForms(receiverModule: ReceiverModuleState) = with(binding) {
         setProgressBar(false)
+    }
+
+    private fun getReceiverSettingsByteArray() {
+
+    }
+
+    private fun getReceiverSettingsIntValueFromSelectedChips(): Int {
+
+    }
+
+    private fun getIncludedReceiverChannelCode(): Int = with(binding) {
+        return when(rxChannelSelectionChipGroup.checkedChipId) {
+            firstChannelSelectionChip.id -> RX_CHANNEL_1.shl(10)
+            secondChannelSelectionChip.id -> RX_CHANNEL_2.shl(10)
+            thirdChannelSelectionChip.id -> RX_CHANNEL_3.shl(10)
+            fourthChannelSelectionChip.id -> RX_CHANNEL_4.shl(10)
+            fifthChannelSelectionChip.id -> RX_CHANNEL_5.shl(10)
+            else -> RX_CHANNEL_MASK.shl(10)
+        }
+    }
+
+    private fun getLockedReceiverChannelsCode(): Int = with(binding) {
+        return channelLockBitCode(channel1LockSelectionChip, FIRST_CHANNEL_LOCK_BIT) or
+                channelLockBitCode(channel2LockSelectionChip, SECOND_CHANNEL_LOCK_BIT) or
+                channelLockBitCode(channel3LockSelectionChip, THIRD_CHANNEL_LOCK_BIT) or
+                channelLockBitCode(channel4LockSelectionChip, FOURTH_CHANNEL_LOCK_BIT) or
+                channelLockBitCode(channel5LockSelectionChip, FIFTH_CHANNEL_LOCK_BIT)
+    }
+
+    private fun getAttenuatorCode(): Int = with(binding) {
+        return attenuatorBitCode(twoDecibelSelectionChip, ATTENUATOR_2_DECIBELS_BIT) or
+                attenuatorBitCode(fourDecibelSelectionChip, ATTENUATOR_4_DECIBELS_BIT) or
+                attenuatorBitCode(eightDecibelSelectionChip, ATTENUATOR_8_DECIBELS_BIT) or
+                attenuatorBitCode(sixteenDecibelSelectionChip, ATTENUATOR_16_DECIBELS_BIT) or
+                attenuatorBitCode(thirtyTwoDecibelChip, ATTENUATOR_32_DECIBELS_BIT)
+    }
+
+    private fun channelLockBitCode(chip: Chip, channelBitNumber: Int): Int {
+        return if (!chip.isChecked) 1.shl(channelBitNumber)
+        else 0
+    }
+
+    private fun attenuatorBitCode(chip: Chip, attenuatorBitNumber: Int): Int {
+        return if (chip.isChecked) 1.shl(attenuatorBitNumber)
+        else 0
     }
 
     private fun Int.dpToPx(): Int {
