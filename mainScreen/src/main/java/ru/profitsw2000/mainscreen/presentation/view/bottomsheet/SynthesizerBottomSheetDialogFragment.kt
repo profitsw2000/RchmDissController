@@ -12,6 +12,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
 import com.google.android.material.progressindicator.IndeterminateDrawable
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import ru.profitsw2000.mainscreen.R
@@ -54,6 +56,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun initViews() {
         initRadioGroup()
+        initButton()
     }
 
     private fun observeFlows() {
@@ -85,6 +88,64 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             }
             rootCoordinatorLayout.requestLayout()
         }
+    }
+
+    private fun initButton() = with(binding) {
+        synthesizerParamsSendButton.setOnClickListener {
+            synthesizerModeSelectionRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+                when(checkedId) {
+                    R.id.cw_mode_radio_button -> sendCwParameters()
+                    R.id.lfm_mode_radio_button -> sendLfmParameters()
+                }
+                rootCoordinatorLayout.requestLayout()
+            }
+        }
+    }
+
+    private fun sendCwParameters() = with(binding) {
+        clearInputFormsErrors()
+        val cwInputFrequencyIsEmpty = inputIsEmpty(cwFrequencyTextInputLayout, cwFrequencyTextInputEditText)
+
+        if (!cwInputFrequencyIsEmpty) {
+            mainViewModel.updateSynthesizerCwMode(
+                cwFrequencyTextInputEditText.text.toString().toLong()
+            )
+        }
+    }
+
+    private fun sendLfmParameters() = with(binding) {
+        clearInputFormsErrors()
+        val lowestLfmInputFrequencyIsEmpty = inputIsEmpty(lfmLowFrequencyTextInputLayout, lfmLowFrequencyTextInputEditText)
+        val highestLfmInputFrequencyIsEmpty = inputIsEmpty(lfmHighFrequencyTextInputLayout, lfmHighFrequencyTextInputEditText)
+        val lfmPeriodInputFrequencyIsEmpty = inputIsEmpty(lfmPeriodTextInputLayout, lfmPeriodTextInputEditText)
+
+        if (!lowestLfmInputFrequencyIsEmpty && !highestLfmInputFrequencyIsEmpty && !lfmPeriodInputFrequencyIsEmpty) {
+            mainViewModel.updateSynthesizerLfmMode(
+                startFrequency = lfmLowFrequencyTextInputEditText.toString().toLong(),
+                stopFrequency = lfmHighFrequencyTextInputEditText.toString().toLong(),
+                lfmPeriod = lfmPeriodTextInputEditText.toString().toDouble(),
+                isSymmetricLfm = symmetricLfmCheckBox.isChecked
+            )
+        }
+    }
+
+    private fun inputIsEmpty(
+        textInputLayout: TextInputLayout,
+        textInputEditText: TextInputEditText
+    ): Boolean = with(binding) {
+        return if (textInputEditText.text?.isEmpty() == true) {
+            textInputLayout.error = resources.getString(ru.profitsw2000.core.R.string.empty_input_error_text)
+            true
+        } else {
+            false
+        }
+    }
+
+    private fun clearInputFormsErrors() = with(binding) {
+        cwFrequencyTextInputLayout.error = null
+        lfmLowFrequencyTextInputLayout.error = null
+        lfmHighFrequencyTextInputLayout.error = null
+        lfmPeriodTextInputLayout.error = null
     }
 
     private fun setLfmSettingsViewsVisibility(isVisible: Boolean) = with(binding) {
