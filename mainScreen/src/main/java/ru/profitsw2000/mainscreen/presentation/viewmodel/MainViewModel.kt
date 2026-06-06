@@ -2,6 +2,7 @@ package ru.profitsw2000.mainscreen.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,11 +10,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_ABOVE_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_UNDER_INPUT_ERROR
@@ -46,6 +49,7 @@ import ru.profitsw2000.mainscreen.state.SynthesizerUpdatingStatus
 import ru.profitsw2000.mainscreen.state.TransmitterUpdatingStatus
 import kotlin.experimental.and
 import kotlin.experimental.or
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
@@ -65,7 +69,7 @@ class MainViewModel(
     )
     val receiverUpdatingStatusFlow: StateFlow<ReceiverUpdatingStatus> = _receiverUpdatingStatusFlow
     private val _synthesizerUpdatingStatusFlow = MutableStateFlow<SynthesizerUpdatingStatus>(
-        SynthesizerUpdatingStatus.Idle
+        SynthesizerUpdatingStatus.Updating
     )
     val synthesizerUpdatingStatusFlow: StateFlow<SynthesizerUpdatingStatus> = _synthesizerUpdatingStatusFlow
 
@@ -100,26 +104,7 @@ class MainViewModel(
         )
 
     init {
-        _transmitterUpdatingStatusFlow.onEach { state ->
-            if (state is TransmitterUpdatingStatus.Success) {
-                delay(3000)
-                _transmitterUpdatingStatusFlow.value =
-                    TransmitterUpdatingStatus.Idle(
-                        rchmDissStateRepository.rchmDissState.value.transmitterModuleState,
-                        rchmDissStateRepository.rchmDissState.value.outputModuleState
-                    )
-            }
-        }.launchIn(viewModelScope)
-
-        _receiverUpdatingStatusFlow.onEach { state ->
-            if (state is ReceiverUpdatingStatus.Success) {
-                delay(3000)
-                _receiverUpdatingStatusFlow.value =
-                    ReceiverUpdatingStatus.Idle(
-                        rchmDissStateRepository.rchmDissState.value.receiverModuleState
-                    )
-            }
-        }.launchIn(viewModelScope)
+        loadSynthesizerInitialParameters()
     }
 
     fun updateTransmitter(channelByte: Byte, turnTransmitterOn: Boolean) {
@@ -130,7 +115,7 @@ class MainViewModel(
                 bluetoothRepository.bluetoothDataRepository.writeData(
                     bluetoothPacketManager.getWriteToTransmitterPacket(channelByte)
                 )
-                withTimeout(5000L) {
+                withTimeout(5000L.milliseconds) {
                     rchmDissStateRepository.lastPacket.first {
                         it == RcdInputPacketType.TransmitterStateInputPacket
                     }
@@ -144,8 +129,14 @@ class MainViewModel(
                     }
                 }
 
-                _transmitterUpdatingStatusFlow.value =
-                    TransmitterUpdatingStatus.Success(rchmDissStateRepository.rchmDissState.value.transmitterModuleState)
+                _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Success
+
+                delay(500.milliseconds)
+
+                _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Idle(
+                    rchmDissStateRepository.rchmDissState.value.transmitterModuleState,
+                    rchmDissStateRepository.rchmDissState.value.outputModuleState
+                )
             } catch (exc: TimeoutCancellationException) {
                 _transmitterUpdatingStatusFlow.value = TransmitterUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
@@ -162,7 +153,7 @@ class MainViewModel(
                 bluetoothRepository.bluetoothDataRepository.writeData(
                     bluetoothPacketManager.getWriteToReceiverPacket(byteArray)
                 )
-                withTimeout(5000L) {
+                withTimeout(5000L.milliseconds) {
                     rchmDissStateRepository.lastPacket.first {
                         it == RcdInputPacketType.ReceiverStateInputPacket
                     }
@@ -170,6 +161,14 @@ class MainViewModel(
 
                 _receiverUpdatingStatusFlow.value =
                     ReceiverUpdatingStatus.Success
+
+                delay(500.milliseconds)
+
+                _receiverUpdatingStatusFlow.value =
+                    ReceiverUpdatingStatus.Idle(
+                        rchmDissStateRepository.rchmDissState.value.receiverModuleState
+                    )
+
             } catch (exc: TimeoutCancellationException) {
                 _receiverUpdatingStatusFlow.value = ReceiverUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
             } catch (exc: Exception) {
@@ -238,21 +237,41 @@ class MainViewModel(
                             register.toRegisterByteArray()
                         )
                     )
-                    withTimeout(5000L) {
+                    withTimeout(5000L.milliseconds) {
                         rchmDissStateRepository.lastPacket.first {
                             it == RcdInputPacketType.SynthesizerStateInputPacket
                         }
                     }
                 }
 
+                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Success
+
+                delay(500.milliseconds)
+
                 _synthesizerUpdatingStatusFlow.value =
-                    SynthesizerUpdatingStatus.Success(
+                    SynthesizerUpdatingStatus.Idle(
                         pllRegisters1208PL1URepository.getLfmParameters(
                             rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
                         )
                     )
             } catch (exc: TimeoutCancellationException) {
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
+            } catch (exc: Exception) {
+                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
+            }
+        }
+    }
+
+    private fun loadSynthesizerInitialParameters() {
+        viewModelScope.launch {
+            try {
+                val lfmParams = withContext(Dispatchers.IO) {
+                    pllRegisters1208PL1URepository.getLfmParameters(
+                        rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
+                    )
+                }
+                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Idle(lfmParams)
+
             } catch (exc: Exception) {
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
             }
@@ -302,7 +321,7 @@ class MainViewModel(
         synthesizer: SynthesizerUpdatingStatus
     ): RchmDissStateModel {
         val transmitterData = when(transmitter) {
-            is TransmitterUpdatingStatus.Success ->
+            is TransmitterUpdatingStatus.Idle ->
                 Pair(transmitter.transmitterModuleState, true)
             else -> Pair(TransmitterModuleState(), false)
         }
@@ -312,7 +331,7 @@ class MainViewModel(
             else -> Pair(ReceiverModuleState(), false)
         }
         val synthesizerData = when(synthesizer) {
-            is SynthesizerUpdatingStatus.Success ->
+            is SynthesizerUpdatingStatus.Idle ->
                 Pair(synthesizer.synthesizerModuleStateModel, true)
             else -> Pair(SynthesizerModuleStateModel(), false)
         }

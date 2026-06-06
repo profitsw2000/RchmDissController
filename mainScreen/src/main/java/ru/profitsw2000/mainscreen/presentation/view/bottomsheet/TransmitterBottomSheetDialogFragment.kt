@@ -77,7 +77,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     when(state) {
                         is TransmitterUpdatingStatus.Error -> handleError(state.errorCode)
                         is TransmitterUpdatingStatus.Idle -> setForms(state.transmitterModuleState, state.outputModuleState)
-                        is TransmitterUpdatingStatus.Success -> setStatusText(
+                        TransmitterUpdatingStatus.Success -> setStatusText(
                             resources.getColor(ru.profitsw2000.core.R.color.scarlet),
                             ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
                         )

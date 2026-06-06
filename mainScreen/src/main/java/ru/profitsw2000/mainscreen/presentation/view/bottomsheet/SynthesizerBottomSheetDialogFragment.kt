@@ -62,7 +62,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 mainViewModel.synthesizerUpdatingStatusFlow.collect { state ->
                     when(state) {
                         is SynthesizerUpdatingStatus.Error -> TODO()
-                        SynthesizerUpdatingStatus.Idle -> TODO()
+                        is SynthesizerUpdatingStatus.Idle -> TODO()
                         is SynthesizerUpdatingStatus.Success -> TODO()
                         SynthesizerUpdatingStatus.Updating -> TODO()
                     }
