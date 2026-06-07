@@ -16,6 +16,17 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_ABOVE_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_UNDER_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.LOW_FREQUENCY_ABOVE_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.LOW_FREQUENCY_UNDER_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.MODULATION_PERIOD_ABOVE_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.MODULATION_PERIOD_UNDER_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.REGISTERS_CALCULATION_ERROR_CODE
+import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
+import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
+import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
@@ -64,7 +75,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainViewModel.synthesizerUpdatingStatusFlow.collect { state ->
                     when(state) {
-                        is SynthesizerUpdatingStatus.Error -> TODO()
+                        is SynthesizerUpdatingStatus.Error -> handleError(state.errorCode)
                         is SynthesizerUpdatingStatus.Idle -> TODO()
                         is SynthesizerUpdatingStatus.Success -> TODO()
                         SynthesizerUpdatingStatus.Updating -> TODO()
@@ -100,6 +111,72 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 rootCoordinatorLayout.requestLayout()
             }
         }
+    }
+
+    private fun handleError(errorCode: Int) {
+        clearInputFormsErrors()
+
+        if ((errorCode and LOW_FREQUENCY_UNDER_INPUT_ERROR) != 0 ||
+            (errorCode and LOW_FREQUENCY_ABOVE_INPUT_ERROR) != 0 ||
+            (errorCode and LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR) != 0)
+            handleLowFrequencyInputError(errorCode)
+
+        if ((errorCode and HIGH_FREQUENCY_UNDER_INPUT_ERROR) != 0 ||
+            (errorCode and HIGH_FREQUENCY_ABOVE_INPUT_ERROR) != 0)
+            handleHighFrequencyInputError(errorCode)
+
+        if ((errorCode and MODULATION_PERIOD_ABOVE_INPUT_ERROR) != 0 ||
+            (errorCode and MODULATION_PERIOD_UNDER_INPUT_ERROR) != 0)
+            handleLfmPeriodInputError(errorCode)
+
+        if((errorCode and REGISTERS_CALCULATION_ERROR_CODE) != 0 ||
+            (errorCode and RESPONSE_PACKET_TIMEOUT_ERROR_CODE) != 0 ||
+            (errorCode and UNKNOWN_ERROR_CODE) != 0)
+            handlePacketSendingError(errorCode)
+    }
+
+    private fun handleLowFrequencyInputError(errorCode: Int) = with(binding) {
+        var errorString = ""
+
+        if ((errorCode and LOW_FREQUENCY_UNDER_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.low_freq_under_input_error_text.toString()
+        if ((errorCode and LOW_FREQUENCY_ABOVE_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.low_freq_above_input_error_text.toString()
+        if ((errorCode and LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.low_freq_higher_than_high_freq_input_error_text.toString()
+
+        lfmLowFrequencyTextInputLayout.error = errorString
+    }
+
+    private fun handleHighFrequencyInputError(errorCode: Int) = with(binding) {
+        var errorString = ""
+
+        if ((errorCode and HIGH_FREQUENCY_UNDER_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.high_freq_under_input_error_text.toString()
+        if ((errorCode and HIGH_FREQUENCY_ABOVE_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.high_freq_above_input_error_text.toString()
+
+        lfmHighFrequencyTextInputLayout.error = errorString
+    }
+
+    private fun handleLfmPeriodInputError(errorCode: Int) = with(binding) {
+        var errorString = ""
+
+        if ((errorCode and MODULATION_PERIOD_ABOVE_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.modulation_period_above_input_error_text.toString()
+        if ((errorCode and MODULATION_PERIOD_UNDER_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.modulation_period_under_input_error_text.toString()
+
+        lfmPeriodTextInputLayout.error = errorString
+    }
+
+    private fun handlePacketSendingError(errorCode: Int) = with(binding) {
+        val statusText = if ((errorCode and RESPONSE_PACKET_TIMEOUT_ERROR_CODE) != 0)
+            ru.profitsw2000.core.R.string.response_packet_timeout_error.toString()
+        else if ((errorCode and REGISTERS_CALCULATION_ERROR_CODE) != 0)
+            ru.profitsw2000.core.R.string.register_calculation_error_text.toString()
+        else ru.profitsw2000.core.R.string.unknown_error.toString()
+
+        setStatusText(resources.getColor(ru.profitsw2000.core.R.color.scarlet), statusText)
+    }
+
+    private fun setStatusText(color: Int, statusText: String) = with(binding.updatingStatusResultTextView) {
+        visibility = View.VISIBLE
+        setTextColor(color)
+        text = statusText
     }
 
     private fun sendCwParameters() = with(binding) {

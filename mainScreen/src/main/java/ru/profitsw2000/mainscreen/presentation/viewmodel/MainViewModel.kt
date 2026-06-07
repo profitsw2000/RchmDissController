@@ -310,7 +310,7 @@ class MainViewModel(
     private fun checkCwInputValues(frequency: Long): Int {
         var errorCode = NO_ERROR
         if (frequency < MIN_LFM_FREQ) errorCode = errorCode or LOW_FREQUENCY_UNDER_INPUT_ERROR
-        if (frequency > MAX_LFM_FREQ) errorCode = errorCode or LOW_FREQUENCY_ABOVE_INPUT_ERROR
+        if (frequency > MAX_LFM_FREQ) errorCode = errorCode or HIGH_FREQUENCY_ABOVE_INPUT_ERROR
 
         return errorCode
     }
