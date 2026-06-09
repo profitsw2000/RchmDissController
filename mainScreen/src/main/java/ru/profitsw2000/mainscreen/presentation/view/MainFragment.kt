@@ -1,13 +1,33 @@
 package ru.profitsw2000.mainscreen.presentation.view
 
+import android.content.Context
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_1
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
+import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
+import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissStateModel
+import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
+import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentMainBinding
+import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.navigator.Navigator
 
 class MainFragment : Fragment() {
@@ -15,6 +35,7 @@ class MainFragment : Fragment() {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
     private val navigator: Navigator by inject()
+    private val mainViewModel: MainViewModel by activityViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +61,64 @@ class MainFragment : Fragment() {
         synthesizerConstraintLayout.setOnClickListener {
             navigator.navigateToSynthesizerSettingsDialog()
         }
+    }
+
+    private fun observeFlow() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.rchmDissState.collect { state ->
+                    when(state) {
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun renderData(rchmDissStateModel: RchmDissStateModel) {
+        renderTransmitterData(rchmDissStateModel.transmitterModuleState, rchmDissStateModel.isActualTransmitterData)
+        renderReceiverData(rchmDissStateModel.receiverModuleState, rchmDissStateModel.isActualReceiverData)
+        renderSynthesizerData(rchmDissStateModel.synthesizerModuleState, rchmDissStateModel.isActualSynthesizerData)
+    }
+
+    private fun renderTransmitterData(
+        transmitterModuleState: TransmitterModuleState,
+        isActualData: Boolean
+    ) = with(binding) {
+        when(transmitterModuleState.enabledChannelNumber) {
+            TX_CHANNEL_1 -> txFirstChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
+            TX_CHANNEL_2 -> txSecondChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
+            TX_CHANNEL_3 -> txThirdChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
+            TX_CHANNEL_4 -> txFourthChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
+            TX_CHANNEL_5 -> txFifthChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
+            else -> {}
+        }
+    }
+
+    private fun renderReceiverData(
+        receiverModuleState: ReceiverModuleState,
+        isActualData: Boolean
+    ) {
+
+    }
+
+    private fun renderSynthesizerData(
+        synthesizerModuleStateModel: SynthesizerModuleStateModel,
+        isActualData: Boolean
+    ) {
+
+    }
+
+    private fun getActiveIndicatorColor(isActualData: Boolean): Int {
+        return if (isActualData) requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary)
+        else requireContext().getThemeColor(com.google.android.material.R.attr.colorSecondaryContainer)
+    }
+
+    @ColorInt
+    fun Context.getThemeColor(@AttrRes attrRes: Int): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(attrRes, typedValue, true)
+        return typedValue.data
     }
 }
 
