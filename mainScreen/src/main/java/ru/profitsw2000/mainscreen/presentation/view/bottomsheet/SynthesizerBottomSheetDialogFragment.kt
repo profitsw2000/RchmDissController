@@ -64,6 +64,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         initViews()
+        observeFlows()
     }
 
     private fun initViews() {
@@ -109,6 +110,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun initButton() = with(binding) {
         synthesizerParamsSendButton.setOnClickListener {
+            clearInputFormsErrors()
             synthesizerModeSelectionRadioGroup.setOnCheckedChangeListener { _, checkedId ->
                 when(checkedId) {
                     R.id.cw_mode_radio_button -> sendCwParameters()
@@ -134,7 +136,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun handleError(errorCode: Int) {
-        clearInputFormsErrors()
+        setProgressBar(false)
 
         if ((errorCode and LOW_FREQUENCY_UNDER_INPUT_ERROR) != 0 ||
             (errorCode and LOW_FREQUENCY_ABOVE_INPUT_ERROR) != 0 ||
@@ -209,7 +211,6 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun sendCwParameters() = with(binding) {
-        clearInputFormsErrors()
         val cwInputFrequencyIsEmpty = inputIsEmpty(cwFrequencyTextInputLayout, cwFrequencyTextInputEditText)
 
         if (!cwInputFrequencyIsEmpty) {
@@ -220,7 +221,6 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun sendLfmParameters() = with(binding) {
-        clearInputFormsErrors()
         val lowestLfmInputFrequencyIsEmpty = inputIsEmpty(lfmLowFrequencyTextInputLayout, lfmLowFrequencyTextInputEditText)
         val highestLfmInputFrequencyIsEmpty = inputIsEmpty(lfmHighFrequencyTextInputLayout, lfmHighFrequencyTextInputEditText)
         val lfmPeriodInputFrequencyIsEmpty = inputIsEmpty(lfmPeriodTextInputLayout, lfmPeriodTextInputEditText)
