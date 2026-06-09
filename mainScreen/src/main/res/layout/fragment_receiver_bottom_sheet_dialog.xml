@@ -131,12 +131,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/attenuator_selection_32_decibels_value_text" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/extra_four_decibel_selection_chip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/attenuator_selection_extra_4_decibels_value_text" />
-
         </com.google.android.material.chip.ChipGroup>
 
         <TextView
