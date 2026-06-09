@@ -37,6 +37,7 @@ import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
+import ru.profitsw2000.core.drawable.utils.dpToPx
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
@@ -233,10 +234,5 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun setTestSignalCheckBox(receiverModuleState: ReceiverModuleState) = with(binding) {
         receiverTestSignalSwitchCheckBox.isChecked = receiverModuleState.testSignalIsEnabled
-    }
-
-    private fun Int.dpToPx(): Int {
-        val density = android.content.res.Resources.getSystem().displayMetrics.density
-        return (this * density).toInt()
     }
 }

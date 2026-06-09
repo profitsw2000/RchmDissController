@@ -19,6 +19,7 @@ import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
+import ru.profitsw2000.core.drawable.utils.dpToPx
 import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentTransmitterBottomSheetDialogBinding
@@ -147,10 +148,4 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
             else -> 0
         }
     }
-
-    private fun Int.dpToPx(): Int {
-        val density = android.content.res.Resources.getSystem().displayMetrics.density
-        return (this * density).toInt()
-    }
-
 }

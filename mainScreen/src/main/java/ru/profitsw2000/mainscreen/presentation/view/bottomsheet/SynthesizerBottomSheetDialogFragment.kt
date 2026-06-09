@@ -26,6 +26,7 @@ import ru.profitsw2000.core.drawable.utils.MODULATION_PERIOD_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.REGISTERS_CALCULATION_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
+import ru.profitsw2000.core.drawable.utils.dpToPx
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
@@ -76,9 +77,14 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 mainViewModel.synthesizerUpdatingStatusFlow.collect { state ->
                     when(state) {
                         is SynthesizerUpdatingStatus.Error -> handleError(state.errorCode)
-                        is SynthesizerUpdatingStatus.Idle -> TODO()
-                        is SynthesizerUpdatingStatus.Success -> TODO()
-                        SynthesizerUpdatingStatus.Updating -> TODO()
+                        is SynthesizerUpdatingStatus.Idle -> setForms(
+                            state.synthesizerModuleStateModel
+                        )
+                        is SynthesizerUpdatingStatus.Success -> setStatusText(
+                            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
+                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
+                        )
+                        SynthesizerUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
             }
@@ -113,6 +119,20 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
+    private fun setProgressBar(isUpdating: Boolean) = with(binding.synthesizerParamsSendButton) {
+        if (isUpdating) {
+            text = ""
+            icon = progressIndicator
+            progressIndicator.start()
+            isEnabled = false
+        } else {
+            progressIndicator.stop()
+            icon = null
+            text = resources.getString(ru.profitsw2000.core.R.string.send_button_text)
+            isEnabled = true
+        }
+    }
+
     private fun handleError(errorCode: Int) {
         clearInputFormsErrors()
 
@@ -133,6 +153,15 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             (errorCode and RESPONSE_PACKET_TIMEOUT_ERROR_CODE) != 0 ||
             (errorCode and UNKNOWN_ERROR_CODE) != 0)
             handlePacketSendingError(errorCode)
+    }
+
+    private fun setForms(synthesizerModuleStateModel: SynthesizerModuleStateModel) = with(binding) {
+        setProgressBar(false)
+        cwFrequencyTextInputEditText.setText(synthesizerModuleStateModel.cwFrequency.toString())
+        lfmLowFrequencyTextInputEditText.setText(synthesizerModuleStateModel.lowestLfmFrequency.toString())
+        lfmHighFrequencyTextInputEditText.setText(synthesizerModuleStateModel.highestLfmFrequency.toString())
+        lfmPeriodTextInputEditText.setText(synthesizerModuleStateModel.lfmPeriod.toString())
+        symmetricLfmCheckBox.isChecked = synthesizerModuleStateModel.isSymmetricLfm
     }
 
     private fun handleLowFrequencyInputError(errorCode: Int) = with(binding) {
@@ -237,10 +266,5 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             lfmPeriodTextInputLayout.visibility = View.GONE
             lfmExtTriggerSwitchCheckBox.visibility = View.GONE
         }
-    }
-
-    private fun Int.dpToPx(): Int {
-        val density = android.content.res.Resources.getSystem().displayMetrics.density
-        return (this * density).toInt()
     }
 }
