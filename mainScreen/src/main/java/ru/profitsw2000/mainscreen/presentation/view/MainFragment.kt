@@ -85,17 +85,20 @@ class MainFragment : Fragment() {
         transmitterModuleState: TransmitterModuleState,
         isActualData: Boolean
     ) = with(binding) {
-        disableAllChannels(
-            arrayListOf(
-                txFirstChannelIconView,
-                txSecondChannelIconView,
-                txThirdChannelIconView,
-                txFourthChannelIconView,
-                txFifthChannelIconView
-            )
+        val channelsList = arrayListOf(
+            txFirstChannelIconView,
+            txSecondChannelIconView,
+            txThirdChannelIconView,
+            txFourthChannelIconView,
+            txFifthChannelIconView
         )
+        disableAllChannels(channelsList)
         transmitterConstraintLayout.alpha = if (isActualData) 1f
         else 0.5f
+        highlightActiveChannel(
+            transmitterModuleState.enabledChannelNumber,
+            channelsList
+        )
 
         when(transmitterModuleState.enabledChannelNumber) {
             1 -> txFirstChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
@@ -111,26 +114,17 @@ class MainFragment : Fragment() {
         receiverModuleState: ReceiverModuleState,
         isActualData: Boolean
     ) = with(binding) {
-        disableAllChannels(
-            arrayListOf(
-                rxFirstChannelIconView,
-                rxSecondChannelIconView,
-                rxThirdChannelIconView,
-                rxFourthChannelIconView,
-                rxFifthChannelIconView
-            )
+        val channelList = arrayListOf(
+            rxFirstChannelIconView,
+            rxSecondChannelIconView,
+            rxThirdChannelIconView,
+            rxFourthChannelIconView,
+            rxFifthChannelIconView
         )
+        disableAllChannels(channelList)
+        highlightActiveChannel(receiverModuleState.enabledChannelNumber, channelList)
         transmitterConstraintLayout.alpha = if (isActualData) 1f
         else 0.5f
-
-        when(receiverModuleState.enabledChannelNumber) {
-            1 -> rxFirstChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            2 -> rxSecondChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            3 -> rxThirdChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            4 -> rxFourthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            5 -> rxFifthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            else -> {}
-        }
     }
 
     private fun renderSynthesizerData(
@@ -146,9 +140,31 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun getActiveIndicatorColor(isActualData: Boolean): Int {
-        return if (isActualData) requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary)
-        else requireContext().getThemeColor(com.google.android.material.R.attr.colorSecondaryContainer)
+    private fun highlightActiveChannel(
+        channelNumber: Int, channelsList: List<RfChannelNumberIconView>
+    ) {
+        when(channelNumber) {
+            1 -> channelsList[0].setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            2 -> channelsList[1].setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            3 -> channelsList[2].setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            4 -> channelsList[3].setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            5 -> channelsList[4].setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            else -> {}
+        }
+    }
+
+    private fun setCrossToLockedChannels(
+        channelsList: List<RfChannelNumberIconView>,
+        lockedChannels: List<Boolean>
+    ) {
+        channelsList.forEachIndexed { index, channel ->
+            channel.setCrossVisible(lockedChannels[index])
+        }
+    }
+
+    private fun setTransparencyToView(view: View, isTransparent: Boolean) {
+        view.alpha = if (!isTransparent) 1f
+        else 0.5f
     }
 
     @ColorInt
