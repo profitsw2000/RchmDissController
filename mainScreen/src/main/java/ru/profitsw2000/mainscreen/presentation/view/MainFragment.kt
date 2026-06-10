@@ -15,6 +15,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import ru.profitsw2000.core.drawable.RfChannelNumberIconView
+import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_1
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_1
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
@@ -67,9 +69,7 @@ class MainFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainViewModel.rchmDissState.collect { state ->
-                    when(state) {
-
-                    }
+                    renderData(rchmDissStateModel = state)
                 }
             }
         }
@@ -85,12 +85,24 @@ class MainFragment : Fragment() {
         transmitterModuleState: TransmitterModuleState,
         isActualData: Boolean
     ) = with(binding) {
+        disableAllChannels(
+            arrayListOf(
+                txFirstChannelIconView,
+                txSecondChannelIconView,
+                txThirdChannelIconView,
+                txFourthChannelIconView,
+                txFifthChannelIconView
+            )
+        )
+        transmitterConstraintLayout.alpha = if (isActualData) 1f
+        else 0.5f
+
         when(transmitterModuleState.enabledChannelNumber) {
-            TX_CHANNEL_1 -> txFirstChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
-            TX_CHANNEL_2 -> txSecondChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
-            TX_CHANNEL_3 -> txThirdChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
-            TX_CHANNEL_4 -> txFourthChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
-            TX_CHANNEL_5 -> txFifthChannelIconView.setIconColor(getActiveIndicatorColor(isActualData))
+            1 -> txFirstChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            2 -> txSecondChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            3 -> txThirdChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            4 -> txFourthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            5 -> txFifthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
             else -> {}
         }
     }
@@ -98,8 +110,27 @@ class MainFragment : Fragment() {
     private fun renderReceiverData(
         receiverModuleState: ReceiverModuleState,
         isActualData: Boolean
-    ) {
+    ) = with(binding) {
+        disableAllChannels(
+            arrayListOf(
+                rxFirstChannelIconView,
+                rxSecondChannelIconView,
+                rxThirdChannelIconView,
+                rxFourthChannelIconView,
+                rxFifthChannelIconView
+            )
+        )
+        transmitterConstraintLayout.alpha = if (isActualData) 1f
+        else 0.5f
 
+        when(receiverModuleState.enabledChannelNumber) {
+            1 -> rxFirstChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            2 -> rxSecondChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            3 -> rxThirdChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            4 -> rxFourthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            5 -> rxFifthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+            else -> {}
+        }
     }
 
     private fun renderSynthesizerData(
@@ -107,6 +138,12 @@ class MainFragment : Fragment() {
         isActualData: Boolean
     ) {
 
+    }
+
+    private fun disableAllChannels(channelsList: List<RfChannelNumberIconView>) {
+        channelsList.forEach { channel ->
+            channel.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnSurfaceVariant))
+        }
     }
 
     private fun getActiveIndicatorColor(isActualData: Boolean): Int {

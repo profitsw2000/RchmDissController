@@ -7,7 +7,7 @@
         <item name="android:navigationBarColor">@color/white_marble</item>
         <item name="colorOnSurface">@color/eucaliptus</item>
         <item name="colorOnSurfaceVariant">@color/super_grey</item>
-        <item name="colorSecondaryContainer">@color/may_green</item>
+        <item name="colorSecondaryContainer">@color/eucaliptus</item>
         <item name="colorOnSecondaryContainer">@color/white_parakeet</item>
         <item name="colorSurfaceContainerLow">@color/white_parakeet</item>
         <item name="errorTextColor">@color/guardsman_red</item>
