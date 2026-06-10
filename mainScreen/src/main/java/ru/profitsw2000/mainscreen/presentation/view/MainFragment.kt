@@ -16,12 +16,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import ru.profitsw2000.core.drawable.RfChannelNumberIconView
-import ru.profitsw2000.core.drawable.utils.RX_CHANNEL_1
-import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_1
-import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
-import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_3
-import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_4
-import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_5
+import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissStateModel
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
@@ -126,7 +121,19 @@ class MainFragment : Fragment() {
         synthesizerModuleStateModel: SynthesizerModuleStateModel,
         isActualData: Boolean
     ) {
-
+        when(synthesizerModuleStateModel.radiationMode) {
+            RadiationMode.NONE -> indicateSynthesizerNoneRadiationMode()
+            RadiationMode.CW -> indicateSynthesizerCwRadiationMode(synthesizerModuleStateModel.cwFrequency)
+            RadiationMode.LFM -> indicateSynthesizerLfmRadiationMode(
+                lowFrequency = synthesizerModuleStateModel.lowestLfmFrequency,
+                highFrequency = synthesizerModuleStateModel.highestLfmFrequency,
+                lfmPeriod = synthesizerModuleStateModel.lfmPeriod,
+                isSymmetricLfm = synthesizerModuleStateModel.isSymmetricLfm,
+                lfmExtTrigger = false,
+                extTriggerPeriod = 0.0
+            )
+        }
+        setTransparencyToView(binding.synthesizerConstraintLayout, !isActualData)
     }
 
     private fun disableAllChannels(channelsList: List<RfChannelNumberIconView>) {
@@ -173,6 +180,29 @@ class MainFragment : Fragment() {
     private fun setTransparencyToView(view: View, isTransparent: Boolean) {
         view.alpha = if (isTransparent) 0.5f
         else 1f
+    }
+
+    private fun indicateSynthesizerNoneRadiationMode() = with(binding) {
+        lfmExternalTriggerStateImageView.visibility = View.GONE
+        lfmSwingTypeIconView.visibility = View.GONE
+        periodValueTextView.visibility = View.GONE
+        synthesizerModeIconView.setLabelText(resources.getString(ru.profitsw2000.core.R.string.synthesizer_not_active_icon_label_text))
+        frequencyValueTextView.text = resources.getString(ru.profitsw2000.core.R.string.synthesizer_generation__absent_warning_text)
+    }
+
+    private fun indicateSynthesizerCwRadiationMode(frequency: Long) = with(binding) {
+
+    }
+
+    private fun indicateSynthesizerLfmRadiationMode(
+        lowFrequency: Long,
+        highFrequency: Long,
+        lfmPeriod: Double,
+        isSymmetricLfm: Boolean,
+        lfmExtTrigger: Boolean,
+        extTriggerPeriod: Double
+    ) = with(binding) {
+
     }
 
     @ColorInt

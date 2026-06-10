@@ -51,6 +51,11 @@ class RfStateIndicatorIconView @JvmOverloads constructor(
         updateStyles()
     }
 
+    fun setLabelText(text: String) {
+        rfStateText = text
+        updateStyles()
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         textPaint.textSize = MeasureSpec.getSize(heightMeasureSpec)*0.5f
