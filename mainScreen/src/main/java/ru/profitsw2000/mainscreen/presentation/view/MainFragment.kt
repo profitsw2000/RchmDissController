@@ -51,6 +51,7 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
+        observeFlow()
     }
 
     private fun initViews() = with(binding) {
@@ -92,22 +93,13 @@ class MainFragment : Fragment() {
             txFourthChannelIconView,
             txFifthChannelIconView
         )
+
         disableAllChannels(channelsList)
-        transmitterConstraintLayout.alpha = if (isActualData) 1f
-        else 0.5f
         highlightActiveChannel(
             transmitterModuleState.enabledChannelNumber,
             channelsList
         )
-
-        when(transmitterModuleState.enabledChannelNumber) {
-            1 -> txFirstChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            2 -> txSecondChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            3 -> txThirdChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            4 -> txFourthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            5 -> txFifthChannelIconView.setIconColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
-            else -> {}
-        }
+        setTransparencyToView(transmitterConstraintLayout, !isActualData)
     }
 
     private fun renderReceiverData(
@@ -121,10 +113,13 @@ class MainFragment : Fragment() {
             rxFourthChannelIconView,
             rxFifthChannelIconView
         )
+
         disableAllChannels(channelList)
         highlightActiveChannel(receiverModuleState.enabledChannelNumber, channelList)
-        transmitterConstraintLayout.alpha = if (isActualData) 1f
-        else 0.5f
+        setAttenuatorValue(receiverModuleState.inputAttenuationValue)
+        setCrossToLockedChannels(channelList, receiverModuleState.lockedInputChannels)
+        setTestSignalIndicator(receiverModuleState.testSignalIsEnabled)
+        setTransparencyToView(receiverConstraintLayout, !isActualData)
     }
 
     private fun renderSynthesizerData(
@@ -155,16 +150,29 @@ class MainFragment : Fragment() {
 
     private fun setCrossToLockedChannels(
         channelsList: List<RfChannelNumberIconView>,
-        lockedChannels: List<Boolean>
+        lockedChannels: BooleanArray
     ) {
         channelsList.forEachIndexed { index, channel ->
             channel.setCrossVisible(lockedChannels[index])
         }
     }
 
+    private fun setAttenuatorValue(attenuationValue: Int) = with(binding) {
+        attenuationValueTextView.text = attenuationValue.toString()
+        if (attenuationValue != 0) attenuationValueTextView.setTextColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+        else attenuationValueTextView.setTextColor(requireContext().getThemeColor(com.google.android.material.R.attr.colorOnSurfaceVariant))
+    }
+
+    private fun setTestSignalIndicator(testSignalIsOn: Boolean) = with(binding) {
+        val color = if (testSignalIsOn) requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary)
+        else requireContext().getThemeColor(com.google.android.material.R.attr.colorOnSurfaceVariant)
+
+        receiverTestSignalStateIconView.setLabelColor(color)
+    }
+
     private fun setTransparencyToView(view: View, isTransparent: Boolean) {
-        view.alpha = if (!isTransparent) 1f
-        else 0.5f
+        view.alpha = if (isTransparent) 0.5f
+        else 1f
     }
 
     @ColorInt
