@@ -16,6 +16,8 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import ru.profitsw2000.core.drawable.utils.CW_FREQUENCY_ABOVE_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.CW_FREQUENCY_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_ABOVE_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.LOW_FREQUENCY_ABOVE_INPUT_ERROR
@@ -32,6 +34,9 @@ import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.mainscreen.state.SynthesizerUpdatingStatus
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 import kotlin.getValue
 
 class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
@@ -39,14 +44,17 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentSynthesizerBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
     private val mainViewModel: MainViewModel by activityViewModel()
-    private val spec = CircularProgressIndicatorSpec(requireContext(), null).apply {
-        indicatorSize = 24.dpToPx()
-        trackThickness = 3.dpToPx()
+    private val spec by lazy {
+        CircularProgressIndicatorSpec(requireContext(), null).apply {
+            indicatorSize = 24.dpToPx()
+            trackThickness = 3.dpToPx()
 
-        indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.splashed_white))
+            indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.splashed_white))
+        }
     }
-    val progressIndicator = IndeterminateDrawable.createCircularDrawable(requireContext(), spec)
-
+    val progressIndicator by lazy {
+        IndeterminateDrawable.createCircularDrawable(requireContext(), spec)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -111,12 +119,9 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun initButton() = with(binding) {
         synthesizerParamsSendButton.setOnClickListener {
             clearInputFormsErrors()
-            synthesizerModeSelectionRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-                when(checkedId) {
-                    R.id.cw_mode_radio_button -> sendCwParameters()
-                    R.id.lfm_mode_radio_button -> sendLfmParameters()
-                }
-                rootCoordinatorLayout.requestLayout()
+            when(synthesizerModeSelectionRadioGroup.checkedRadioButtonId) {
+                R.id.cw_mode_radio_button -> sendCwParameters()
+                R.id.lfm_mode_radio_button -> sendLfmParameters()
             }
         }
     }
@@ -138,6 +143,10 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun handleError(errorCode: Int) {
         setProgressBar(false)
 
+        if ((errorCode and CW_FREQUENCY_UNDER_INPUT_ERROR) != 0 ||
+            (errorCode and CW_FREQUENCY_ABOVE_INPUT_ERROR) != 0)
+            handleCwFrequencyInputError(errorCode)
+
         if ((errorCode and LOW_FREQUENCY_UNDER_INPUT_ERROR) != 0 ||
             (errorCode and LOW_FREQUENCY_ABOVE_INPUT_ERROR) != 0 ||
             (errorCode and LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR) != 0)
@@ -158,20 +167,31 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun setForms(synthesizerModuleStateModel: SynthesizerModuleStateModel) = with(binding) {
+        val format = DecimalFormat("#.##", DecimalFormatSymbols(Locale.US))
+
         setProgressBar(false)
-        cwFrequencyTextInputEditText.setText(synthesizerModuleStateModel.cwFrequency.toString())
-        lfmLowFrequencyTextInputEditText.setText(synthesizerModuleStateModel.lowestLfmFrequency.toString())
-        lfmHighFrequencyTextInputEditText.setText(synthesizerModuleStateModel.highestLfmFrequency.toString())
-        lfmPeriodTextInputEditText.setText(synthesizerModuleStateModel.lfmPeriod.toString())
+        cwFrequencyTextInputEditText.setText((synthesizerModuleStateModel.cwFrequency/1_000_000).toString())
+        lfmLowFrequencyTextInputEditText.setText((synthesizerModuleStateModel.lowestLfmFrequency/1_000_000).toString())
+        lfmHighFrequencyTextInputEditText.setText((synthesizerModuleStateModel.highestLfmFrequency/1_000_000).toString())
+        lfmPeriodTextInputEditText.setText(format.format(synthesizerModuleStateModel.lfmPeriod*1_000))
         symmetricLfmCheckBox.isChecked = synthesizerModuleStateModel.isSymmetricLfm
+    }
+
+    private fun handleCwFrequencyInputError(errorCode: Int) = with(binding) {
+        var errorString = ""
+
+        if ((errorCode and CW_FREQUENCY_UNDER_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.low_freq_under_input_error_text)
+        if ((errorCode and CW_FREQUENCY_ABOVE_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.high_freq_above_input_error_text)
+
+        cwFrequencyTextInputLayout.error = errorString
     }
 
     private fun handleLowFrequencyInputError(errorCode: Int) = with(binding) {
         var errorString = ""
 
-        if ((errorCode and LOW_FREQUENCY_UNDER_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.low_freq_under_input_error_text.toString()
-        if ((errorCode and LOW_FREQUENCY_ABOVE_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.low_freq_above_input_error_text.toString()
-        if ((errorCode and LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.low_freq_higher_than_high_freq_input_error_text.toString()
+        if ((errorCode and LOW_FREQUENCY_UNDER_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.low_freq_under_input_error_text)
+        if ((errorCode and LOW_FREQUENCY_ABOVE_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.low_freq_above_input_error_text)
+        if ((errorCode and LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.low_freq_higher_than_high_freq_input_error_text)
 
         lfmLowFrequencyTextInputLayout.error = errorString
     }
@@ -179,8 +199,8 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun handleHighFrequencyInputError(errorCode: Int) = with(binding) {
         var errorString = ""
 
-        if ((errorCode and HIGH_FREQUENCY_UNDER_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.high_freq_under_input_error_text.toString()
-        if ((errorCode and HIGH_FREQUENCY_ABOVE_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.high_freq_above_input_error_text.toString()
+        if ((errorCode and HIGH_FREQUENCY_UNDER_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.high_freq_under_input_error_text)
+        if ((errorCode and HIGH_FREQUENCY_ABOVE_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.high_freq_above_input_error_text)
 
         lfmHighFrequencyTextInputLayout.error = errorString
     }
@@ -188,18 +208,18 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun handleLfmPeriodInputError(errorCode: Int) = with(binding) {
         var errorString = ""
 
-        if ((errorCode and MODULATION_PERIOD_ABOVE_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.modulation_period_above_input_error_text.toString()
-        if ((errorCode and MODULATION_PERIOD_UNDER_INPUT_ERROR) != 0) errorString = ru.profitsw2000.core.R.string.modulation_period_under_input_error_text.toString()
+        if ((errorCode and MODULATION_PERIOD_ABOVE_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.modulation_period_above_input_error_text)
+        if ((errorCode and MODULATION_PERIOD_UNDER_INPUT_ERROR) != 0) errorString = resources.getString(ru.profitsw2000.core.R.string.modulation_period_under_input_error_text)
 
         lfmPeriodTextInputLayout.error = errorString
     }
 
     private fun handlePacketSendingError(errorCode: Int) = with(binding) {
         val statusText = if ((errorCode and RESPONSE_PACKET_TIMEOUT_ERROR_CODE) != 0)
-            ru.profitsw2000.core.R.string.response_packet_timeout_error.toString()
+            resources.getString(ru.profitsw2000.core.R.string.response_packet_timeout_error)
         else if ((errorCode and REGISTERS_CALCULATION_ERROR_CODE) != 0)
-            ru.profitsw2000.core.R.string.register_calculation_error_text.toString()
-        else ru.profitsw2000.core.R.string.unknown_error.toString()
+            resources.getString(ru.profitsw2000.core.R.string.register_calculation_error_text)
+        else resources.getString(ru.profitsw2000.core.R.string.unknown_error)
 
         setStatusText(resources.getColor(ru.profitsw2000.core.R.color.scarlet), statusText)
     }
@@ -227,9 +247,9 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
         if (!lowestLfmInputFrequencyIsEmpty && !highestLfmInputFrequencyIsEmpty && !lfmPeriodInputFrequencyIsEmpty) {
             mainViewModel.updateSynthesizerLfmMode(
-                startFrequency = lfmLowFrequencyTextInputEditText.toString().toLong(),
-                stopFrequency = lfmHighFrequencyTextInputEditText.toString().toLong(),
-                lfmPeriod = lfmPeriodTextInputEditText.toString().toDouble(),
+                startFrequency = lfmLowFrequencyTextInputEditText.text.toString().toLong(),
+                stopFrequency = lfmHighFrequencyTextInputEditText.text.toString().toLong(),
+                lfmPeriod = lfmPeriodTextInputEditText.text.toString().toDouble(),
                 isSymmetricLfm = symmetricLfmCheckBox.isChecked
             )
         }
@@ -248,6 +268,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun clearInputFormsErrors() = with(binding) {
+        updatingStatusResultTextView.visibility = View.GONE
         cwFrequencyTextInputLayout.error = null
         lfmLowFrequencyTextInputLayout.error = null
         lfmHighFrequencyTextInputLayout.error = null

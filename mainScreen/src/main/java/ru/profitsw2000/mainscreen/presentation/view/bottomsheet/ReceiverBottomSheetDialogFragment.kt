@@ -49,14 +49,17 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentReceiverBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
     private val mainViewModel: MainViewModel by activityViewModel()
-    private val spec = CircularProgressIndicatorSpec(requireContext(), null).apply {
-        indicatorSize = 24.dpToPx()
-        trackThickness = 3.dpToPx()
+    private val spec by lazy {
+        CircularProgressIndicatorSpec(requireContext(), null).apply {
+            indicatorSize = 24.dpToPx()
+            trackThickness = 3.dpToPx()
 
-        indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.splashed_white))
+            indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.splashed_white))
+        }
     }
-    val progressIndicator = IndeterminateDrawable.createCircularDrawable(requireContext(), spec)
-
+    val progressIndicator by lazy {
+        IndeterminateDrawable.createCircularDrawable(requireContext(), spec)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -79,6 +82,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun initViews() = with(binding) {
         transmitterParamsSendButton.setOnClickListener {
+            updatingStatusResultTextView.visibility = View.GONE
             mainViewModel.updateReceiver(
                 getReceiverSettingsByteArray()
             )
@@ -105,8 +109,8 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun handleError(errorCode: Int) {
         val statusText = when(errorCode) {
-            RESPONSE_PACKET_TIMEOUT_ERROR_CODE -> ru.profitsw2000.core.R.string.response_packet_timeout_error.toString()
-            else -> ru.profitsw2000.core.R.string.unknown_error.toString()
+            RESPONSE_PACKET_TIMEOUT_ERROR_CODE -> resources.getString(ru.profitsw2000.core.R.string.response_packet_timeout_error)
+            else -> resources.getString(ru.profitsw2000.core.R.string.unknown_error)
         }
         setProgressBar(false)
         setStatusText(resources.getColor(ru.profitsw2000.core.R.color.scarlet), statusText)
