@@ -54,7 +54,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
             indicatorSize = 24.dpToPx()
             trackThickness = 3.dpToPx()
 
-            indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.splashed_white))
+            indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.eucaliptus))
         }
     }
     val progressIndicator by lazy {
@@ -120,7 +120,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         if (isUpdating) {
             text = ""
             icon = progressIndicator
-            progressIndicator.start()
+            progressIndicator.mutate()
+            progressIndicator.setVisible(true, true)
+            iconGravity = com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START
+            iconPadding = 0
+            iconSize = 24.dpToPx()
             isEnabled = false
         } else {
             progressIndicator.stop()
