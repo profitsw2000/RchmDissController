@@ -14,4 +14,10 @@ interface RchmDissStateRepository {
     fun updateReceiverModuleState(lowByte: Byte, highByte: Byte)
 
     fun updateSynthesizerModuleState(lowByte: Byte, middleByte: Byte, highByte: Byte)
+
+    fun updateOutputModuleState(byteArray: ByteArray)
+
+    fun writeModuleTemperature(lowByte: Byte, highByte: Byte)
+
+    fun writeModuleMemoryByte(byte: Byte)
 }
