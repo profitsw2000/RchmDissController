@@ -68,15 +68,22 @@ class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
     }
 
     override fun updateOutputModuleState(byteArray: ByteArray) {
-        TODO("Not yet implemented")
+        repositoryScope.launch {
+            _lastPacket.emit(RcdInputPacketType.RcdOutputControlInputPacket)
+        }
+
     }
 
     override fun writeModuleTemperature(lowByte: Byte, highByte: Byte) {
-        TODO("Not yet implemented")
+        repositoryScope.launch {
+            _lastPacket.emit(RcdInputPacketType.RcdTemperatureInputPacket)
+        }
     }
 
     override fun writeModuleMemoryByte(byte: Byte) {
-        TODO("Not yet implemented")
+        repositoryScope.launch {
+            _lastPacket.emit(RcdInputPacketType.RcdMemoryReadInputPacket)
+        }
     }
 
     private fun getNewSynthesizerState(register: Int): SynthesizerModuleState {
