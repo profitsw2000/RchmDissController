@@ -31,4 +31,10 @@ interface BluetoothPacketManager {
     fun getWriteToSynthesizerPacket(dataByteArray: ByteArray): ByteArray
 
     fun getRchmDissOutputSetPacket(dataByteArray: ByteArray): ByteArray
+
+    fun getWriteToRchmDissEepromPacket(dataByteArray: ByteArray): ByteArray
+
+    fun getReadFromRchmDissEepromPacket(dataByteArray: ByteArray): ByteArray
+
+    fun getReadRchmDissInnerTemperaturePacket(dataByteArray: ByteArray): ByteArray
 }

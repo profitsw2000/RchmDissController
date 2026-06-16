@@ -140,6 +140,18 @@ class BluetoothPacketManagerImpl(
         )
     }
 
+    override fun getWriteToRchmDissEepromPacket(dataByteArray: ByteArray): ByteArray {
+        TODO("Not yet implemented")
+    }
+
+    override fun getReadFromRchmDissEepromPacket(dataByteArray: ByteArray): ByteArray {
+        TODO("Not yet implemented")
+    }
+
+    override fun getReadRchmDissInnerTemperaturePacket(dataByteArray: ByteArray): ByteArray {
+        TODO("Not yet implemented")
+    }
+
     private fun receiverPacket(bytesList: List<Byte>) {
         rchmDissStateRepository.updateReceiverModuleState(
             bytesList[1],

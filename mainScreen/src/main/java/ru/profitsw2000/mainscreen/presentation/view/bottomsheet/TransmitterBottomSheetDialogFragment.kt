@@ -138,7 +138,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
             TX_CHANNEL_5 -> fifthChannelSelectionChip.isChecked = true
             else -> rxChannelSelectionChipGroup.clearCheck()
         }
-        switchTransmitterOnCheckBox.isChecked = outputModuleState.rchmDissDigitalOutput.toInt().and(0x2) == 0
+        switchTransmitterOnCheckBox.isChecked = outputModuleState.transmitterIsOn
         updatingStatusResultTextView.visibility = View.GONE
     }
 
