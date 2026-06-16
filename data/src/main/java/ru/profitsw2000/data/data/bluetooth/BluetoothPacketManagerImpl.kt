@@ -8,9 +8,11 @@ import ru.profitsw2000.core.drawable.utils.PACKET_SIZE_MAXIMUM
 import ru.profitsw2000.core.drawable.utils.PACKET_START_BYTE
 import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_SIZE
+import ru.profitsw2000.core.drawable.utils.READ_FROM_EEPROM_RESPONSE_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_TEMPERATURE_RESPONSE_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_RECEIVER_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_SYNTHESIZER_PACKET_ID
@@ -97,6 +99,9 @@ class BluetoothPacketManagerImpl(
             READ_FROM_TRANSMITTER_PACKET_ID -> rchmDissStateRepository.updateTransmitterModuleState(bytesList[0])
             READ_FROM_RECEIVER_PACKET_ID -> receiverPacket(bytesList)
             READ_FROM_SYNTHESIZER_PACKET_ID -> synthesizerPacket(bytesList)
+            RCHM_DISS_OUTPUT_SET_PACKET_ID -> rcdOutputControlPacket(bytesList)
+            READ_FROM_EEPROM_RESPONSE_PACKET_ID -> TODO()
+            READ_TEMPERATURE_RESPONSE_PACKET_ID -> TODO()
             else -> {}
         }
     }
@@ -164,6 +169,29 @@ class BluetoothPacketManagerImpl(
             bytesList[2],
             bytesList[1],
             bytesList[0]
+        )
+    }
+
+    private fun rcdOutputControlPacket(bytesList: List<Byte>) {
+        rchmDissStateRepository.updateOutputModuleState(
+            byteArrayOf(
+                bytesList[0],
+                bytesList[1],
+                bytesList[2],
+                bytesList[3],
+                bytesList[4],
+            )
+        )
+    }
+
+    private fun eepromDataPacket(bytesList: List<Byte>) {
+        rchmDissStateRepository.writeModuleMemoryByte(bytesList[0])
+    }
+
+    private fun temperatureDataPacket(bytesList: List<Byte>) {
+        rchmDissStateRepository.writeModuleTemperature(
+            bytesList[0],
+            bytesList[1]
         )
     }
 
