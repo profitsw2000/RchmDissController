@@ -342,7 +342,7 @@ class MainViewModel(
             rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
         ).lfmPeriod
         val periodConventionalUnits = (lfmPeriod/0.000008).toInt()
-        val transmitterIsOnBit = if (currentOutput.transmitterIsOn) 1 else 0
+        val transmitterIsOnBit = if (turnTransmitterOn) 1 else 0
         val extTriggerLfmBit = if (currentOutput.lfmExtTriggerIsOn) 1 else 0
 
         val newOutput = ((periodConventionalUnits shl 2) or (extTriggerLfmBit shl 1) or transmitterIsOnBit)
