@@ -4,6 +4,6 @@ data class OutputModuleState(
     val lfmExtTriggerIsOn: Boolean = false,
     val transmitterIsOn: Boolean = true,
     val pllIsLocked: Boolean = false,
-    val transmitterDetectorVoltage: Int = -1,
-    val secondaryPowerSourceVoltage: Int = -1
+    val transmitterDetectorVoltage: Double = 0.0,
+    val secondaryPowerSourceVoltage: Double = 0.0
 )
