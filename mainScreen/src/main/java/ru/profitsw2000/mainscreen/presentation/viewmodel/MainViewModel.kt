@@ -336,12 +336,16 @@ class MainViewModel(
         )
     }
 
-    private fun getOutputModuleStateByteArray(turnTransmitterOn: Boolean): ByteArray {
-        val currentOutput = rchmDissStateRepository.rchmDissState.value.outputModuleState.rchmDissDigitalOutput
-        val mask: UShort = 0xFFFDu
-        val transmitterOutput: UShort = if (turnTransmitterOn) 0x2u
-        else 0u
-        val newOutput = (currentOutput and mask) or transmitterOutput
+    private suspend fun getOutputModuleStateByteArray(turnTransmitterOn: Boolean): ByteArray {
+        val currentOutput = rchmDissStateRepository.rchmDissState.value.outputModuleState
+        val lfmPeriod = pllRegisters1208PL1URepository.getLfmParameters(
+            rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
+        ).lfmPeriod
+        val periodConventionalUnits = (lfmPeriod/0.000008).toInt()
+        val transmitterIsOnBit = if (currentOutput.transmitterIsOn) 1 else 0
+        val extTriggerLfmBit = if (currentOutput.lfmExtTriggerIsOn) 1 else 0
+
+        val newOutput = ((periodConventionalUnits shl 2) or (extTriggerLfmBit shl 1) or transmitterIsOnBit)
 
         return byteArrayOf(newOutput.toByte(), (newOutput.toUInt().shr(8)).toByte())
     }
