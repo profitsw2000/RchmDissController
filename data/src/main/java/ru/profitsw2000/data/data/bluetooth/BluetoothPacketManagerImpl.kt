@@ -14,6 +14,8 @@ import ru.profitsw2000.core.drawable.utils.READ_FROM_EEPROM_RESPONSE_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_TEMPERATURE_REQUEST_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_TEMPERATURE_REQUEST_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.READ_TEMPERATURE_RESPONSE_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_EEPROM_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_EEPROM_PACKET_SIZE
@@ -167,8 +169,8 @@ class BluetoothPacketManagerImpl(
 
     override fun getReadRchmDissInnerTemperaturePacket(): ByteArray {
         return getWriteByteArrayPacket(
-            READ_FROM_EEPROM_REQUEST_PACKET_SIZE,
-            READ_FROM_EEPROM_REQUEST_PACKET_ID,
+            READ_TEMPERATURE_REQUEST_PACKET_SIZE,
+            READ_TEMPERATURE_REQUEST_PACKET_ID,
             byteArrayOf()
         )
     }
