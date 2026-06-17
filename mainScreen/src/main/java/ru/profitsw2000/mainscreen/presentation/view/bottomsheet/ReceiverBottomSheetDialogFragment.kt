@@ -197,7 +197,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun channelLockBitCode(chip: Chip, channelBitNumber: Int): Int {
-        return if (!chip.isChecked) 1.shl(channelBitNumber)
+        return if (chip.isChecked) 1.shl(channelBitNumber)
         else 0
     }
 
