@@ -7,4 +7,6 @@ data class RchmDissStateModel(
     val isActualTransmitterData: Boolean = false,
     val synthesizerModuleState: SynthesizerModuleStateModel = SynthesizerModuleStateModel(),
     val isActualSynthesizerData: Boolean = false,
+    val innerModuleTemperature: Double = 250.0,
+    val readMemoryValue: Byte = 0xFF.toByte()
 )

@@ -16,5 +16,8 @@ sealed class RcdInputPacketType {
     object SynthesizerLfm3RegisterInputPacket: RcdInputPacketType()
     object SynthesizerPraRegisterInputPacket: RcdInputPacketType()
     object SynthesizerPrwRegisterInputPacket: RcdInputPacketType()
+    object RcdOutputControlInputPacket: RcdInputPacketType()
+    object RcdMemoryReadInputPacket: RcdInputPacketType()
+    object RcdTemperatureInputPacket: RcdInputPacketType()
     object InvalidInputPacket: RcdInputPacketType()
 }

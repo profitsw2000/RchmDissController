@@ -10,23 +10,22 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import ru.profitsw2000.core.drawable.utils.CW_FREQUENCY_ABOVE_INPUT_ERROR
+import ru.profitsw2000.core.drawable.utils.CW_FREQUENCY_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_ABOVE_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.LOW_FREQUENCY_ABOVE_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.LOW_FREQUENCY_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.MAX_LFM_FREQ
-import ru.profitsw2000.core.drawable.utils.MAX_LFM_PERIOD_MS
+import ru.profitsw2000.core.drawable.utils.MAX_LFM_PERIOD_SEC
 import ru.profitsw2000.core.drawable.utils.MIN_LFM_FREQ
-import ru.profitsw2000.core.drawable.utils.MIN_LFM_PERIOD_MS
+import ru.profitsw2000.core.drawable.utils.MIN_LFM_PERIOD_SEC
 import ru.profitsw2000.core.drawable.utils.MODULATION_PERIOD_ABOVE_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.MODULATION_PERIOD_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.NO_ERROR
@@ -47,8 +46,6 @@ import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
 import ru.profitsw2000.mainscreen.state.SynthesizerUpdatingStatus
 import ru.profitsw2000.mainscreen.state.TransmitterUpdatingStatus
-import kotlin.experimental.and
-import kotlin.experimental.or
 import kotlin.time.Duration.Companion.milliseconds
 
 class MainViewModel(
@@ -179,8 +176,8 @@ class MainViewModel(
 
     fun updateSynthesizerCwMode(frequency: Long) {
         val errorCode = checkCwInputValues(frequency * 1_000_000)
+        _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Updating
         if (errorCode == NO_ERROR) {
-            _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Updating
             viewModelScope.launch {
                 try {
                     val registersList = pllRegisters1208PL1URepository.getCwRegisters(frequency * 1_000_000)
@@ -197,29 +194,32 @@ class MainViewModel(
         startFrequency: Long,
         stopFrequency: Long,
         lfmPeriod: Double,
-        isSymmetricLfm: Boolean
+        isSymmetricLfm: Boolean,
+        isExtTriggerLfm: Boolean
     ) {
-        val errorCode = checkLfmInputValues(
-            getLfmParametersModel(
-                startFrequency = startFrequency,
-                stopFrequency = stopFrequency,
-                lfmPeriod = lfmPeriod,
-                isSymmetricLfm = isSymmetricLfm
-            )
+        val lfmParameters = getLfmParametersModel(
+            startFrequency = startFrequency * 1_000_000,
+            stopFrequency = stopFrequency * 1_000_000,
+            lfmPeriod = lfmPeriod * 0.001,
+            isSymmetricLfm = isSymmetricLfm
         )
+        val errorCode = checkLfmInputValues(lfmParameters)
+
+        _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Updating
         if (errorCode == NO_ERROR) {
-            _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Updating
             viewModelScope.launch {
                 try {
-                    val registersList = pllRegisters1208PL1URepository.getLfmRegisters(
-                        getLfmParametersModel(
-                            startFrequency = startFrequency * 1_000_000,
-                            stopFrequency = stopFrequency * 1_000_000,
-                            lfmPeriod = lfmPeriod * 0.001,
-                            isSymmetricLfm = isSymmetricLfm
-                        )
-                    )
+                    val registersList = pllRegisters1208PL1URepository.getLfmRegisters(lfmParameters)
                     updateSynthesizer(registersList)
+
+                    //Здесь отправляем пакет для установки сигнала Вкл_ЛЧМ
+                    launch {
+                        bluetoothRepository.bluetoothDataRepository.writeData(
+                            bluetoothPacketManager.getRchmDissOutputSetPacket(
+                                getOutputModuleStateByteArray(isExtTriggerLfm, lfmPeriod)
+                            )
+                        )
+                    }
                 } catch (e: Exception) {
                     _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(REGISTERS_CALCULATION_ERROR_CODE)
                 }
@@ -243,6 +243,7 @@ class MainViewModel(
                         }
                     }
                 }
+
 
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Success
 
@@ -301,16 +302,16 @@ class MainViewModel(
             if (highestLfmFrequency - lowestLfmFrequency < 10_000_000) errorCode = errorCode or LOW_FREQ_HIGHER_THAN_HIGH_FREQ_INPUT_ERROR
             if (highestLfmFrequency < MIN_LFM_FREQ) errorCode = errorCode or HIGH_FREQUENCY_UNDER_INPUT_ERROR
             if (highestLfmFrequency > MAX_LFM_FREQ) errorCode = errorCode or HIGH_FREQUENCY_ABOVE_INPUT_ERROR
-            if (lfmDeviationPeriod > MAX_LFM_PERIOD_MS) errorCode = errorCode or MODULATION_PERIOD_ABOVE_INPUT_ERROR
-            if (lfmDeviationPeriod < MIN_LFM_PERIOD_MS) errorCode = errorCode or MODULATION_PERIOD_UNDER_INPUT_ERROR
+            if (lfmDeviationPeriod > MAX_LFM_PERIOD_SEC) errorCode = errorCode or MODULATION_PERIOD_ABOVE_INPUT_ERROR
+            if (lfmDeviationPeriod < MIN_LFM_PERIOD_SEC) errorCode = errorCode or MODULATION_PERIOD_UNDER_INPUT_ERROR
         }
         return errorCode
     }
 
     private fun checkCwInputValues(frequency: Long): Int {
         var errorCode = NO_ERROR
-        if (frequency < MIN_LFM_FREQ) errorCode = errorCode or LOW_FREQUENCY_UNDER_INPUT_ERROR
-        if (frequency > MAX_LFM_FREQ) errorCode = errorCode or HIGH_FREQUENCY_ABOVE_INPUT_ERROR
+        if (frequency < MIN_LFM_FREQ) errorCode = errorCode or CW_FREQUENCY_UNDER_INPUT_ERROR
+        if (frequency > MAX_LFM_FREQ) errorCode = errorCode or CW_FREQUENCY_ABOVE_INPUT_ERROR
 
         return errorCode
     }
@@ -346,13 +347,27 @@ class MainViewModel(
         )
     }
 
-    private fun getOutputModuleStateByteArray(turnTransmitterOn: Boolean): ByteArray {
-        val currentOutput = rchmDissStateRepository.rchmDissState.value.outputModuleState.rchmDissDigitalOutput
-        val mask: UShort = 0xFFFDu
-        val transmitterOutput: UShort = if (turnTransmitterOn) 0x2u
-        else 0u
-        val newOutput = (currentOutput and mask) or transmitterOutput
+    private suspend fun getOutputModuleStateByteArray(transmitterIsOn: Boolean): ByteArray {
+        val outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
+        val lfmPeriod = pllRegisters1208PL1URepository.getLfmParameters(
+            rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
+        ).lfmPeriod
+        val periodConventionalUnits = (lfmPeriod/0.000008).toInt()
+        val transmitterIsOnBit = if (transmitterIsOn) 1 else 0
+        val extTriggerLfmBit = if (outputModuleState.lfmExtTriggerIsOn) 1 else 0
 
-        return byteArrayOf(newOutput.toByte(), (newOutput.toUInt().shr(8)).toByte())
+        val newOutput = ((periodConventionalUnits shl 2) or (transmitterIsOnBit shl 1) or extTriggerLfmBit)
+
+        return byteArrayOf((newOutput.toUInt().shr(8)).toByte(), newOutput.toByte())
+    }
+
+    private suspend fun getOutputModuleStateByteArray(extTriggerLfm: Boolean, lfmPeriod: Double): ByteArray {
+        val outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
+        val periodConventionalUnits = (lfmPeriod/0.000008).toInt()
+        val transmitterIsOnBit = if (outputModuleState.transmitterIsOn) 0 else 1
+        val extTriggerLfmBit = if (extTriggerLfm) 1 else 0
+        val newOutput = ((periodConventionalUnits shl 2) or (transmitterIsOnBit shl 1) or extTriggerLfmBit)
+
+        return byteArrayOf((newOutput.toUInt().shr(8)).toByte(), newOutput.toByte())
     }
 }

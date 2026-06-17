@@ -67,6 +67,33 @@ class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
         )
     }
 
+    override fun updateOutputModuleState(byteArray: ByteArray) {
+        repositoryScope.launch {
+            _lastPacket.emit(RcdInputPacketType.RcdOutputControlInputPacket)
+        }
+        _rchmDissState.value = rchmDissState.value.copy(
+            outputModuleState = packetBytesConverter.rcdOutputBytes(byteArray)
+        )
+    }
+
+    override fun writeModuleTemperature(lowByte: Byte, highByte: Byte) {
+        repositoryScope.launch {
+            _lastPacket.emit(RcdInputPacketType.RcdTemperatureInputPacket)
+        }
+        _rchmDissState.value = rchmDissState.value.copy(
+            innerModuleTemperature = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+        )
+    }
+
+    override fun writeModuleMemoryByte(byte: Byte) {
+        repositoryScope.launch {
+            _lastPacket.emit(RcdInputPacketType.RcdMemoryReadInputPacket)
+        }
+        _rchmDissState.value = rchmDissState.value.copy(
+            readMemoryValue = byte
+        )
+    }
+
     private fun getNewSynthesizerState(register: Int): SynthesizerModuleState {
         return when(register and SYNTHESIZER_REGISTERS_TYPE_MASK) {
             REF_REGISTER_COMMAND -> rchmDissState.value.synthesizerModuleState.updateRegister(register, {it.refRegister}) {copy(refRegister = it)}

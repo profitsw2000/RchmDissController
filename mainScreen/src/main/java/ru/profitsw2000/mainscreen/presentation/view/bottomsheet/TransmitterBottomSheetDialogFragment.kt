@@ -31,13 +31,17 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentTransmitterBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
     private val mainViewModel: MainViewModel by activityViewModel()
-    private val spec = CircularProgressIndicatorSpec(requireContext(), null).apply {
-        indicatorSize = 24.dpToPx()
-        trackThickness = 3.dpToPx()
+    private val spec by lazy {
+        CircularProgressIndicatorSpec(requireContext(), null).apply {
+            indicatorSize = 24.dpToPx()
+            trackThickness = 3.dpToPx()
 
-        indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.splashed_white))
+            indicatorColors = intArrayOf(resources.getColor(ru.profitsw2000.core.R.color.eucaliptus))
+        }
     }
-    val progressIndicator = IndeterminateDrawable.createCircularDrawable(requireContext(), spec)
+    val progressIndicator by lazy {
+        IndeterminateDrawable.createCircularDrawable(requireContext(), spec)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,7 +67,9 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun initSendButton() = with(binding) {
+        //transmitterParamsSendButton.icon = progressIndicator
         transmitterParamsSendButton.setOnClickListener {
+            updatingStatusResultTextView.visibility = View.GONE
             mainViewModel.updateTransmitter(
                 getTransmitterByteFromSelectedChip(rxChannelSelectionChipGroup.checkedChipId),
                 switchTransmitterOnCheckBox.isChecked
@@ -91,8 +97,8 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun handleError(errorCode: Int) = with(binding.updatingStatusResultTextView) {
         val statusText = when(errorCode) {
-            RESPONSE_PACKET_TIMEOUT_ERROR_CODE -> ru.profitsw2000.core.R.string.response_packet_timeout_error.toString()
-            else -> ru.profitsw2000.core.R.string.unknown_error.toString()
+            RESPONSE_PACKET_TIMEOUT_ERROR_CODE -> resources.getString(ru.profitsw2000.core.R.string.response_packet_timeout_error)
+            else -> resources.getString(ru.profitsw2000.core.R.string.unknown_error)
         }
 
         setProgressBar(false)
@@ -103,7 +109,11 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
         if (isUpdating) {
             text = ""
             icon = progressIndicator
-            progressIndicator.start()
+            progressIndicator.mutate()
+            progressIndicator.setVisible(true, true)
+            iconGravity = com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START
+            iconPadding = 0
+            iconSize = 24.dpToPx()
             isEnabled = false
         } else {
             progressIndicator.stop()
@@ -128,7 +138,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
             TX_CHANNEL_5 -> fifthChannelSelectionChip.isChecked = true
             else -> rxChannelSelectionChipGroup.clearCheck()
         }
-        switchTransmitterOnCheckBox.isChecked = outputModuleState.rchmDissDigitalOutput.toInt().and(0x2) == 0
+        switchTransmitterOnCheckBox.isChecked = outputModuleState.transmitterIsOn
         updatingStatusResultTextView.visibility = View.GONE
     }
 
