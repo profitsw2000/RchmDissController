@@ -254,7 +254,8 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 startFrequency = lfmLowFrequencyTextInputEditText.text.toString().toLong(),
                 stopFrequency = lfmHighFrequencyTextInputEditText.text.toString().toLong(),
                 lfmPeriod = lfmPeriodTextInputEditText.text.toString().toDouble(),
-                isSymmetricLfm = symmetricLfmCheckBox.isChecked
+                isSymmetricLfm = symmetricLfmCheckBox.isChecked,
+                isExtTriggerLfm = lfmExtTriggerSwitchCheckBox.isChecked
             )
         }
     }

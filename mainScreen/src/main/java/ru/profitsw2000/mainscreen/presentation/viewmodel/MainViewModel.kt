@@ -194,7 +194,8 @@ class MainViewModel(
         startFrequency: Long,
         stopFrequency: Long,
         lfmPeriod: Double,
-        isSymmetricLfm: Boolean
+        isSymmetricLfm: Boolean,
+        isExtTriggerLfm: Boolean
     ) {
         val lfmParameters = getLfmParametersModel(
             startFrequency = startFrequency * 1_000_000,
@@ -210,6 +211,15 @@ class MainViewModel(
                 try {
                     val registersList = pllRegisters1208PL1URepository.getLfmRegisters(lfmParameters)
                     updateSynthesizer(registersList)
+
+                    //Здесь отправляем пакет для установки сигнала Вкл_ЛЧМ
+                    launch {
+                        bluetoothRepository.bluetoothDataRepository.writeData(
+                            bluetoothPacketManager.getRchmDissOutputSetPacket(
+                                getOutputModuleStateByteArray(isExtTriggerLfm, lfmPeriod)
+                            )
+                        )
+                    }
                 } catch (e: Exception) {
                     _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(REGISTERS_CALCULATION_ERROR_CODE)
                 }
@@ -233,6 +243,7 @@ class MainViewModel(
                         }
                     }
                 }
+
 
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Success
 
@@ -336,17 +347,27 @@ class MainViewModel(
         )
     }
 
-    private suspend fun getOutputModuleStateByteArray(turnTransmitterOn: Boolean): ByteArray {
-        val currentOutput = rchmDissStateRepository.rchmDissState.value.outputModuleState
+    private suspend fun getOutputModuleStateByteArray(transmitterIsOn: Boolean): ByteArray {
+        val outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
         val lfmPeriod = pllRegisters1208PL1URepository.getLfmParameters(
             rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
         ).lfmPeriod
         val periodConventionalUnits = (lfmPeriod/0.000008).toInt()
-        val transmitterIsOnBit = if (turnTransmitterOn) 1 else 0
-        val extTriggerLfmBit = if (currentOutput.lfmExtTriggerIsOn) 1 else 0
+        val transmitterIsOnBit = if (transmitterIsOn) 0 else 1
+        val extTriggerLfmBit = if (outputModuleState.lfmExtTriggerIsOn) 1 else 0
 
-        val newOutput = ((periodConventionalUnits shl 2) or (extTriggerLfmBit shl 1) or transmitterIsOnBit)
+        val newOutput = ((periodConventionalUnits shl 2) or (transmitterIsOnBit shl 1) or extTriggerLfmBit)
 
-        return byteArrayOf(newOutput.toByte(), (newOutput.toUInt().shr(8)).toByte())
+        return byteArrayOf((newOutput.toUInt().shr(8)).toByte(), newOutput.toByte())
+    }
+
+    private suspend fun getOutputModuleStateByteArray(extTriggerLfm: Boolean, lfmPeriod: Double): ByteArray {
+        val outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
+        val periodConventionalUnits = (lfmPeriod/0.000008).toInt()
+        val transmitterIsOnBit = if (outputModuleState.transmitterIsOn) 0 else 1
+        val extTriggerLfmBit = if (extTriggerLfm) 1 else 0
+        val newOutput = ((periodConventionalUnits shl 2) or (transmitterIsOnBit shl 1) or extTriggerLfmBit)
+
+        return byteArrayOf((newOutput.toUInt().shr(8)).toByte(), newOutput.toByte())
     }
 }

@@ -121,7 +121,7 @@ class PacketBytesConverter {
     }
 
     private fun transmitterIsOn(byte: Byte): Boolean {
-        return (byte and TRANSMITTER_CONTROL_BIT_MASK).toInt() != 0
+        return (byte and TRANSMITTER_CONTROL_BIT_MASK).toInt() == 0
     }
 
     private fun pllIsLocked(byte: Byte): Boolean {
