@@ -36,5 +36,5 @@ interface BluetoothPacketManager {
 
     fun getReadFromRchmDissEepromPacket(dataByteArray: ByteArray): ByteArray
 
-    fun getReadRchmDissInnerTemperaturePacket(dataByteArray: ByteArray): ByteArray
+    fun getReadRchmDissInnerTemperaturePacket(): ByteArray
 }

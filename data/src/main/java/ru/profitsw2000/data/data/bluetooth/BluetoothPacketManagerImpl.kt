@@ -8,11 +8,15 @@ import ru.profitsw2000.core.drawable.utils.PACKET_SIZE_MAXIMUM
 import ru.profitsw2000.core.drawable.utils.PACKET_START_BYTE
 import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_SIZE
+import ru.profitsw2000.core.drawable.utils.READ_FROM_EEPROM_REQUEST_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_FROM_EEPROM_REQUEST_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.READ_FROM_EEPROM_RESPONSE_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_TEMPERATURE_RESPONSE_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_EEPROM_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.WRITE_TO_EEPROM_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_RECEIVER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_RECEIVER_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_SYNTHESIZER_PACKET_ID
@@ -146,15 +150,27 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun getWriteToRchmDissEepromPacket(dataByteArray: ByteArray): ByteArray {
-        TODO("Not yet implemented")
+        return getWriteByteArrayPacket(
+            WRITE_TO_EEPROM_PACKET_SIZE,
+            WRITE_TO_EEPROM_PACKET_ID,
+            dataByteArray
+        )
     }
 
     override fun getReadFromRchmDissEepromPacket(dataByteArray: ByteArray): ByteArray {
-        TODO("Not yet implemented")
+        return getWriteByteArrayPacket(
+            READ_FROM_EEPROM_REQUEST_PACKET_SIZE,
+            READ_FROM_EEPROM_REQUEST_PACKET_ID,
+            dataByteArray
+        )
     }
 
-    override fun getReadRchmDissInnerTemperaturePacket(dataByteArray: ByteArray): ByteArray {
-        TODO("Not yet implemented")
+    override fun getReadRchmDissInnerTemperaturePacket(): ByteArray {
+        return getWriteByteArrayPacket(
+            READ_FROM_EEPROM_REQUEST_PACKET_SIZE,
+            READ_FROM_EEPROM_REQUEST_PACKET_ID,
+            byteArrayOf()
+        )
     }
 
     private fun receiverPacket(bytesList: List<Byte>) {
