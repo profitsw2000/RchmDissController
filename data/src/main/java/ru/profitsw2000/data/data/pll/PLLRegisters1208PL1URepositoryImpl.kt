@@ -282,7 +282,7 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
      * @return Значение регистра Int, находящийся в переменной типа Int (используются только 3 первых байта)
      */
     private fun getIntRegisterCw(frequency: Long): Int {
-        return ((REF_REG_CW*frequency)/(4*Fref)).toInt()
+        return ((REF_REG_CW*frequency)/(4*Fref)).toInt() or INT_REG
     }
 
     /**
