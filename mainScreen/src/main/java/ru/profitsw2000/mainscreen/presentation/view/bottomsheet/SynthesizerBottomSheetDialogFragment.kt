@@ -286,11 +286,13 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             lfmHighFrequencyTextInputLayout.visibility = View.VISIBLE
             lfmPeriodTextInputLayout.visibility = View.VISIBLE
             lfmExtTriggerSwitchCheckBox.visibility = View.VISIBLE
+            symmetricLfmCheckBox.visibility = View.VISIBLE
         } else {
             lfmLowFrequencyTextInputLayout.visibility = View.GONE
             lfmHighFrequencyTextInputLayout.visibility = View.GONE
             lfmPeriodTextInputLayout.visibility = View.GONE
             lfmExtTriggerSwitchCheckBox.visibility = View.GONE
+            symmetricLfmCheckBox.visibility = View.GONE
         }
     }
 }
