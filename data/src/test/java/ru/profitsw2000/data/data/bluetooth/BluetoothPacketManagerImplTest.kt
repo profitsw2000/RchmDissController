@@ -83,7 +83,7 @@ class BluetoothPacketManagerImplTest {
     }
 
     @Test
-    fun `получаем мусор со стартовым байтом посередине, а потом пакет передатчика - проверяем запуск функции`() = runTest(testDispatcher) {
+    fun `получаем мусор со стартовым байтом посередине, а потом нормальный пакет - проверяем запуск функций`() = runTest(testDispatcher) {
         val fakeBytesFlow = MutableSharedFlow<ByteArray>()
         io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
         manager.observeBluetoothDataBytesFlow()
@@ -146,6 +146,86 @@ class BluetoothPacketManagerImplTest {
                 byteArrayOf(0x07, 0x04, 0x17, 0x5, 0xBA.toByte())
             )
         }
+    }
+
+    @Test
+    fun `получаем пакет с неверной контрольной суммой - проверяем отсутствие запуска функций`() = runTest(testDispatcher) {
+        val fakeBytesFlow = MutableSharedFlow<ByteArray>()
+        io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
+        manager.observeBluetoothDataBytesFlow()
+
+        val transmitter = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x05,
+            READ_FROM_TRANSMITTER_PACKET_ID.toByte(), 0x08, 0x12
+        )
+
+        val receiver = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x06,
+            READ_FROM_RECEIVER_PACKET_ID.toByte(), 0xBC.toByte(), 0x3D, 0x55
+        )
+
+        val synthesizer = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x07,
+            READ_FROM_SYNTHESIZER_PACKET_ID.toByte(), 0x20, 0x00, 0xA5.toByte(), 0xD2.toByte()
+        )
+
+        val output = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x09,
+            RCHM_DISS_OUTPUT_CONTROL_PACKET_ID.toByte(),
+            0x07, 0x04, 0x17, 0x5, 0xBA.toByte(), 0x44
+        )
+
+        fakeBytesFlow.emit(transmitter)
+        verify{ rchmDissStateRepository wasNot Called }
+
+        fakeBytesFlow.emit(receiver)
+        verify{ rchmDissStateRepository wasNot Called }
+
+        fakeBytesFlow.emit(synthesizer)
+        verify{ rchmDissStateRepository wasNot Called }
+
+        fakeBytesFlow.emit(output)
+        verify{ rchmDissStateRepository wasNot Called }
+    }
+
+    @Test
+    fun `получаем пакет с неверным количеством данных - проверяем отсутствие запуска функций`() = runTest(testDispatcher) {
+        val fakeBytesFlow = MutableSharedFlow<ByteArray>()
+        io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
+        manager.observeBluetoothDataBytesFlow()
+
+        val transmitter = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x05,
+            READ_FROM_TRANSMITTER_PACKET_ID.toByte(), 0x08, 0xD5.toByte(), 0xE6.toByte()
+        )
+
+        val receiver = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x06,
+            READ_FROM_RECEIVER_PACKET_ID.toByte(), 0xBC.toByte(), 0x23, 0x3D, 0x28
+        )
+
+        val synthesizer = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x07,
+            READ_FROM_SYNTHESIZER_PACKET_ID.toByte(), 0x20, 0xA5.toByte(), 0xD1.toByte()
+        )
+
+        val output = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x09,
+            RCHM_DISS_OUTPUT_CONTROL_PACKET_ID.toByte(),
+            0x07, 0x5, 0xBA.toByte(), 0xD6.toByte()
+        )
+
+        fakeBytesFlow.emit(transmitter)
+        verify{ rchmDissStateRepository wasNot Called }
+
+        fakeBytesFlow.emit(receiver)
+        verify{ rchmDissStateRepository wasNot Called }
+
+        fakeBytesFlow.emit(synthesizer)
+        verify{ rchmDissStateRepository wasNot Called }
+
+        fakeBytesFlow.emit(output)
+        verify{ rchmDissStateRepository wasNot Called }
     }
 
 }
