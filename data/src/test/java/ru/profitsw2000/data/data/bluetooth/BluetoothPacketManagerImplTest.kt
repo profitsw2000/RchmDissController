@@ -16,6 +16,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import ru.profitsw2000.core.drawable.utils.PACKET_START_BYTE
+import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_CONTROL_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_FROM_RECEIVER_PACKET_ID
+import ru.profitsw2000.core.drawable.utils.READ_FROM_SYNTHESIZER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.READ_FROM_TRANSMITTER_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.TRANSMITTER_CONTROL_BIT_MASK
 import ru.profitsw2000.core.drawable.utils.WRITE_TO_TRANSMITTER_PACKET_ID
@@ -85,7 +88,7 @@ class BluetoothPacketManagerImplTest {
         io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
         manager.observeBluetoothDataBytesFlow()
 
-        val garbage = byteArrayOf(
+        val garbageTransmitter = byteArrayOf(
             0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK,
             WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23,
             PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18,
@@ -94,11 +97,55 @@ class BluetoothPacketManagerImplTest {
             READ_FROM_TRANSMITTER_PACKET_ID.toByte(), 0x08, 0x11
         )
 
-        fakeBytesFlow.emit(garbage)
+        val garbageReceiver = byteArrayOf(
+            0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK,
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23, 0x5F,
+            PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18,
+            0xAD.toByte(), 0x99.toByte(), 0x89.toByte(),
+            PACKET_START_BYTE.toByte(), 0x06,
+            READ_FROM_RECEIVER_PACKET_ID.toByte(), 0xBC.toByte(), 0x3D, 0x05
+        )
+
+        val garbageSynthesizer = byteArrayOf(
+            0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK,
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23,
+            PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18,
+            0xAD.toByte(), 0x99.toByte(), 0x89.toByte(),
+            PACKET_START_BYTE.toByte(), 0x07,
+            READ_FROM_SYNTHESIZER_PACKET_ID.toByte(), 0x20, 0x00, 0xA5.toByte(), 0xD1.toByte()
+        )
+
+        val garbageOutput = byteArrayOf(
+            0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK,
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23,
+            PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18,
+            0xAD.toByte(), 0x99.toByte(), 0x89.toByte(),
+            PACKET_START_BYTE.toByte(), 0x09,
+            RCHM_DISS_OUTPUT_CONTROL_PACKET_ID.toByte(),
+            0x07, 0x04, 0x17, 0x5, 0xBA.toByte(), 0xF1.toByte()
+        )
+
+        fakeBytesFlow.emit(garbageTransmitter)
         verify(exactly = 1) {
             rchmDissStateRepository.updateTransmitterModuleState(0x08)
         }
-        assertThat(manager.packetCheckSum).isEqualTo(0x11)
+
+        fakeBytesFlow.emit(garbageReceiver)
+        verify(exactly = 1) {
+            rchmDissStateRepository.updateReceiverModuleState( 0x3D, 0xBC.toByte(),)
+        }
+
+        fakeBytesFlow.emit(garbageSynthesizer)
+        verify(exactly = 1) {
+            rchmDissStateRepository.updateSynthesizerModuleState(0xA5.toByte(), 0x00, 0x20)
+        }
+
+        fakeBytesFlow.emit(garbageOutput)
+        verify(exactly = 1) {
+            rchmDissStateRepository.updateOutputModuleState(
+                byteArrayOf(0x07, 0x04, 0x17, 0x5, 0xBA.toByte())
+            )
+        }
     }
 
 }
