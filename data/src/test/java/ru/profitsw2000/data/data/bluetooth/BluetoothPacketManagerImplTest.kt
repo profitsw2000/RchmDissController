@@ -228,4 +228,139 @@ class BluetoothPacketManagerImplTest {
         verify{ rchmDissStateRepository wasNot Called }
     }
 
+    @Test
+    fun `получаем мусор и нормальный пакет передатчика, приходящие по частям - проверяем запуск функций`() = runTest(testDispatcher) {
+        val fakeBytesFlow = MutableSharedFlow<ByteArray>()
+        io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
+        manager.observeBluetoothDataBytesFlow()
+
+        val garbageTransmitter1 = byteArrayOf(
+            0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK,
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23,
+            PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18
+        )
+
+        fakeBytesFlow.emit(garbageTransmitter1)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val garbageTransmitter2 = byteArrayOf(
+            0xAD.toByte(), 0x99.toByte(), 0x89.toByte(),
+            PACKET_START_BYTE.toByte(), 0x05
+        )
+
+        fakeBytesFlow.emit(garbageTransmitter2)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val garbageTransmitter3 = byteArrayOf(
+            READ_FROM_TRANSMITTER_PACKET_ID.toByte(), 0x08, 0x11
+        )
+
+        fakeBytesFlow.emit(garbageTransmitter3)
+        verify(exactly = 1) {
+            rchmDissStateRepository.updateTransmitterModuleState(0x08)
+        }
+
+    }
+
+    @Test
+    fun `получаем мусор и нормальный пакет приёмника, приходящие по частям - проверяем запуск функций`() = runTest(testDispatcher) {
+        val fakeBytesFlow = MutableSharedFlow<ByteArray>()
+        io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
+        manager.observeBluetoothDataBytesFlow()
+
+        val receiver1 = byteArrayOf(
+            0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK,
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23, 0x5F
+        )
+
+        fakeBytesFlow.emit(receiver1)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val receiver2 = byteArrayOf(
+            PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18,
+            0xAD.toByte(), 0x99.toByte(), 0x89.toByte(),
+            PACKET_START_BYTE.toByte()
+        )
+
+        fakeBytesFlow.emit(receiver2)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val receiver3 = byteArrayOf(
+            0x06, READ_FROM_RECEIVER_PACKET_ID.toByte(), 0xBC.toByte(), 0x3D, 0x05
+        )
+
+        fakeBytesFlow.emit(receiver3)
+        verify(exactly = 1) {
+            rchmDissStateRepository.updateReceiverModuleState(0x3D, 0xBC.toByte())
+        }
+    }
+
+    @Test
+    fun `получаем мусор и нормальный пакет синтезатора, приходящие по частям - проверяем запуск функций`() = runTest(testDispatcher) {
+        val fakeBytesFlow = MutableSharedFlow<ByteArray>()
+        io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
+        manager.observeBluetoothDataBytesFlow()
+
+        val garbageSynthesizer1 = byteArrayOf(
+            0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK
+        )
+
+        fakeBytesFlow.emit(garbageSynthesizer1)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val garbageSynthesizer2 = byteArrayOf(
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23,
+            PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18
+        )
+
+        fakeBytesFlow.emit(garbageSynthesizer2)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val garbageSynthesizer3 = byteArrayOf(
+            0xAD.toByte(), 0x99.toByte(), 0x89.toByte(),
+            PACKET_START_BYTE.toByte(), 0x07
+        )
+
+        fakeBytesFlow.emit(garbageSynthesizer3)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val garbageSynthesizer4 = byteArrayOf(
+            READ_FROM_SYNTHESIZER_PACKET_ID.toByte(), 0x20, 0x00, 0xA5.toByte(), 0xD1.toByte()
+        )
+
+        fakeBytesFlow.emit(garbageSynthesizer4)
+        verify(exactly = 1) {
+            rchmDissStateRepository.updateSynthesizerModuleState(0xA5.toByte(), 0x00, 0x20)
+        }
+    }
+
+    @Test
+    fun `получаем мусор и нормальный пакет контроля выводов, приходящие по частям - проверяем запуск функций`() = runTest(testDispatcher) {
+        val fakeBytesFlow = MutableSharedFlow<ByteArray>()
+        io.mockk.every { bluetoothRepository.bluetoothBytesDataFlow } returns fakeBytesFlow
+        manager.observeBluetoothDataBytesFlow()
+
+        val garbageOutput1 = byteArrayOf(
+            0xDF.toByte(), 0xAD.toByte(), 0x00, 0x15, TRANSMITTER_CONTROL_BIT_MASK,
+            WRITE_TO_TRANSMITTER_PACKET_ID.toByte(), 0x78, 0x23,
+            PACKET_START_BYTE.toByte(), 0x33, 0xFF.toByte(), 0x54, 0x18
+        )
+
+        fakeBytesFlow.emit(garbageOutput1)
+        verify { rchmDissStateRepository wasNot Called }
+
+        val garbageOutput2 = byteArrayOf(
+            0xAD.toByte(), 0x99.toByte(), 0x89.toByte(),
+            PACKET_START_BYTE.toByte(), 0x09,
+            RCHM_DISS_OUTPUT_CONTROL_PACKET_ID.toByte(),
+            0x07, 0x04, 0x17, 0x5, 0xBA.toByte(), 0xF1.toByte()
+        )
+
+        fakeBytesFlow.emit(garbageOutput2)
+        verify(exactly = 1) {
+            rchmDissStateRepository.updateOutputModuleState(
+                byteArrayOf(0x07, 0x04, 0x17, 0x5, 0xBA.toByte())
+            )
+        }
+    }
 }
