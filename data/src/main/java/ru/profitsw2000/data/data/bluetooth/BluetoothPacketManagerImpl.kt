@@ -1,5 +1,6 @@
 package ru.profitsw2000.data.data.bluetooth
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,10 +34,11 @@ import ru.profitsw2000.data.domain.state.RchmDissStateRepository
 
 class BluetoothPacketManagerImpl(
     private val bluetoothRepository: BluetoothRepository,
-    private val rchmDissStateRepository: RchmDissStateRepository
+    private val rchmDissStateRepository: RchmDissStateRepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : BluetoothPacketManager {
 
-    private val coroutineScope = CoroutineScope(Job() + Dispatchers.Default)
+    private val coroutineScope = CoroutineScope(Job() + defaultDispatcher)
 
     override val BUFFER_SIZE: Int = 16
     override val packetBuffer: MutableList<Byte> = arrayListOf()
@@ -87,7 +89,7 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun getPacketData(byte: Byte) {
-        if (packetState < packetSize) {
+        if (packetState < (packetSize - 1)) {
             packetBuffer.add(byte)
             packetCheckSum += byte.toUnsignedInteger()
             packetState++
