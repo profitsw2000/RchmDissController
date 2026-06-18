@@ -22,6 +22,7 @@
     <string name="transmitter_switch_check_box_text">ВКЛ_ПРД</string>
     <string name="receiver_test_signal_switch_check_box_text">Вкл. пилот-сигнал</string>
     <string name="lfm_ext_trig_switch_check_box_text">Внешний запуск ЛЧМ</string>
+    <string name="symmetric_lfm_check_box_text">Симметричная</string>
     <string name="send_button_text">ОТПРАВИТЬ</string>
     <string name="attenuator_settings_title_text">Аттенюатор</string>
     <string name="receiver_lock_settings_title_text">Запирание входа приёмника</string>
@@ -52,4 +53,19 @@
     <string name="yes_button_text">Да</string>
     <string name="no_button_text">Нет</string>
     <string name="device_selection_dialog_title">Устройства</string>
+    <string name="packet_send_successfull_status_text">Успешная отправка</string>
+    <string name="response_packet_timeout_error">Ошибка приёма ответного байта данных</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="empty_input_error_text">Пустое поле</string>
+    <string name="register_calculation_error_text">Не удалось получить значения регистров</string>
+    <string name="low_freq_under_input_error_text">Не менее 13250 МГц </string>
+    <string name="low_freq_above_input_error_text">Не более 13390 МГц </string>
+    <string name="high_freq_under_input_error_text">Не менее 13260 МГц </string>
+    <string name="high_freq_above_input_error_text">Не более 13400 МГц </string>
+    <string name="low_freq_higher_than_high_freq_input_error_text">Нижнее значение не более верхнего </string>
+    <string name="modulation_period_above_input_error_text">Не более 100 мс</string>
+    <string name="modulation_period_under_input_error_text">Не менее 0,2 мс</string>
+    <string name="synthesizer_not_active_icon_label_text">Н/А</string>
+    <string name="synthesizer_generation__absent_warning_text">Нет генерации сигнала</string>
+
 </resources>

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_coordinator_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="@dimen/root_layout_standart_padding"
     tools:context=".presentation.view.bottomsheet.TransmitterBottomSheetDialogFragment">
 
@@ -94,10 +94,23 @@
             style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:text="@string/send_button_text"
             app:layout_constraintTop_toBottomOf="@+id/switch_transmitter_on_check_box" />
+
+        <TextView
+            android:id="@+id/updating_status_result_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="@string/packet_send_successfull_status_text"
+            android:layout_marginTop="@dimen/lfm_parameter_text_margin_start"
+            app:layout_constraintTop_toBottomOf="@+id/transmitter_params_send_button"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
