@@ -15,7 +15,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.io.mockk)
-    testImplementation(libs.truth.test)
+    testImplementation("com.google.truth:truth:1.4.5")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

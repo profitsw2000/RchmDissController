@@ -116,8 +116,7 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun getWriteToTransmitterPacket(dataByte: Byte): ByteArray {
-        val checkSum = ((PACKET_START_BYTE +
-                WRITE_TO_TRANSMITTER_PACKET_SIZE +
+        val checkSum = ((WRITE_TO_TRANSMITTER_PACKET_SIZE +
                 WRITE_TO_TRANSMITTER_PACKET_ID +
                 dataByte.toUnsignedInteger()) and 0xFF).toByte()
 
@@ -217,8 +216,7 @@ class BluetoothPacketManagerImpl(
     }
 
     private fun getWriteByteArrayPacket(packetSize: Int, packetId: Int, byteArray: ByteArray): ByteArray {
-        val checkSum = ((PACKET_START_BYTE +
-                packetSize +
+        val checkSum = ((packetSize +
                 packetId +
                 getByteArrayCheckSum(byteArray)) and 0xFF).toByte()
 

@@ -363,4 +363,210 @@ class BluetoothPacketManagerImplTest {
             )
         }
     }
+
+    @Test
+    fun `проверка формирования пакета передатчика`() {
+        val dataByte: Byte = 0x08
+        val expectedCheckSum = 0x0E.toByte()
+        val result = manager.getWriteToTransmitterPacket(dataByte)
+
+        assertThat(result.size).isEqualTo(5)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x05, 0x01, dataByte, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета передатчика с нулевым байтом`() {
+        val dataByte: Byte = 0x00
+        val expectedCheckSum = 0x06.toByte()
+        val result = manager.getWriteToTransmitterPacket(dataByte)
+
+        assertThat(result.size).isEqualTo(5)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x05, 0x01, dataByte, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета передатчика с максимальным байтом`() {
+        val dataByte: Byte = 0xFF.toByte()
+        val expectedCheckSum = 0x05.toByte()
+        val result = manager.getWriteToTransmitterPacket(dataByte)
+
+        assertThat(result.size).isEqualTo(5)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x05, 0x01, dataByte, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета приёмника с минимальным значением байтов`() {
+        val inputData: ByteArray = byteArrayOf(0x3C.toByte(), 0x00)
+        val expectedSize = 0x06
+        val expectedCheckSum = 0x45.toByte()
+        val result = manager.getWriteToReceiverPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x06, 0x03, 0x3C.toByte(), 0x00, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета приёмника с максимальным значением байтов`() {
+        val inputData: ByteArray = byteArrayOf(0xFF.toByte(), 0xE1.toByte())
+        val expectedSize = 0x06
+        val expectedCheckSum = 0xE9.toByte()
+        val result = manager.getWriteToReceiverPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x06, 0x03, 0xFF.toByte(), 0xE1.toByte(), expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета синтезатора с минимальным значением байтов`() {
+        val inputData: ByteArray = byteArrayOf(0x00, 0x00, 0x01)
+        val expectedSize = 0x07
+        val expectedCheckSum = 0x0A.toByte()
+        val result = manager.getWriteToSynthesizerPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x07, 0x02, 0x00, 0x00, 0x01, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета синтезатора с максимальным значением байтов`() {
+        val inputData: ByteArray = byteArrayOf(0x3F, 0xA0.toByte(), 0x7C)
+        val expectedSize = 0x07
+        val expectedCheckSum = 0x64.toByte()
+        val result = manager.getWriteToSynthesizerPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x07, 0x02, 0x3F, 0xA0.toByte(), 0x7C, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета установки выводов с минимальным значением байтов`() {
+        val inputData: ByteArray = byteArrayOf(0x00, 0x00)
+        val expectedSize = 0x06
+        val expectedCheckSum = 0x0E.toByte()
+        val result = manager.getRchmDissOutputSetPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x06, 0x08, 0x00, 0x00, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета установки выводов с максимальным значением байтов`() {
+        val inputData: ByteArray = byteArrayOf(0xC3.toByte(), 0x53)
+        val expectedSize = 0x06
+        val expectedCheckSum = 0x24.toByte()
+        val result = manager.getRchmDissOutputSetPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x06, 0x08, 0xC3.toByte(), 0x53, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета записи в память по нулевому адресу`() {
+        val inputData: ByteArray = byteArrayOf(0x00, 0x00, 0x33)
+        val expectedSize = 0x07
+        val expectedCheckSum = 0x43.toByte()
+        val result = manager.getWriteToRchmDissEepromPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x07, 0x09, 0x00, 0x00, 0x33, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета записи в память по максимальному адресу`() {
+        val inputData: ByteArray = byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0x33)
+        val expectedSize = 0x07
+        val expectedCheckSum = 0x41.toByte()
+        val result = manager.getWriteToRchmDissEepromPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x07, 0x09, 0xFF.toByte(), 0xFF.toByte(), 0x33, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета чтения из памяти по нулевому адресу`() {
+        val inputData: ByteArray = byteArrayOf(0x00, 0x00)
+        val expectedSize = 0x06
+        val expectedCheckSum = 0x10.toByte()
+        val result = manager.getReadFromRchmDissEepromPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x06, 0x0A, 0x00, 0x00, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета чтения из памяти по максимальному адресу`() {
+        val inputData: ByteArray = byteArrayOf(0x7F.toByte(), 0xFF.toByte())
+        val expectedSize = 0x06
+        val expectedCheckSum = 0x8E.toByte()
+        val result = manager.getReadFromRchmDissEepromPacket(inputData)
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x06, 0x0A, 0x7F.toByte(), 0xFF.toByte(), expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
+
+    @Test
+    fun `проверка формирования пакета чтения температуры модуля`() {
+        val expectedSize = 0x04
+        val expectedCheckSum = 0x10.toByte()
+        val result = manager.getReadRchmDissInnerTemperaturePacket()
+
+        assertThat(result.size).isEqualTo(expectedSize)
+
+        val expectedPacket = byteArrayOf(
+            0x53, 0x04, 0x0C, expectedCheckSum
+        )
+        assertThat(result).isEqualTo(expectedPacket)
+    }
 }
