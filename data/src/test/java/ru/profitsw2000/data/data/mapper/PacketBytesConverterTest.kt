@@ -252,16 +252,93 @@ class PacketBytesConverterTest {
         assertThat(result).isEqualTo(expectedState)
     }
 
-/*    fun testReceiverBytes() {
+    @Test
+    fun `тест функции получения температуры - +125 градусов`() {
+        val lowByte: Byte = 0xD0.toByte()
+        val highByte: Byte = 0x07.toByte()
+        val expectedResult = 125.0
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
     }
 
-    fun testSynthesizerBytes() {
+    @Test
+    fun `тест функции получения температуры - +85 градусов`() {
+        val lowByte: Byte = 0x50.toByte()
+        val highByte: Byte = 0x05.toByte()
+        val expectedResult = 85.0
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
     }
 
-    fun testRcdOutputBytes() {
+    @Test
+    fun `тест функции получения температуры - +0,5 градусов`() {
+        val lowByte: Byte = 0x08.toByte()
+        val highByte: Byte = 0x00.toByte()
+        val expectedResult = 0.5
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
     }
 
-    fun testRcdTemperatureBytes() {
-    }*/
+    @Test
+    fun `тест функции получения температуры - +10,125 градусов`() {
+        val lowByte: Byte = 0xA2.toByte()
+        val highByte: Byte = 0x00.toByte()
+        val expectedResult = 10.125
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
 
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `тест функции получения температуры - 0 градусов`() {
+        val lowByte: Byte = 0x00.toByte()
+        val highByte: Byte = 0x00.toByte()
+        val expectedResult = 0.0
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `тест функции получения температуры - -0,5 градусов`() {
+        val lowByte: Byte = 0xF8.toByte()
+        val highByte: Byte = 0xFF.toByte()
+        val expectedResult = -0.5
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `тест функции получения температуры - -10,125 градусов`() {
+        val lowByte: Byte = 0x5E.toByte()
+        val highByte: Byte = 0xFF.toByte()
+        val expectedResult = -10.125
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `тест функции получения температуры - -25,0625 градусов`() {
+        val lowByte: Byte = 0x6F.toByte()
+        val highByte: Byte = 0xFE.toByte()
+        val expectedResult = -25.0625
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `тест функции получения температуры - -55 градусов`() {
+        val lowByte: Byte = 0x90.toByte()
+        val highByte: Byte = 0xFC.toByte()
+        val expectedResult = -55.0
+        val result = packetBytesConverter.rcdTemperatureBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
 }
