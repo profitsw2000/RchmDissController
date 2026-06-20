@@ -3,6 +3,8 @@ package ru.profitsw2000.data.data.mapper
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import ru.profitsw2000.data.mapper.PacketBytesConverter
+import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 
 class PacketBytesConverterTest {
@@ -70,6 +72,184 @@ class PacketBytesConverterTest {
         val result = packetBytesConverter.transmitterByte(channelByte)
 
         assertThat(result).isEqualTo(expectedChannelState)
+    }
+
+    @Test
+    fun `тест приёмника включён канал 1, заперт канал 1, включены секции 8 и 16 дБ, включён пилот-сигнал`() {
+        val lowByte: Byte = 0x3D
+        val highByte: Byte = 0x80.toByte()
+        val expectedState =
+            ReceiverModuleState(
+                enabledChannelNumber = 1,
+                testSignalIsEnabled = true,
+                lockedInputChannels = booleanArrayOf(true, false, false, false, false),
+                inputAttenuationValue = 24,
+                inputAttenuatorsCode = 0xC0
+            )
+        val result = packetBytesConverter.receiverBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест приёмника включён канал 3, заперт канал 1,2,3, включены секции 2 и 32 дБ, включён пилот-сигнал`() {
+        val lowByte: Byte = 0x3D
+        val highByte: Byte = 0x80.toByte()
+        val expectedState =
+            ReceiverModuleState(
+                enabledChannelNumber = 3,
+                testSignalIsEnabled = true,
+                lockedInputChannels = booleanArrayOf(true, true, true, false, false),
+                inputAttenuationValue = 34,
+                inputAttenuatorsCode = 0xC0
+            )
+        val result = packetBytesConverter.receiverBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест приёмника включён канал 2, заперт канал 3,5, включена секция 4 дБ, выключен пилот-сигнал`() {
+        val lowByte: Byte = 0x3D
+        val highByte: Byte = 0x80.toByte()
+        val expectedState =
+            ReceiverModuleState(
+                enabledChannelNumber = 2,
+                testSignalIsEnabled = false,
+                lockedInputChannels = booleanArrayOf(false, false, true, false, true),
+                inputAttenuationValue = 4,
+                inputAttenuatorsCode = 0xC0
+            )
+        val result = packetBytesConverter.receiverBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест приёмника включён канал 5, заперт канал 4,5, включены секции 2,8,16 дБ, выключен пилот-сигнал`() {
+        val lowByte: Byte = 0x3D
+        val highByte: Byte = 0x80.toByte()
+        val expectedState =
+            ReceiverModuleState(
+                enabledChannelNumber = 5,
+                testSignalIsEnabled = false,
+                lockedInputChannels = booleanArrayOf(false, false, false, true, true),
+                inputAttenuationValue = 26,
+                inputAttenuatorsCode = 0x35
+            )
+        val result = packetBytesConverter.receiverBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест приёмника все каналы выключены, все заперты, включены все секции аттенюатора, выключен пилот-сигнал`() {
+        val lowByte: Byte = 0x3D
+        val highByte: Byte = 0x80.toByte()
+        val expectedState =
+            ReceiverModuleState(
+                enabledChannelNumber = 0,
+                testSignalIsEnabled = false,
+                lockedInputChannels = booleanArrayOf(true, true, true, true, true),
+                inputAttenuationValue = 62,
+                inputAttenuatorsCode = 0x35
+            )
+        val result = packetBytesConverter.receiverBytes(lowByte, highByte)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест синтезатора - 0x404E20`() {
+        val lowByte: Byte = 0x20
+        val middleByte: Byte = 0x4E.toByte()
+        val highByte: Byte = 0x40.toByte()
+        val expectedState = 0x404E20
+        val result = packetBytesConverter.synthesizerBytes(lowByte, middleByte, highByte)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест синтезатора - неверный 0x840608`() {
+        val lowByte: Byte = 0x84.toByte()
+        val middleByte: Byte = 0x06.toByte()
+        val highByte: Byte = 0x08.toByte()
+        val expectedState = 0x840608
+        val result = packetBytesConverter.synthesizerBytes(lowByte, middleByte, highByte)
+
+        assertThat(result).isNotEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест синтезатора - 0x840608`() {
+        val lowByte: Byte = 0x08.toByte()
+        val middleByte: Byte = 0x06.toByte()
+        val highByte: Byte = 0x84.toByte()
+        val expectedState = 0x840608
+        val result = packetBytesConverter.synthesizerBytes(lowByte, middleByte, highByte)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест контроля выводов - выключен ПРД, выключен внешний запуск ЛЧМ, OUT_ФАПЧ - 0, напряжение детектора 3,66 В, напряжение ВИП - 7,32 В`() {
+        val incomingBytes: ByteArray = byteArrayOf(0x00, 0x02, 0xEE.toByte(), 0x05, 0xDC.toByte())
+        val expectedState = OutputModuleState(
+            lfmExtTriggerIsOn = false,
+            transmitterIsOn = false,
+            pllIsLocked = false,
+            transmitterDetectorVoltage = 3.66,
+            secondaryPowerSourceVoltage = 7.32
+        )
+        val result = packetBytesConverter.rcdOutputBytes(incomingBytes)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест контроля выводов - включен ПРД, выключен внешний запуск ЛЧМ, OUT_ФАПЧ - 0, напряжение детектора 1,22 В, напряжение ВИП - 4,88 В`() {
+        val incomingBytes: ByteArray = byteArrayOf(0x02, 0x00, 0xFA.toByte(), 0x03, 0xE8.toByte())
+        val expectedState = OutputModuleState(
+            lfmExtTriggerIsOn = false,
+            transmitterIsOn = true,
+            pllIsLocked = false,
+            transmitterDetectorVoltage = 1.22,
+            secondaryPowerSourceVoltage = 4.88
+        )
+        val result = packetBytesConverter.rcdOutputBytes(incomingBytes)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест контроля выводов - включен ПРД, выключен внешний запуск ЛЧМ, OUT_ФАПЧ - 1, напряжение детектора 0 В, напряжение ВИП - 0 В`() {
+        val incomingBytes: ByteArray = byteArrayOf(0x06, 0x00, 0x00, 0x00, 0x00)
+        val expectedState = OutputModuleState(
+            lfmExtTriggerIsOn = false,
+            transmitterIsOn = true,
+            pllIsLocked = true,
+            transmitterDetectorVoltage = 0.00,
+            secondaryPowerSourceVoltage = 0.00
+        )
+        val result = packetBytesConverter.rcdOutputBytes(incomingBytes)
+
+        assertThat(result).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun `тест контроля выводов - включен ПРД, включен внешний запуск ЛЧМ, OUT_ФАПЧ - 1, напряжение детектора 9,76 В, напряжение ВИП - 9,76 В`() {
+        val incomingBytes: ByteArray = byteArrayOf(0x07, 0x07, 0xD0.toByte(), 0x07, 0xD0.toByte())
+        val expectedState = OutputModuleState(
+            lfmExtTriggerIsOn = true,
+            transmitterIsOn = true,
+            pllIsLocked = true,
+            transmitterDetectorVoltage = 9.76,
+            secondaryPowerSourceVoltage = 9.76
+        )
+        val result = packetBytesConverter.rcdOutputBytes(incomingBytes)
+
+        assertThat(result).isEqualTo(expectedState)
     }
 
 /*    fun testReceiverBytes() {

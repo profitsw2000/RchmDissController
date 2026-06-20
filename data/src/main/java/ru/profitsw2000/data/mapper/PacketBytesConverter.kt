@@ -30,6 +30,7 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import kotlin.experimental.and
+import kotlin.math.roundToInt
 
 class PacketBytesConverter {
 
@@ -121,7 +122,7 @@ class PacketBytesConverter {
     }
 
     private fun transmitterIsOn(byte: Byte): Boolean {
-        return (byte and TRANSMITTER_CONTROL_BIT_MASK).toInt() == 0
+        return (byte and TRANSMITTER_CONTROL_BIT_MASK).toInt() != 0
     }
 
     private fun pllIsLocked(byte: Byte): Boolean {
@@ -129,11 +130,11 @@ class PacketBytesConverter {
     }
 
     private fun getVoltageValue(highByte: Byte, lowByte: Byte): Double {
-        val adcVoltageCode = (highByte.toInt().shl(8) and
-                lowByte.toInt()) and ADC_RESULT_MASK
+        val adcVoltageCode = (highByte.toInt().shl(8) or
+                lowByte.toUnsignedInteger()) and ADC_RESULT_MASK
 
         return if ((adcVoltageCode and ADC_NEGATIVE_BIT_MASK) == 0)
-            adcVoltageCode*ADC_VOLTAGE_RESOLUTION_VALUE
-        else (adcVoltageCode.inv())*ADC_VOLTAGE_RESOLUTION_VALUE
+            (adcVoltageCode*ADC_VOLTAGE_RESOLUTION_VALUE*100).roundToInt()/100.0
+        else ((adcVoltageCode.inv())*ADC_VOLTAGE_RESOLUTION_VALUE*100).roundToInt()/100.0
     }
 }
