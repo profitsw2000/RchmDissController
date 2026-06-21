@@ -1,4 +1,4 @@
-package ru.profitsw2000.data.data.mapper
+package ru.profitsw2000.data.mapper
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
