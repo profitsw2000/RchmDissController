@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 
@@ -141,6 +142,55 @@ class RchmDissStateRepositoryImplTest {
                         lockedInputChannels = booleanArrayOf(true, true, true, true, true),
                         inputAttenuationValue = 0,
                         inputAttenuatorsCode = 0x35
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `тест синтезатора несимметричная ЛЧМ`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+
+        repository.lastPacket.test {
+            repository.updateSynthesizerModuleState(0x00, 0x00, 0x70)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0x01, 0x00, 0x00)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0xA5.toByte(), 0x00, 0x20)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0x20, 0x4E.toByte(), 0x40)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0x00, 0x7D, 0x60)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0x08, 0x06, 0x84.toByte())
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0x02, 0x00, 0xA0.toByte())
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0x01, 0x00, 0xC0.toByte())
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0xF0.toByte(), 0x00, 0x10)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0xF9.toByte(), 0xA0.toByte(), 0x3F.toByte())
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+            repository.updateSynthesizerModuleState(0x04.toByte(), 0x00, 0x50)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.SynthesizerStateInputPacket)
+
+            assertThat(repository.rchmDissState.value.synthesizerModuleState)
+                .isEqualTo(
+                    SynthesizerModuleState().copy(
+                        refRegister = listOf(0x01, 0x01),
+                        intRegister = listOf(0x2000A5, 0x20000C),
+                        fracRegister = listOf(0x404E20, 0x400000),
+                        modRegister = listOf(0x607D00, 0x600000),
+                        ctr1Register = listOf(0x840608, 0x800000),
+                        ctr2Register = listOf(0xA00002, 0xA0003F),
+                        ctr3Register = listOf(0xC00001, 0xC00015),
+                        lfm1Register = listOf(0x1000F0, 0x100000),
+                        lfm2Register = listOf(0x3FA0F9, 0x300000),
+                        lfm3Register = listOf(0x500004, 0x500000),
+                        prwRegister = 0x700000,
+                        praRegister = 0x900000
                     )
                 )
         }
