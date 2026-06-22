@@ -6,6 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
@@ -269,6 +270,98 @@ class RchmDissStateRepositoryImplTest {
                         lfm3Register = listOf(0x500204, 0x500006),
                         prwRegister = 0x704000,
                         praRegister = 0x900000
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `контроль выводов - внешний запуск ЛЧМ отключён, включ передатчик, нет захвата ФАПЧ, напр детектора 2,44В, напр ВИП 7,32В`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+
+        repository.lastPacket.test {
+            repository.updateOutputModuleState(
+                byteArrayOf(0x02, 0x01, 0xF4.toByte(), 0x05, 0xDC.toByte())
+            )
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdOutputControlInputPacket)
+            assertThat(repository.rchmDissState.value.outputModuleState)
+                .isEqualTo(
+                    OutputModuleState(
+                        lfmExtTriggerIsOn = false,
+                        transmitterIsOn = true,
+                        pllIsLocked = false,
+                        transmitterDetectorVoltage = 2.44,
+                        secondaryPowerSourceVoltage = 7.32
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `контроль выводов - внешний запуск ЛЧМ включён, включ передатчик, захват ФАПЧ, напр детектора 1,22В, напр ВИП 7,32В`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+
+        repository.lastPacket.test {
+            repository.updateOutputModuleState(
+                byteArrayOf(0x02, 0x00, 0xFA.toByte(), 0x05, 0xDC.toByte())
+            )
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdOutputControlInputPacket)
+            assertThat(repository.rchmDissState.value.outputModuleState)
+                .isEqualTo(
+                    OutputModuleState(
+                        lfmExtTriggerIsOn = false,
+                        transmitterIsOn = true,
+                        pllIsLocked = false,
+                        transmitterDetectorVoltage = 1.22,
+                        secondaryPowerSourceVoltage = 7.32
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `контроль выводов - внешний запуск ЛЧМ отключён, выключ передатчик, нет захвата ФАПЧ, напр детектора 7,32В, напр ВИП 1,44В`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+
+        repository.lastPacket.test {
+            repository.updateOutputModuleState(
+                byteArrayOf(0x00, 0x05, 0xDC.toByte(), 0x01, 0xF4.toByte())
+            )
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdOutputControlInputPacket)
+            assertThat(repository.rchmDissState.value.outputModuleState)
+                .isEqualTo(
+                    OutputModuleState(
+                        lfmExtTriggerIsOn = false,
+                        transmitterIsOn = false,
+                        pllIsLocked = false,
+                        transmitterDetectorVoltage = 7.32,
+                        secondaryPowerSourceVoltage = 2.44
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `контроль выводов - внешний запуск ЛЧМ включён, выключ передатчик, захват ФАПЧ, напр детектора 4,88В, напр ВИП 4,88В`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+
+        repository.lastPacket.test {
+            repository.updateOutputModuleState(
+                byteArrayOf(0x05, 0x03, 0xE8.toByte(), 0x03, 0xE8.toByte())
+            )
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdOutputControlInputPacket)
+            assertThat(repository.rchmDissState.value.outputModuleState)
+                .isEqualTo(
+                    OutputModuleState(
+                        lfmExtTriggerIsOn = true,
+                        transmitterIsOn = false,
+                        pllIsLocked = true,
+                        transmitterDetectorVoltage = 4.88,
+                        secondaryPowerSourceVoltage = 4.88
                     )
                 )
         }
