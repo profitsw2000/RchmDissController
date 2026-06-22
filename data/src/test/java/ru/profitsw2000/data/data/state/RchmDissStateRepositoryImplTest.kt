@@ -366,4 +366,91 @@ class RchmDissStateRepositoryImplTest {
                 )
         }
     }
+
+    @Test
+    fun `тест обновления температуры - +85 градусов`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+        val lowByte: Byte = 0x50.toByte()
+        val highByte: Byte = 0x05.toByte()
+        val expectedResult = 85.0
+
+        repository.lastPacket.test {
+            repository.writeModuleTemperature(lowByte, highByte)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdTemperatureInputPacket)
+            assertThat(repository.rchmDissState.value.innerModuleTemperature).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `тест обновления температуры - -10,125 градусов`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+        val lowByte: Byte = 0x5E.toByte()
+        val highByte: Byte = 0xFF.toByte()
+        val expectedResult = -10.125
+
+        repository.lastPacket.test {
+            repository.writeModuleTemperature(lowByte, highByte)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdTemperatureInputPacket)
+            assertThat(repository.rchmDissState.value.innerModuleTemperature).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `тест обновления температуры - -0,5 градусов`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+        val lowByte: Byte = 0xF8.toByte()
+        val highByte: Byte = 0xFF.toByte()
+        val expectedResult = -0.5
+
+        repository.lastPacket.test {
+            repository.writeModuleTemperature(lowByte, highByte)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdTemperatureInputPacket)
+            assertThat(repository.rchmDissState.value.innerModuleTemperature).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `тест обновления байта данных из памяти модуля - 0xAA`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+        val dataByte: Byte = 0xAA.toByte()
+        val expectedByte = 0xAA.toByte()
+
+        repository.lastPacket.test {
+            repository.writeModuleMemoryByte(dataByte)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdMemoryReadInputPacket)
+            assertThat(repository.rchmDissState.value.readMemoryValue).isEqualTo(expectedByte)
+        }
+    }
+
+    @Test
+    fun `тест обновления байта данных из памяти модуля - 0x00`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+        val dataByte: Byte = 0x00.toByte()
+        val expectedByte = 0x00.toByte()
+
+        repository.lastPacket.test {
+            repository.writeModuleMemoryByte(dataByte)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdMemoryReadInputPacket)
+            assertThat(repository.rchmDissState.value.readMemoryValue).isEqualTo(expectedByte)
+        }
+    }
+
+    @Test
+    fun `тест обновления байта данных из памяти модуля - 0xFF`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repository = RchmDissStateRepositoryImpl(defaultDispatcher = testDispatcher)
+        val dataByte: Byte = 0xFF.toByte()
+        val expectedByte = 0xFF.toByte()
+
+        repository.lastPacket.test {
+            repository.writeModuleMemoryByte(dataByte)
+            assertThat(awaitItem()).isEqualTo(RcdInputPacketType.RcdMemoryReadInputPacket)
+            assertThat(repository.rchmDissState.value.readMemoryValue).isEqualTo(expectedByte)
+        }
+    }
 }
