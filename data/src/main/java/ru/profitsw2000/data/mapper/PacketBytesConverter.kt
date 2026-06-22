@@ -93,11 +93,11 @@ class PacketBytesConverter {
     private fun getLockedRxChannelNumber(command: Int): BooleanArray {
         val rxState = command.shr(1) and RX_CHANNEL_MASK
         return booleanArrayOf(
-            rxState and 0x1 != 0,
-            rxState and 0x2 != 0,
-            rxState and 0x4 != 0,
+            rxState and 0x10 != 0,
             rxState and 0x8 != 0,
-            rxState and 0x10 != 0
+            rxState and 0x4 != 0,
+            rxState and 0x2 != 0,
+            rxState and 0x1 != 0
         )
     }
 

@@ -74,89 +74,94 @@ class PacketBytesConverterTest {
         assertThat(result).isEqualTo(expectedChannelState)
     }
 
+    //1
     @Test
     fun `тест приёмника включён канал 1, заперт канал 1, включены секции 8 и 16 дБ, включён пилот-сигнал`() {
-        val lowByte: Byte = 0x3D
-        val highByte: Byte = 0x80.toByte()
+        val lowByte: Byte = 0xA0.toByte()
+        val highByte: Byte = 0xBD.toByte()
         val expectedState =
             ReceiverModuleState(
                 enabledChannelNumber = 1,
                 testSignalIsEnabled = true,
                 lockedInputChannels = booleanArrayOf(true, false, false, false, false),
                 inputAttenuationValue = 24,
-                inputAttenuatorsCode = 0xC0
+                inputAttenuatorsCode = 0x180
             )
         val result = packetBytesConverter.receiverBytes(lowByte, highByte)
 
-        assertThat(result).isEqualTo(expectedState)
+        assertThat(result.toString()).isEqualTo(expectedState.toString())
     }
 
+    //2
     @Test
     fun `тест приёмника включён канал 3, заперт канал 1,2,3, включены секции 2 и 32 дБ, включён пилот-сигнал`() {
-        val lowByte: Byte = 0x3D
-        val highByte: Byte = 0x80.toByte()
+        val lowByte: Byte = 0x78
+        val highByte: Byte = 0xEE.toByte()
         val expectedState =
             ReceiverModuleState(
                 enabledChannelNumber = 3,
                 testSignalIsEnabled = true,
                 lockedInputChannels = booleanArrayOf(true, true, true, false, false),
                 inputAttenuationValue = 34,
-                inputAttenuatorsCode = 0xC0
+                inputAttenuatorsCode = 0x240
             )
         val result = packetBytesConverter.receiverBytes(lowByte, highByte)
 
-        assertThat(result).isEqualTo(expectedState)
+        assertThat(result.toString()).isEqualTo(expectedState.toString())
     }
 
+    //3
     @Test
     fun `тест приёмника включён канал 2, заперт канал 3,5, включена секция 4 дБ, выключен пилот-сигнал`() {
-        val lowByte: Byte = 0x3D
-        val highByte: Byte = 0x80.toByte()
+        val lowByte: Byte = 0x0B
+        val highByte: Byte = 0x5C.toByte()
         val expectedState =
             ReceiverModuleState(
                 enabledChannelNumber = 2,
                 testSignalIsEnabled = false,
                 lockedInputChannels = booleanArrayOf(false, false, true, false, true),
                 inputAttenuationValue = 4,
-                inputAttenuatorsCode = 0xC0
+                inputAttenuatorsCode = 0x1
             )
         val result = packetBytesConverter.receiverBytes(lowByte, highByte)
 
-        assertThat(result).isEqualTo(expectedState)
+        assertThat(result.toString()).isEqualTo(expectedState.toString())
     }
 
+    //4
     @Test
     fun `тест приёмника включён канал 5, заперт канал 4,5, включены секции 2,8,16 дБ, выключен пилот-сигнал`() {
-        val lowByte: Byte = 0x3D
-        val highByte: Byte = 0x80.toByte()
+        val lowByte: Byte = 0xC6.toByte()
+        val highByte: Byte = 0x79.toByte()
         val expectedState =
             ReceiverModuleState(
                 enabledChannelNumber = 5,
                 testSignalIsEnabled = false,
                 lockedInputChannels = booleanArrayOf(false, false, false, true, true),
                 inputAttenuationValue = 26,
-                inputAttenuatorsCode = 0x35
+                inputAttenuatorsCode = 0x1C0
             )
         val result = packetBytesConverter.receiverBytes(lowByte, highByte)
 
-        assertThat(result).isEqualTo(expectedState)
+        assertThat(result.toString()).isEqualTo(expectedState.toString())
     }
 
+    //5
     @Test
     fun `тест приёмника все каналы выключены, все заперты, включены все секции аттенюатора, выключен пилот-сигнал`() {
-        val lowByte: Byte = 0x3D
-        val highByte: Byte = 0x80.toByte()
+        val lowByte: Byte = 0xFF.toByte()
+        val highByte: Byte = 0x7F.toByte()
         val expectedState =
             ReceiverModuleState(
                 enabledChannelNumber = 0,
                 testSignalIsEnabled = false,
                 lockedInputChannels = booleanArrayOf(true, true, true, true, true),
                 inputAttenuationValue = 62,
-                inputAttenuatorsCode = 0x35
+                inputAttenuatorsCode = 0x3C1
             )
         val result = packetBytesConverter.receiverBytes(lowByte, highByte)
 
-        assertThat(result).isEqualTo(expectedState)
+        assertThat(result.toString()).isEqualTo(expectedState.toString())
     }
 
     @Test
