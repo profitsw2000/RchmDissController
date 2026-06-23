@@ -397,4 +397,96 @@ class PLLRegisters1208PL1URepositoryImplTest {
 
         assertThat(result).isEqualTo(expectedRegisterList)
     }
+
+    @Test
+    fun `тест вычисления регистров НГ - 13250 МГц`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getCwRegisters(13_250_000_000)
+        val expectedRegisterList = listOf(
+            0x700000,
+            0x000010,
+            0x200A5A,
+            0x4001F4,
+            0x6001F4,
+            0x890689,
+            0x890688,
+            0xA00005,
+            0xC00001,
+            0x100000,
+            0x300000,
+            0x500000,
+            0x900000
+        )
+
+        assertThat(result).isEqualTo(expectedRegisterList)
+    }
+
+    @Test
+    fun `тест вычисления регистров НГ - 13295 МГц`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getCwRegisters(13_295_000_000)
+        val expectedRegisterList = listOf(
+            0x700000,
+            0x000010,
+            0x200A63,
+            0x4001F4,
+            0x6001F4,
+            0x890689,
+            0x890688,
+            0xA00005,
+            0xC00001,
+            0x100000,
+            0x300000,
+            0x500000,
+            0x900000
+        )
+
+        assertThat(result).isEqualTo(expectedRegisterList)
+    }
+
+    @Test
+    fun `тест вычисления регистров НГ - 13325 МГц`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getCwRegisters(13_325_000_000)
+        val expectedRegisterList = listOf(
+            0x700000,
+            0x000010,
+            0x200A69,
+            0x4001F4,
+            0x6001F4,
+            0x890689,
+            0x890688,
+            0xA00005,
+            0xC00001,
+            0x100000,
+            0x300000,
+            0x500000,
+            0x900000
+        )
+
+        assertThat(result).isEqualTo(expectedRegisterList)
+    }
+
+    @Test
+    fun `тест вычисления регистров НГ - 13360 МГц`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getCwRegisters(13_360_000_000)
+        val expectedRegisterList = listOf(
+            0x700000,
+            0x000010,
+            0x200A70,
+            0x4001F4,
+            0x6001F4,
+            0x890689,
+            0x890688,
+            0xA00005,
+            0xC00001,
+            0x100000,
+            0x300000,
+            0x500000,
+            0x900000
+        )
+
+        assertThat(result).isEqualTo(expectedRegisterList)
+    }
 }
