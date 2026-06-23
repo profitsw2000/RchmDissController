@@ -15,7 +15,7 @@ import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 class PLLRegisters1208PL1URepositoryImplTest {
 
     @Test
-    fun `тест вычисления регистров ЛЧМ - 13250-13400, 50мкс, НСМ`() = runTest {
+    fun `тест вычисления регистров ЛЧМ - 13250-13400, 50мс, НСМ`() = runTest {
         //val testDispatcher = StandardTestDispatcher(testScheduler)
         val repository = PLLRegisters1208PL1URepositoryImpl()
         val result = repository.getLfmRegisters(
@@ -26,5 +26,22 @@ class PLLRegisters1208PL1URepositoryImplTest {
                 isSymmetricLfm = false
             )
         )
+        val expectedRegisterList = arrayListOf(
+            0x700000,
+            0x000001,
+            0x2000A5,
+            0x404E20,
+            0x607D00,
+            0x840609,
+            0x840608,
+            0xA00002,
+            0xC00001,
+            0x1000F0,
+            0x3FA0F9,
+            0x500004,
+            0x900000
+        )
+
+        assertThat(result).isEqualTo(expectedRegisterList)
     }
 }
