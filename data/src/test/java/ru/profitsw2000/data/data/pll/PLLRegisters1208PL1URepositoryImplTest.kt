@@ -625,8 +625,11 @@ class PLLRegisters1208PL1URepositoryImplTest {
                 )
         )
         val expectedParams = SynthesizerModuleStateModel().copy(
-            radiationMode = RadiationMode.CW,
-            cwFrequency = 13_370_000_000
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_250_000_000,
+            highestLfmFrequency = 13_400_000_000,
+            lfmPeriod = 0.01,
+            isSymmetricLfm = false
         )
 
         assertThat(result).isEqualTo(expectedParams)
