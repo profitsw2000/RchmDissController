@@ -381,7 +381,7 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         val dFracReg = (synthesizerModuleState.lfm1Register[0] and REGISTERS_VALUE_MASK).toLong()
 
         return if(isSymmetricLfm(synthesizerModuleState.lfm3Register[0])) (4*Fref*(intReg + (fracReg/modReg)))/refReg
-        else getLfmHighestFrequency(synthesizerModuleState) + ((dFracReg*Fref)/(16*modReg*refReg))
+        else getLfmLowestFrequency(synthesizerModuleState) + ((dFracReg*Fref)/(16*modReg*refReg))
     }
 
     /**
