@@ -6,6 +6,7 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.data.model.pll.LfmInputParametersModel
+import kotlin.math.round
 
 const val REF_REG_CW = 0x10
 const val FRAC_REG_CW = 0x4001F4
@@ -418,7 +419,7 @@ class PLLRegisters1208PL1URepositoryImpl : PLLRegisters1208PL1URepository {
         val fracInc = (((synthesizerModuleState.lfm2Register[0] and REGISTERS_VALUE_MASK) and 0xFF) + 1).toDouble()
         val sawStep = ((synthesizerModuleState.lfm2Register[0] and REGISTERS_VALUE_MASK).shr(8)).toDouble()
         val refReg = (synthesizerModuleState.refRegister[0] and REGISTERS_VALUE_MASK).toDouble()
-        val deviationTime = fracInc*((refReg*sawStep)/Fref)
+        val deviationTime = round(10_000.0*fracInc*((refReg*sawStep)/Fref)) / 10_000.0
 
         return if(isSymmetricLfm(synthesizerModuleState.lfm3Register[0])) deviationTime*2
         else deviationTime

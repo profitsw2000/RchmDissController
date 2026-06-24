@@ -635,4 +635,221 @@ class PLLRegisters1208PL1URepositoryImplTest {
         assertThat(result).isEqualTo(expectedParams)
     }
 
+    @Test
+    fun `тест вычисления параметров сигнала по регистрам - ЛЧМ, 13300 - 13360, 1 мс, НСМ`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getLfmParameters(
+            SynthesizerModuleState(
+                refRegister = listOf(0x1, 0x00),
+                intRegister = listOf(0x2000A6, 0x00),
+                fracRegister = listOf(0x401F40, 0x00),
+                modRegister = listOf(0x607D00, 0x00),
+                ctr1Register = listOf(0x840608, 0x00),
+                ctr2Register = listOf(0xA00002, 0x00),
+                ctr3Register = listOf(0xC00001, 0x00),
+                lfm1Register = listOf(0x100060, 0x00),
+                lfm2Register = listOf(0x3FA004, 0x00),
+                lfm3Register = listOf(0x500004, 0x00),
+                prwRegister = 0x700000,
+                praRegister = 0x900000,
+
+                )
+        )
+        val expectedParams = SynthesizerModuleStateModel().copy(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_300_000_000,
+            highestLfmFrequency = 13_360_000_000,
+            lfmPeriod = 0.001,
+            isSymmetricLfm = false
+        )
+
+        assertThat(result).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `тест вычисления параметров сигнала по регистрам - ЛЧМ, 13280 - 13380, 0,2 мс, НСМ`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getLfmParameters(
+            SynthesizerModuleState(
+                refRegister = listOf(0x1, 0x00),
+                intRegister = listOf(0x2000A6, 0x00),
+                fracRegister = listOf(0x400000, 0x00),
+                modRegister = listOf(0x607D00, 0x00),
+                ctr1Register = listOf(0x840608, 0x00),
+                ctr2Register = listOf(0xA00002, 0x00),
+                ctr3Register = listOf(0xC00001, 0x00),
+                lfm1Register = listOf(0x1000A0, 0x00),
+                lfm2Register = listOf(0x3FA000, 0x00),
+                lfm3Register = listOf(0x500004, 0x00),
+                prwRegister = 0x700000,
+                praRegister = 0x900000,
+
+                )
+        )
+        val expectedParams = SynthesizerModuleStateModel().copy(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_280_000_000,
+            highestLfmFrequency = 13_380_000_000,
+            lfmPeriod = 0.0002,
+            isSymmetricLfm = false
+        )
+
+        assertThat(result).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `тест вычисления параметров сигнала по регистрам - ЛЧМ, 13250 - 13380, 50 мс, НСМ`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getLfmParameters(
+            SynthesizerModuleState(
+                refRegister = listOf(0x1, 0x00),
+                intRegister = listOf(0x2000A5, 0x00),
+                fracRegister = listOf(0x404E20, 0x00),
+                modRegister = listOf(0x607D00, 0x00),
+                ctr1Register = listOf(0x840608, 0x00),
+                ctr2Register = listOf(0xA00002, 0x00),
+                ctr3Register = listOf(0xC00001, 0x00),
+                lfm1Register = listOf(0x1000D0, 0x00),
+                lfm2Register = listOf(0x3FA0F9, 0x00),
+                lfm3Register = listOf(0x500004, 0x00),
+                prwRegister = 0x700000,
+                praRegister = 0x900000,
+
+                )
+        )
+        val expectedParams = SynthesizerModuleStateModel().copy(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_250_000_000,
+            highestLfmFrequency = 13_380_000_000,
+            lfmPeriod = 0.05,
+            isSymmetricLfm = false
+        )
+
+        assertThat(result).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `тест вычисления параметров сигнала по регистрам - ЛЧМ, 13250 - 13400, 10 мс, СМ`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getLfmParameters(
+            SynthesizerModuleState(
+                refRegister = listOf(0x1, 0x01),
+                intRegister = listOf(0x2000A5, 0x2000A7),
+                fracRegister = listOf(0x404E20, 0x403E80),
+                modRegister = listOf(0x607D00, 0x607D00),
+                ctr1Register = listOf(0x840608, 0x840608),
+                ctr2Register = listOf(0xA00002, 0xA00002),
+                ctr3Register = listOf(0xC00001, 0xC00001),
+                lfm1Register = listOf(0x1000F0, 0x1000F0),
+                lfm2Register = listOf(0x3FA018, 0x3FA018),
+                lfm3Register = listOf(0x500204, 0x500006),
+                prwRegister = 0x700000,
+                praRegister = 0x900000,
+
+                )
+        )
+        val expectedParams = SynthesizerModuleStateModel().copy(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_250_000_000,
+            highestLfmFrequency = 13_400_000_000,
+            lfmPeriod = 0.01,
+            isSymmetricLfm = true
+        )
+
+        assertThat(result).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `тест вычисления параметров сигнала по регистрам - ЛЧМ, 13300 - 13360, 1 мс, СМ`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getLfmParameters(
+            SynthesizerModuleState(
+                refRegister = listOf(0x1, 0x1),
+                intRegister = listOf(0x2000A6, 0x2000A7),
+                fracRegister = listOf(0x401F40, 0x400000),
+                modRegister = listOf(0x607D00, 0x607D00),
+                ctr1Register = listOf(0x840608, 0x840608),
+                ctr2Register = listOf(0xA00002, 0xA00002),
+                ctr3Register = listOf(0xC00001, 0xC00001),
+                lfm1Register = listOf(0x100073, 0x100073),
+                lfm2Register = listOf(0x3D0502, 0x3D0502),
+                lfm3Register = listOf(0x500204, 0x500006),
+                prwRegister = 0x700000,
+                praRegister = 0x900000,
+
+                )
+        )
+        val expectedParams = SynthesizerModuleStateModel().copy(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_300_000_000,
+            highestLfmFrequency = 13_360_000_000,
+            lfmPeriod = 0.001,
+            isSymmetricLfm = true
+        )
+
+        assertThat(result).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `тест вычисления параметров сигнала по регистрам - ЛЧМ, 13280 - 13380, 0,2 мс, СМ`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getLfmParameters(
+            SynthesizerModuleState(
+                refRegister = listOf(0x1, 0x01),
+                intRegister = listOf(0x2000A6, 0x2000A7),
+                fracRegister = listOf(0x400000, 0x401F40),
+                modRegister = listOf(0x607D00, 0x607D00),
+                ctr1Register = listOf(0x840608, 0x840608),
+                ctr2Register = listOf(0xA00002, 0xA00002),
+                ctr3Register = listOf(0xC00001, 0xC00001),
+                lfm1Register = listOf(0x100140, 0x100140),
+                lfm2Register = listOf(0x37D000, 0x37D000),
+                lfm3Register = listOf(0x500204, 0x500006),
+                prwRegister = 0x700000,
+                praRegister = 0x900000,
+
+                )
+        )
+        val expectedParams = SynthesizerModuleStateModel().copy(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_280_000_000,
+            highestLfmFrequency = 13_380_000_000,
+            lfmPeriod = 0.0002,
+            isSymmetricLfm = true
+        )
+
+        assertThat(result).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `тест вычисления параметров сигнала по регистрам - ЛЧМ, 13250 - 13380, 50 мс, СМ`() = runTest {
+        val repository = PLLRegisters1208PL1URepositoryImpl()
+        val result = repository.getLfmParameters(
+            SynthesizerModuleState(
+                refRegister = listOf(0x1, 0x01),
+                intRegister = listOf(0x2000A5, 0x2000A7),
+                fracRegister = listOf(0x404E20, 0x401F40),
+                modRegister = listOf(0x607D00, 0x607D00),
+                ctr1Register = listOf(0x840608, 0x840608),
+                ctr2Register = listOf(0xA00002, 0xA00002),
+                ctr3Register = listOf(0xC00001, 0xC00001),
+                lfm1Register = listOf(0x1000D0, 0x1000D0),
+                lfm2Register = listOf(0x3FA07C, 0x3FA07C),
+                lfm3Register = listOf(0x500204, 0x500006),
+                prwRegister = 0x700000,
+                praRegister = 0x900000,
+
+                )
+        )
+        val expectedParams = SynthesizerModuleStateModel().copy(
+            radiationMode = RadiationMode.LFM,
+            lowestLfmFrequency = 13_250_000_000,
+            highestLfmFrequency = 13_380_000_000,
+            lfmPeriod = 0.05,
+            isSymmetricLfm = true
+        )
+
+        assertThat(result).isEqualTo(expectedParams)
+    }
+
 }
