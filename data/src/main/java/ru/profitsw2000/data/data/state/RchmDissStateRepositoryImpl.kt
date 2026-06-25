@@ -1,5 +1,6 @@
 package ru.profitsw2000.data.data.state
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,8 +29,10 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.updateRegister
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 
-class RchmDissStateRepositoryImpl() : RchmDissStateRepository {
-    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+class RchmDissStateRepositoryImpl(
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+) : RchmDissStateRepository {
+    private val repositoryScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
     private val _rchmDissState: MutableStateFlow<RchmDissState> = MutableStateFlow(RchmDissState())
     override val rchmDissState: StateFlow<RchmDissState>
         get() = _rchmDissState

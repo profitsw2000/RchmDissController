@@ -1,11 +1,13 @@
 package ru.profitsw2000.data.data.bluetooth
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.profitsw2000.core.drawable.utils.PACKET_SIZE_MAXIMUM
 import ru.profitsw2000.core.drawable.utils.PACKET_START_BYTE
+import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_CONTROL_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_ID
 import ru.profitsw2000.core.drawable.utils.RCHM_DISS_OUTPUT_SET_PACKET_SIZE
 import ru.profitsw2000.core.drawable.utils.READ_FROM_EEPROM_REQUEST_PACKET_ID
@@ -32,10 +34,11 @@ import ru.profitsw2000.data.domain.state.RchmDissStateRepository
 
 class BluetoothPacketManagerImpl(
     private val bluetoothRepository: BluetoothRepository,
-    private val rchmDissStateRepository: RchmDissStateRepository
+    private val rchmDissStateRepository: RchmDissStateRepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : BluetoothPacketManager {
 
-    private val coroutineScope = CoroutineScope(Job() + Dispatchers.Default)
+    private val coroutineScope = CoroutineScope(Job() + defaultDispatcher)
 
     override val BUFFER_SIZE: Int = 16
     override val packetBuffer: MutableList<Byte> = arrayListOf()
@@ -86,7 +89,7 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun getPacketData(byte: Byte) {
-        if (packetState < packetSize) {
+        if (packetState < (packetSize - 1)) {
             packetBuffer.add(byte)
             packetCheckSum += byte.toUnsignedInteger()
             packetState++
@@ -105,7 +108,7 @@ class BluetoothPacketManagerImpl(
             READ_FROM_TRANSMITTER_PACKET_ID -> rchmDissStateRepository.updateTransmitterModuleState(bytesList[0])
             READ_FROM_RECEIVER_PACKET_ID -> receiverPacket(bytesList)
             READ_FROM_SYNTHESIZER_PACKET_ID -> synthesizerPacket(bytesList)
-            RCHM_DISS_OUTPUT_SET_PACKET_ID -> rcdOutputControlPacket(bytesList)
+            RCHM_DISS_OUTPUT_CONTROL_PACKET_ID -> rcdOutputControlPacket(bytesList)
             READ_FROM_EEPROM_RESPONSE_PACKET_ID -> TODO()
             READ_TEMPERATURE_RESPONSE_PACKET_ID -> TODO()
             else -> {}
@@ -113,8 +116,7 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun getWriteToTransmitterPacket(dataByte: Byte): ByteArray {
-        val checkSum = ((PACKET_START_BYTE +
-                WRITE_TO_TRANSMITTER_PACKET_SIZE +
+        val checkSum = ((WRITE_TO_TRANSMITTER_PACKET_SIZE +
                 WRITE_TO_TRANSMITTER_PACKET_ID +
                 dataByte.toUnsignedInteger()) and 0xFF).toByte()
 
@@ -214,8 +216,7 @@ class BluetoothPacketManagerImpl(
     }
 
     private fun getWriteByteArrayPacket(packetSize: Int, packetId: Int, byteArray: ByteArray): ByteArray {
-        val checkSum = ((PACKET_START_BYTE +
-                packetSize +
+        val checkSum = ((packetSize +
                 packetId +
                 getByteArrayCheckSum(byteArray)) and 0xFF).toByte()
 

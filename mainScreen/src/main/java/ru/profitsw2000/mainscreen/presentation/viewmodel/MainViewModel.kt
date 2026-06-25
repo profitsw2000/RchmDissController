@@ -243,8 +243,6 @@ class MainViewModel(
                         }
                     }
                 }
-
-
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Success
 
                 delay(500.milliseconds)
@@ -364,7 +362,7 @@ class MainViewModel(
     private suspend fun getOutputModuleStateByteArray(extTriggerLfm: Boolean, lfmPeriod: Double): ByteArray {
         val outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
         val periodConventionalUnits = (lfmPeriod/0.000008).toInt()
-        val transmitterIsOnBit = if (outputModuleState.transmitterIsOn) 0 else 1
+        val transmitterIsOnBit = if (outputModuleState.transmitterIsOn) 1 else 0
         val extTriggerLfmBit = if (extTriggerLfm) 1 else 0
         val newOutput = ((periodConventionalUnits shl 2) or (transmitterIsOnBit shl 1) or extTriggerLfmBit)
 
