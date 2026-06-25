@@ -1,5 +1,6 @@
 package ru.profitsw2000.data.data.bluetooth
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,10 +34,11 @@ import ru.profitsw2000.data.domain.state.RchmDissStateRepository
 
 class BluetoothPacketManagerImpl(
     private val bluetoothRepository: BluetoothRepository,
-    private val rchmDissStateRepository: RchmDissStateRepository
+    private val rchmDissStateRepository: RchmDissStateRepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : BluetoothPacketManager {
 
-    private val coroutineScope = CoroutineScope(Job() + Dispatchers.Default)
+    private val coroutineScope = CoroutineScope(Job() + defaultDispatcher)
 
     override val BUFFER_SIZE: Int = 16
     override val packetBuffer: MutableList<Byte> = arrayListOf()
@@ -87,7 +89,7 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun getPacketData(byte: Byte) {
-        if (packetState < packetSize) {
+        if (packetState < (packetSize - 1)) {
             packetBuffer.add(byte)
             packetCheckSum += byte.toUnsignedInteger()
             packetState++
@@ -114,8 +116,7 @@ class BluetoothPacketManagerImpl(
     }
 
     override fun getWriteToTransmitterPacket(dataByte: Byte): ByteArray {
-        val checkSum = ((PACKET_START_BYTE +
-                WRITE_TO_TRANSMITTER_PACKET_SIZE +
+        val checkSum = ((WRITE_TO_TRANSMITTER_PACKET_SIZE +
                 WRITE_TO_TRANSMITTER_PACKET_ID +
                 dataByte.toUnsignedInteger()) and 0xFF).toByte()
 
@@ -215,8 +216,7 @@ class BluetoothPacketManagerImpl(
     }
 
     private fun getWriteByteArrayPacket(packetSize: Int, packetId: Int, byteArray: ByteArray): ByteArray {
-        val checkSum = ((PACKET_START_BYTE +
-                packetSize +
+        val checkSum = ((packetSize +
                 packetId +
                 getByteArrayCheckSum(byteArray)) and 0xFF).toByte()
 
