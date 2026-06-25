@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="moduleParameterChipStyle" parent="Widget.Material3.Chip.Suggestion">
+        <item name="chipStrokeColor">@color/citrusy_emerald</item>
+        <item name="chipStartPadding">4dp</item>
+        <item name="chipEndPadding">4dp</item>
+        <item name="chipCornerRadius">16dp</item>
+    </style>
+
+    <style name="outlinedBoxStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeColor">?attr/colorOnSurfaceVariant</item>
+        <item name="boxBackgroundColor">@android:color/transparent</item>
+    </style>
+</resources>

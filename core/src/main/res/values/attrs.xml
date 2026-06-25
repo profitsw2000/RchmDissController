@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RfChannelNumberIconView">
+        <attr name="rfChannelNumber" format="string"/>
+        <attr name="rfIconColor" format="color"/>
+        <attr name="rfCrossColor" format="color"/>
+        <attr name="rfCrossIsVisible" format="boolean"/>
+        <attr name="rfChannelIcon" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="RfStateIndicatorIconView">
+        <attr name="rfStateText" format="string"/>
+        <attr name="rfStateIconColor" format="color"/>
+        <attr name="rfStateIconPadding" format="dimension"/>
+    </declare-styleable>
+</resources>
