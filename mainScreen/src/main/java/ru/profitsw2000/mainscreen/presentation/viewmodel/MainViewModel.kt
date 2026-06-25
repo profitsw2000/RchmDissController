@@ -118,9 +118,9 @@ class MainViewModel(
             )
 
     val rchmDissState: StateFlow<RchmDissStateModel> = combine(
-        transmitterUpdatingStatusFlow,
-        receiverUpdatingStatusFlow,
-        synthesizerUpdatingStatusFlow
+        transmitterStatePairFlow,
+        receiverStatePairFlow,
+        synthesizerStatePairFlow
     ) { transmitter, receiver, synthesizer ->
 
         getRchmDissStateModelFromSubModulesState(
@@ -363,33 +363,17 @@ class MainViewModel(
     }
 
     private fun getRchmDissStateModelFromSubModulesState(
-        transmitter: TransmitterUpdatingStatus,
-        receiver: ReceiverUpdatingStatus,
-        synthesizer: SynthesizerUpdatingStatus
+        transmitter: Pair<TransmitterModuleState, Boolean>,
+        receiver: Pair<ReceiverModuleState, Boolean>,
+        synthesizer: Pair<SynthesizerModuleStateModel, Boolean>
     ): RchmDissStateModel {
-        val transmitterData = when(transmitter) {
-            is TransmitterUpdatingStatus.Idle ->
-                Pair(transmitter.transmitterModuleState, true)
-            else -> Pair(TransmitterModuleState(), false)
-        }
-        val receiverData = when(receiver) {
-            is ReceiverUpdatingStatus.Idle ->
-                Pair(receiver.receiverModuleState, true)
-            else -> Pair(ReceiverModuleState(), false)
-        }
-        val synthesizerData = when(synthesizer) {
-            is SynthesizerUpdatingStatus.Idle ->
-                Pair(synthesizer.synthesizerModuleStateModel, true)
-            else -> Pair(SynthesizerModuleStateModel(), false)
-        }
-
         return RchmDissStateModel(
-            receiverModuleState = receiverData.first,
-            isActualReceiverData = receiverData.second,
-            transmitterModuleState = transmitterData.first,
-            isActualTransmitterData = transmitterData.second,
-            synthesizerModuleState = synthesizerData.first,
-            isActualSynthesizerData = synthesizerData.second
+            receiverModuleState = receiver.first,
+            isActualReceiverData = receiver.second,
+            transmitterModuleState = transmitter.first,
+            isActualTransmitterData = transmitter.second,
+            synthesizerModuleState = synthesizer.first,
+            isActualSynthesizerData = synthesizer.second
         )
     }
 
