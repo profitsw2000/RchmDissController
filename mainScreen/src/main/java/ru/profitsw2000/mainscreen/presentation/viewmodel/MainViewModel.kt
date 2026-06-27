@@ -81,7 +81,7 @@ class MainViewModel(
                 initialValue = RchmDissStateModel()
             )
 
-    private val _isReceivedOutputControlPacket: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private val _isReceivedOutputControlPacket: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isReceivedOutputControlPacket: StateFlow<Boolean> = _isReceivedOutputControlPacket.asStateFlow()
 
     init {
