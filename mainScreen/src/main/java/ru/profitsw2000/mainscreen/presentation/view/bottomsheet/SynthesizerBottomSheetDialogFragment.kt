@@ -16,6 +16,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.profitsw2000.core.drawable.utils.CW_FREQUENCY_ABOVE_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.CW_FREQUENCY_UNDER_INPUT_ERROR
 import ru.profitsw2000.core.drawable.utils.HIGH_FREQUENCY_ABOVE_INPUT_ERROR
@@ -33,6 +34,7 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateMode
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
+import ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs.SynthesizerViewModel
 import ru.profitsw2000.mainscreen.state.SynthesizerUpdatingStatus
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -43,7 +45,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentSynthesizerBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
-    private val mainViewModel: MainViewModel by activityViewModel()
+    private val synthesizerViewModel: SynthesizerViewModel by viewModel()
     private val spec by lazy {
         CircularProgressIndicatorSpec(requireContext(), null).apply {
             indicatorSize = 24.dpToPx()
@@ -83,7 +85,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun observeFlows() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.synthesizerUpdatingStatusFlow.collect { state ->
+                synthesizerViewModel.synthesizerUpdatingStatusFlow.collect { state ->
                     when(state) {
                         is SynthesizerUpdatingStatus.Error -> handleError(state.errorCode)
                         is SynthesizerUpdatingStatus.Idle -> setForms(
@@ -238,7 +240,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         val cwInputFrequencyIsEmpty = inputIsEmpty(cwFrequencyTextInputLayout, cwFrequencyTextInputEditText)
 
         if (!cwInputFrequencyIsEmpty) {
-            mainViewModel.updateSynthesizerCwMode(
+            synthesizerViewModel.updateSynthesizerCwMode(
                 cwFrequencyTextInputEditText.text.toString().toLong()
             )
         }
@@ -250,7 +252,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         val lfmPeriodInputFrequencyIsEmpty = inputIsEmpty(lfmPeriodTextInputLayout, lfmPeriodTextInputEditText)
 
         if (!lowestLfmInputFrequencyIsEmpty && !highestLfmInputFrequencyIsEmpty && !lfmPeriodInputFrequencyIsEmpty) {
-            mainViewModel.updateSynthesizerLfmMode(
+            synthesizerViewModel.updateSynthesizerLfmMode(
                 startFrequency = lfmLowFrequencyTextInputEditText.text.toString().toLong(),
                 stopFrequency = lfmHighFrequencyTextInputEditText.text.toString().toLong(),
                 lfmPeriod = lfmPeriodTextInputEditText.text.toString().toDouble(),
