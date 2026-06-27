@@ -65,7 +65,7 @@ class MainFragment : Fragment() {
     private fun observeFlow() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.rchmDissState.collect { state ->
+                mainViewModel.rchmDissStateModelFlow.collect { state ->
                     renderData(rchmDissStateModel = state)
                 }
             }
@@ -73,9 +73,9 @@ class MainFragment : Fragment() {
     }
 
     private fun renderData(rchmDissStateModel: RchmDissStateModel) {
-        renderTransmitterData(rchmDissStateModel.transmitterModuleState, rchmDissStateModel.isActualTransmitterData)
-        renderReceiverData(rchmDissStateModel.receiverModuleState, rchmDissStateModel.isActualReceiverData)
-        renderSynthesizerData(rchmDissStateModel.synthesizerModuleState, rchmDissStateModel.isActualSynthesizerData)
+        renderTransmitterData(rchmDissStateModel.transmitterModuleState, true)
+        renderReceiverData(rchmDissStateModel.receiverModuleState, true)
+        renderSynthesizerData(rchmDissStateModel.synthesizerModuleState, true)
     }
 
     private fun renderTransmitterData(
