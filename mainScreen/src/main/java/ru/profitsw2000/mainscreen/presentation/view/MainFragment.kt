@@ -35,6 +35,11 @@ class MainFragment : Fragment() {
     private val navigator: Navigator by inject()
     private val mainViewModel: MainViewModel by activityViewModel()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
