@@ -116,6 +116,9 @@ class MainViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = Pair(SynthesizerModuleStateModel(), false)
             )
+    val _rchmDissStateModelFlow: MutableStateFlow<RchmDissStateModel> = MutableStateFlow(
+
+    )
 
     val rchmDissState: StateFlow<RchmDissStateModel> = combine(
         transmitterStatePairFlow,
@@ -321,6 +324,23 @@ class MainViewModel(
 
             } catch (exc: Exception) {
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
+            }
+        }
+    }
+
+    private fun loadRchmDissInitialParameters() {
+        viewModelScope.launch {
+            try {
+                val lfmParams = withContext(Dispatchers.IO) {
+                    pllRegisters1208PL1URepository.getLfmParameters(
+                        rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
+                    )
+                }
+                _rchmDissStateModelFlow.value = RchmDissStateModel(
+                    synthesizerModuleState = lfmParams
+                )
+            } catch (exc: Exception) {
+                _rchmDissStateModelFlow.value = RchmDissStateModel()
             }
         }
     }
