@@ -6,6 +6,7 @@
         android:id="@+id/data_exchange_status"
         android:title="@string/data_exchange_status_menu_item_title"
         android:icon="@drawable/data_exchange_status_icon"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        android:orderInCategory="10"/>
 
 </menu>

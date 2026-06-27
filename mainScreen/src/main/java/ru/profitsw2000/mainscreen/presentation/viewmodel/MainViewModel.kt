@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,7 +81,7 @@ class MainViewModel(
                 initialValue = RchmDissStateModel()
             )
 
-    private val _isReceivedOutputControlPacket: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val _isReceivedOutputControlPacket: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val isReceivedOutputControlPacket: StateFlow<Boolean> = _isReceivedOutputControlPacket.asStateFlow()
 
     init {
