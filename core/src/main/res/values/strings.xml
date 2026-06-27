@@ -67,5 +67,6 @@
     <string name="modulation_period_under_input_error_text">Не менее 0,2 мс</string>
     <string name="synthesizer_not_active_icon_label_text">Н/А</string>
     <string name="synthesizer_generation__absent_warning_text">Нет генерации сигнала</string>
+    <string name="data_exchange_status_menu_item_title">Статус обмена данными</string>
 
 </resources>
