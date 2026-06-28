@@ -7,11 +7,13 @@
         android:id="@+id/bluetooth_connection_status"
         android:icon="@drawable/bt_disconnected_icon"
         android:title="@string/bluetooth_connection_status_menu_item_title"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        android:orderInCategory="50"/>
 
     <item
         android:id="@+id/bluetooth_state"
         android:icon="@drawable/bluetooth_state_icon"
         android:title="@string/bluetooth_state_menu_item_title"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        android:orderInCategory="60"/>
 </menu>
