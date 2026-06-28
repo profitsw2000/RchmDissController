@@ -14,6 +14,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicatorSp
 import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_16_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_2_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_32_DECIBELS_BIT
@@ -41,6 +42,7 @@ import ru.profitsw2000.core.drawable.utils.dpToPx
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
+import ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs.ReceiverViewModel
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
 import kotlin.getValue
 
@@ -48,7 +50,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentReceiverBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
-    private val mainViewModel: MainViewModel by activityViewModel()
+    private val receiverViewModel: ReceiverViewModel by viewModel()
     private val spec by lazy {
         CircularProgressIndicatorSpec(requireContext(), null).apply {
             indicatorSize = 24.dpToPx()
@@ -83,7 +85,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun initViews() = with(binding) {
         transmitterParamsSendButton.setOnClickListener {
             updatingStatusResultTextView.visibility = View.GONE
-            mainViewModel.updateReceiver(
+            receiverViewModel.updateReceiver(
                 getReceiverSettingsByteArray()
             )
         }
@@ -92,7 +94,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun observeFlows() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.receiverUpdatingStatusFlow.collect { state ->
+                receiverViewModel.receiverUpdatingStatusFlow.collect { state ->
                     when(state) {
                         is ReceiverUpdatingStatus.Error -> handleError(state.errorCode)
                         is ReceiverUpdatingStatus.Idle -> setForms(state.receiverModuleState)

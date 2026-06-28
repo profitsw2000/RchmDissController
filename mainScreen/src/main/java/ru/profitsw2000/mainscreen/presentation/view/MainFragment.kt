@@ -5,20 +5,24 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import ru.profitsw2000.core.drawable.RfChannelNumberIconView
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
-import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissStateModel
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
@@ -28,12 +32,22 @@ import ru.profitsw2000.mainscreen.databinding.FragmentMainBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.navigator.Navigator
 
+private const val TRANSMITTER_LAYOUT_CLICK = 1
+private const val RECEIVER_LAYOUT_CLICK = 2
+private const val SYNTHESIZER_LAYOUT_CLICK = 3
+
 class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
     private val navigator: Navigator by inject()
     private val mainViewModel: MainViewModel by activityViewModel()
+    private var statusMenuItem: MenuItem? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,41 +60,77 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setMenuProvider()
         initViews()
-        observeFlow()
+        observeFlows()
+    }
+
+    private fun setMenuProvider() {
+        requireActivity().addMenuProvider( object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.main_fragment_menu, menu)
+                statusMenuItem = menu.findItem(R.id.data_exchange_status)
+                updateStatusIcon(mainViewModel.isReceivedOutputControlPacket.value)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private fun initViews() = with(binding) {
         transmitterConstraintLayout.setOnClickListener {
-            navigator.navigateToTransmitterSettingsDialog()
+            mainViewModel.layoutClicked(TRANSMITTER_LAYOUT_CLICK)
         }
         receiverConstraintLayout.setOnClickListener {
-            navigator.navigateToReceiverSettingsDialog()
+            mainViewModel.layoutClicked(RECEIVER_LAYOUT_CLICK)
         }
         synthesizerConstraintLayout.setOnClickListener {
-            navigator.navigateToSynthesizerSettingsDialog()
+            mainViewModel.layoutClicked(SYNTHESIZER_LAYOUT_CLICK)
         }
     }
 
-    private fun observeFlow() {
+    private fun observeFlows() = with(binding) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.rchmDissState.collect { state ->
+                mainViewModel.rchmDissStateModelFlow.collect { state ->
                     renderData(rchmDissStateModel = state)
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.isReceivedOutputControlPacket.collect { status ->
+                    setTransparencyToView(transmitterConstraintLayout, !status)
+                    setTransparencyToView(receiverConstraintLayout, !status)
+                    setTransparencyToView(synthesizerConstraintLayout, !status)
+                    requireActivity().invalidateMenu()
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                mainViewModel.clickActionSharedFlow.collect { clickedLayout ->
+                    when(clickedLayout) {
+                        TRANSMITTER_LAYOUT_CLICK -> navigator.navigateToTransmitterSettingsDialog()
+                        RECEIVER_LAYOUT_CLICK -> navigator.navigateToReceiverSettingsDialog()
+                        SYNTHESIZER_LAYOUT_CLICK -> navigator.navigateToSynthesizerSettingsDialog()
+                        else -> {}
+                    }
                 }
             }
         }
     }
 
     private fun renderData(rchmDissStateModel: RchmDissStateModel) {
-        renderTransmitterData(rchmDissStateModel.transmitterModuleState, rchmDissStateModel.isActualTransmitterData)
-        renderReceiverData(rchmDissStateModel.receiverModuleState, rchmDissStateModel.isActualReceiverData)
-        renderSynthesizerData(rchmDissStateModel.synthesizerModuleState, rchmDissStateModel.isActualSynthesizerData)
+        renderTransmitterData(rchmDissStateModel.transmitterModuleState)
+        renderReceiverData(rchmDissStateModel.receiverModuleState)
+        renderSynthesizerData(rchmDissStateModel.synthesizerModuleState)
     }
 
     private fun renderTransmitterData(
-        transmitterModuleState: TransmitterModuleState,
-        isActualData: Boolean
+        transmitterModuleState: TransmitterModuleState
     ) = with(binding) {
         val channelsList = arrayListOf(
             txFirstChannelIconView,
@@ -95,12 +145,10 @@ class MainFragment : Fragment() {
             transmitterModuleState.enabledChannelNumber,
             channelsList
         )
-        setTransparencyToView(transmitterConstraintLayout, !isActualData)
     }
 
     private fun renderReceiverData(
-        receiverModuleState: ReceiverModuleState,
-        isActualData: Boolean
+        receiverModuleState: ReceiverModuleState
     ) = with(binding) {
         val channelList = arrayListOf(
             rxFirstChannelIconView,
@@ -115,12 +163,10 @@ class MainFragment : Fragment() {
         setAttenuatorValue(receiverModuleState.inputAttenuationValue)
         setCrossToLockedChannels(channelList, receiverModuleState.lockedInputChannels)
         setTestSignalIndicator(receiverModuleState.testSignalIsEnabled)
-        setTransparencyToView(receiverConstraintLayout, !isActualData)
     }
 
     private fun renderSynthesizerData(
-        synthesizerModuleStateModel: SynthesizerModuleStateModel,
-        isActualData: Boolean
+        synthesizerModuleStateModel: SynthesizerModuleStateModel
     ) {
         when(synthesizerModuleStateModel.radiationMode) {
             RadiationMode.NONE -> indicateSynthesizerNoneRadiationMode()
@@ -133,7 +179,6 @@ class MainFragment : Fragment() {
                 lfmExtTrigger = false
             )
         }
-        setTransparencyToView(binding.synthesizerConstraintLayout, !isActualData)
     }
 
     private fun disableAllChannels(channelsList: List<RfChannelNumberIconView>) {
@@ -218,6 +263,17 @@ class MainFragment : Fragment() {
     private fun setTransparencyToView(view: View, isTransparent: Boolean) {
         view.alpha = if (isTransparent) 0.5f
         else 1f
+    }
+
+    private fun updateStatusIcon(isConnected: Boolean) {
+        val item = statusMenuItem ?: return
+        val color = if (isConnected) {
+            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus)
+        } else {
+            resources.getColor(ru.profitsw2000.core.R.color.guardsman_red)
+        }
+
+        item.icon?.mutate()?.setTint(color)
     }
 
     @ColorInt

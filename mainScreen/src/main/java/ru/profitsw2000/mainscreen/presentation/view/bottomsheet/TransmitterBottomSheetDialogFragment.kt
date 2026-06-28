@@ -13,6 +13,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicatorSp
 import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_1
 import ru.profitsw2000.core.drawable.utils.TX_CHANNEL_2
@@ -24,13 +25,14 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentTransmitterBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
+import ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs.TransmitterViewModel
 import ru.profitsw2000.mainscreen.state.TransmitterUpdatingStatus
 
 class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentTransmitterBottomSheetDialogBinding? = null
     private val binding get() = _binding!!
-    private val mainViewModel: MainViewModel by activityViewModel()
+    private val transmitterViewModel: TransmitterViewModel by viewModel()
     private val spec by lazy {
         CircularProgressIndicatorSpec(requireContext(), null).apply {
             indicatorSize = 24.dpToPx()
@@ -70,7 +72,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
         //transmitterParamsSendButton.icon = progressIndicator
         transmitterParamsSendButton.setOnClickListener {
             updatingStatusResultTextView.visibility = View.GONE
-            mainViewModel.updateTransmitter(
+            transmitterViewModel.updateTransmitter(
                 getTransmitterByteFromSelectedChip(rxChannelSelectionChipGroup.checkedChipId),
                 switchTransmitterOnCheckBox.isChecked
             )
@@ -80,7 +82,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun observeFlows() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.transmitterUpdatingStatusFlow.collect { state ->
+                transmitterViewModel.transmitterUpdatingStatusFlow.collect { state ->
                     when(state) {
                         is TransmitterUpdatingStatus.Error -> handleError(state.errorCode)
                         is TransmitterUpdatingStatus.Idle -> setForms(state.transmitterModuleState, state.outputModuleState)
