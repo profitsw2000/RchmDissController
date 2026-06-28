@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
@@ -30,6 +31,10 @@ import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentMainBinding
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.navigator.Navigator
+
+private const val TRANSMITTER_LAYOUT_CLICK = 1
+private const val RECEIVER_LAYOUT_CLICK = 2
+private const val SYNTHESIZER_LAYOUT_CLICK = 3
 
 class MainFragment : Fragment() {
 
@@ -57,7 +62,7 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setMenuProvider()
         initViews()
-        observeFlow()
+        observeFlows()
     }
 
     private fun setMenuProvider() {
@@ -76,17 +81,17 @@ class MainFragment : Fragment() {
 
     private fun initViews() = with(binding) {
         transmitterConstraintLayout.setOnClickListener {
-            navigator.navigateToTransmitterSettingsDialog()
+            mainViewModel.layoutClicked(TRANSMITTER_LAYOUT_CLICK)
         }
         receiverConstraintLayout.setOnClickListener {
-            navigator.navigateToReceiverSettingsDialog()
+            mainViewModel.layoutClicked(RECEIVER_LAYOUT_CLICK)
         }
         synthesizerConstraintLayout.setOnClickListener {
-            navigator.navigateToSynthesizerSettingsDialog()
+            mainViewModel.layoutClicked(SYNTHESIZER_LAYOUT_CLICK)
         }
     }
 
-    private fun observeFlow() = with(binding) {
+    private fun observeFlows() = with(binding) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainViewModel.rchmDissStateModelFlow.collect { state ->
@@ -101,6 +106,18 @@ class MainFragment : Fragment() {
                     setTransparencyToView(receiverConstraintLayout, !status)
                     setTransparencyToView(synthesizerConstraintLayout, !status)
                     requireActivity().invalidateMenu()
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                mainViewModel.clickActionSharedFlow.collect { clickedLayout ->
+                    when(clickedLayout) {
+                        TRANSMITTER_LAYOUT_CLICK -> navigator.navigateToTransmitterSettingsDialog()
+                        RECEIVER_LAYOUT_CLICK -> navigator.navigateToReceiverSettingsDialog()
+                        SYNTHESIZER_LAYOUT_CLICK -> navigator.navigateToSynthesizerSettingsDialog()
+                        else -> {}
+                    }
                 }
             }
         }

@@ -7,7 +7,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,6 +54,7 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
+import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 import ru.profitsw2000.data.model.pll.LfmInputParametersModel
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
@@ -61,6 +64,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class MainViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
+    private val bluetoothRepository: BluetoothRepository,
     private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository
 ): ViewModel() {
 
@@ -83,9 +87,17 @@ class MainViewModel(
 
     private val _isReceivedOutputControlPacket: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isReceivedOutputControlPacket: StateFlow<Boolean> = _isReceivedOutputControlPacket.asStateFlow()
+    val clickActionSharedFlow: MutableSharedFlow<Int> = MutableSharedFlow<Int>(replay = 0)
 
     init {
         monitorOutputControlPackets()
+    }
+
+    fun layoutClicked(action: Int) {
+        if (bluetoothRepository.bluetoothConnectionRepository.bluetoothConnectionStatusFlow.value is BluetoothConnectionStatus.Connected)
+            viewModelScope.launch {
+                clickActionSharedFlow.emit(action)
+            }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -17,7 +17,7 @@ val mainModule = module {
     single<RchmDissStateRepository> { RchmDissStateRepositoryImpl() }
     single<BluetoothPacketManager> { BluetoothPacketManagerImpl(get(), get()) }
     single<PLLRegisters1208PL1URepository> { PLLRegisters1208PL1URepositoryImpl() }
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainViewModel(get(), get(), get()) }
     viewModel { TransmitterViewModel(get(), get(), get(), get()) }
     viewModel { ReceiverViewModel(get(), get(), get()) }
     viewModel { SynthesizerViewModel(get(), get(), get(), get()) }
