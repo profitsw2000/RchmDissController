@@ -2,6 +2,7 @@ package ru.profitsw2000.mainscreen.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +30,8 @@ import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 class MainViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
     private val bluetoothRepository: BluetoothRepository,
-    private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository
+    private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ): ViewModel() {
 
     val rchmDissStateModelFlow: StateFlow<RchmDissStateModel> =
@@ -82,7 +84,7 @@ class MainViewModel(
     }
 
     private suspend fun getSynthesizerParametersModel(synthesizerModuleState: SynthesizerModuleState): SynthesizerModuleStateModel {
-        return withContext(Dispatchers.Default) {
+        return withContext(defaultDispatcher) {
             pllRegisters1208PL1URepository.getLfmParameters(
                 synthesizerModuleState
             )
