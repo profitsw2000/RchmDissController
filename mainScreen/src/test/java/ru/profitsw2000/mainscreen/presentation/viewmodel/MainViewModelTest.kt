@@ -5,9 +5,13 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_BIT_MASK
@@ -22,6 +26,7 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
+import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest {
@@ -201,6 +206,39 @@ class MainViewModelTest {
                 0xA4.toByte(),
                 emittedItem.readMemoryValue
             )
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `проверка таймаута прихода пакета`() = runTest {
+        val lastPacketFlow = MutableSharedFlow<RcdInputPacketType>()
+        every { rchmDissStateRepository.lastPacket } returns lastPacketFlow
+
+        val mainViewModel = MainViewModel(
+            rchmDissStateRepository,
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            defaultDispatcher = mainDispatcherRule.testDispatcher
+        )
+        val mockPacket = RcdInputPacketType.RcdOutputControlInputPacket
+
+        mainViewModel.isReceivedOutputControlPacket.test {
+            val initialValue = awaitItem()
+            assertFalse(initialValue)
+
+            // Если вы проверяете ТОЛЬКО инициализацию, закройте тест:
+            //cancelAndIgnoreRemainingEvents()
+
+            lastPacketFlow.emit(mockPacket)
+            assertTrue(awaitItem())
+
+            advanceTimeBy(2000)
+            lastPacketFlow.emit(mockPacket)
+            advanceTimeBy(2000)
+            expectNoEvents()
+            advanceTimeBy(2000)
+            assertFalse(awaitItem())
             ensureAllEventsConsumed()
         }
     }

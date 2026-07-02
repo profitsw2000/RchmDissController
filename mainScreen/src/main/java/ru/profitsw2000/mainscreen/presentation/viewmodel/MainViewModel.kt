@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -68,7 +69,7 @@ class MainViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun monitorOutputControlPackets() {
-        viewModelScope.launch {
+        viewModelScope.launch(defaultDispatcher) {
             val outputControlPacket = rchmDissStateRepository.lastPacket
                 .filterIsInstance<RcdInputPacketType.RcdOutputControlInputPacket>()
                 .onEach {
@@ -76,6 +77,7 @@ class MainViewModel(
                 }
 
             outputControlPacket
+                .flowOn(defaultDispatcher)
                 .debounce(MODULE_OUTPUT_CONTROL_PACKET_TIMEOUT)
                 .collect {
                     _isReceivedOutputControlPacket.value = false
