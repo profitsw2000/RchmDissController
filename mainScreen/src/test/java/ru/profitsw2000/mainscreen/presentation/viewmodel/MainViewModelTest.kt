@@ -26,6 +26,7 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
+import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 import ru.profitsw2000.data.model.rcd.RcdInputPacketType
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -240,6 +241,59 @@ class MainViewModelTest {
             advanceTimeBy(2000)
             assertFalse(awaitItem())
             ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `проверка нажатия при подключённом устройстве`() = runTest {
+        val mockBluetoothStatus = MutableStateFlow<BluetoothConnectionStatus>(
+            BluetoothConnectionStatus.Connected
+        )
+        every {
+            bluetoothRepository.bluetoothConnectionRepository.bluetoothConnectionStatusFlow
+        } returns mockBluetoothStatus
+
+        val mainViewModel = MainViewModel(
+            rchmDissStateRepository,
+            bluetoothRepository,
+            pllRegisters1208PL1URepository,
+            defaultDispatcher = mainDispatcherRule.testDispatcher
+        )
+
+        val actionId = 100
+
+        mainViewModel.clickActionSharedFlow.test {
+            mainViewModel.layoutClicked(actionId)
+
+            val actualAction = awaitItem()
+            assertEquals(actionId, actualAction)
+
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `проверка нажатия при отсутствии подключения`() = runTest {
+        val mockBluetoothStatus = MutableStateFlow<BluetoothConnectionStatus>(
+            BluetoothConnectionStatus.Disconnected
+        )
+        every {
+            bluetoothRepository.bluetoothConnectionRepository.bluetoothConnectionStatusFlow
+        } returns mockBluetoothStatus
+
+        val mainViewModel = MainViewModel(
+            rchmDissStateRepository,
+            bluetoothRepository,
+            pllRegisters1208PL1URepository,
+            defaultDispatcher = mainDispatcherRule.testDispatcher
+        )
+
+        val actionId = 100
+
+        mainViewModel.clickActionSharedFlow.test {
+            mainViewModel.layoutClicked(actionId)
+
+            expectNoEvents()
         }
     }
 }
