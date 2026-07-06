@@ -58,11 +58,9 @@ class SynthesizerViewModel(
     private fun loadSynthesizerInitialParameters() {
         viewModelScope.launch {
             try {
-                val lfmParams = withContext(defaultDispatcher) {
-                    pllRegisters1208PL1URepository.getLfmParameters(
+                val lfmParams = pllRegisters1208PL1URepository.getLfmParameters(
                         rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
                     )
-                }
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Idle(lfmParams)
 
             } catch (exc: Exception) {
