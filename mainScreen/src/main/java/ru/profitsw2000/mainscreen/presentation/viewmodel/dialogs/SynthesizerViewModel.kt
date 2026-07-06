@@ -2,6 +2,7 @@ package ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
@@ -42,7 +43,8 @@ class SynthesizerViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
     private val bluetoothRepository: BluetoothRepository,
     private val bluetoothPacketManager: BluetoothPacketManager,
-    private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository
+    private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
     private val _synthesizerUpdatingStatusFlow = MutableStateFlow<SynthesizerUpdatingStatus>(
         SynthesizerUpdatingStatus.Updating
@@ -56,7 +58,7 @@ class SynthesizerViewModel(
     private fun loadSynthesizerInitialParameters() {
         viewModelScope.launch {
             try {
-                val lfmParams = withContext(Dispatchers.IO) {
+                val lfmParams = withContext(defaultDispatcher) {
                     pllRegisters1208PL1URepository.getLfmParameters(
                         rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
                     )
