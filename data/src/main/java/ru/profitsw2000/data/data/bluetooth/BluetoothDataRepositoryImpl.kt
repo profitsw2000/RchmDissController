@@ -1,6 +1,7 @@
 package ru.profitsw2000.data.data.bluetooth
 
 import android.bluetooth.BluetoothSocket
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -11,7 +12,8 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class BluetoothDataRepositoryImpl(
-    private val socket: BluetoothSocket?
+    private val socket: BluetoothSocket?,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BluetoothDataRepository {
 
     override suspend fun writeData(byteArray: ByteArray) {
@@ -23,7 +25,7 @@ class BluetoothDataRepositoryImpl(
     }
 
     private suspend fun writeByteArray(outputStream: OutputStream, byteArray: ByteArray): Boolean {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 outputStream.write(byteArray)
                 outputStream.flush()
@@ -47,5 +49,5 @@ class BluetoothDataRepositoryImpl(
                 break
             }
         }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(ioDispatcher)
 }
