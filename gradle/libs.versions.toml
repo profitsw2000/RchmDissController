@@ -60,6 +60,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
 io-mockk = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

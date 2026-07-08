@@ -22,6 +22,12 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
-    androidTestImplementation(libs.androidx.junit)
+    //Instrumentation test
+    androidTestImplementation(libs.androidx.fragment.test)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.io.mockk)
+    androidTestImplementation(libs.koin.test)
+    androidTestImplementation(libs.androidx.junit)
 }
