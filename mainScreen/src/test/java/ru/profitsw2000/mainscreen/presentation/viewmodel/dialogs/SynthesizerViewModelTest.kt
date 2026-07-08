@@ -3,6 +3,7 @@ package ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs
 import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,6 +30,7 @@ import ru.profitsw2000.data.domain.bluetooth.BluetoothPacketManager
 import ru.profitsw2000.data.domain.bluetooth.BluetoothRepository
 import ru.profitsw2000.data.domain.pll.PLLRegisters1208PL1URepository
 import ru.profitsw2000.data.domain.state.RchmDissStateRepository
+import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
@@ -1092,11 +1094,16 @@ class SynthesizerViewModelTest {
             prwRegister = 0x700000,
             praRegister = 0x900000
         )
+        val outputModuleState = OutputModuleState(
+            transmitterIsOn = false
+        )
         val mockRchmDissState = RchmDissState(
-            synthesizerModuleState = synthesizerModuleState
+            synthesizerModuleState = synthesizerModuleState,
+            outputModuleState = outputModuleState
         )
         val mockSynthesizerPacket = byteArrayOf(0x53, 0x07, 0x02, 0x40, 0x1F, 0x40, 0x77)
         val mockOutputSetPacket = byteArrayOf(0x53, 0x06, 0x08, 0x55, 0x1F, 0xA8.toByte())
+        val expectedCalculatedBytes = byteArrayOf(0x13, 0x89.toByte())
         val mockSynthesizerStateModel = SynthesizerModuleStateModel(
             radiationMode = RadiationMode.LFM,
             lowestLfmFrequency = 13_280_000_000,
@@ -1110,7 +1117,7 @@ class SynthesizerViewModelTest {
             0x704000, 0x1, 0x2000A7, 0x401F40, 0x607D00, 0x840608, 0xA00002, 0xC00001, 0x1000A0, 0x3FA018, 0x500006, 0x900000
         )
         every { bluetoothPacketManager.getWriteToSynthesizerPacket(any()) } returns mockSynthesizerPacket
-        every { bluetoothPacketManager.getRchmDissOutputSetPacket(any()) } returns mockOutputSetPacket
+        every { bluetoothPacketManager.getRchmDissOutputSetPacket(expectedCalculatedBytes) } returns mockOutputSetPacket
         every { rchmDissStateRepository.rchmDissState } returns MutableStateFlow(mockRchmDissState)
 
         val lastPacketFlow = MutableSharedFlow<RcdInputPacketType>()
@@ -1235,7 +1242,34 @@ class SynthesizerViewModelTest {
             }
 
             coVerify(exactly = 1) { pllRegisters1208PL1URepository.getLfmRegisters(any()) }
-            coVerify(exactly = 25) { bluetoothRepository.bluetoothDataRepository.writeData(any()) }
+            coVerifySequence {
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(any())
+                bluetoothRepository.bluetoothDataRepository.writeData(mockOutputSetPacket)
+            }
+            //coVerify(exactly = 25) { bluetoothRepository.bluetoothDataRepository.writeData(any()) }
             coVerify(exactly = 2) { pllRegisters1208PL1URepository.getLfmParameters(any()) }
             coVerify(exactly = 1) { bluetoothPacketManager.getRchmDissOutputSetPacket(any()) }
             ensureAllEventsConsumed()

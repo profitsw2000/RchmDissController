@@ -122,7 +122,7 @@ class SynthesizerViewModel(
                     //Здесь отправляем пакет для установки сигнала Вкл_ЛЧМ
                     bluetoothRepository.bluetoothDataRepository.writeData(
                         bluetoothPacketManager.getRchmDissOutputSetPacket(
-                            getOutputModuleStateByteArray(isExtTriggerLfm, lfmPeriod)
+                            getOutputModuleStateByteArray(isExtTriggerLfm, lfmPeriod * 0.001)
                         )
                     )
 
