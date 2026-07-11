@@ -256,7 +256,7 @@ class MainFragment : Fragment() {
     }
 
     private fun getIndicatorColor(isActive: Boolean): Int {
-        return if (isActive) requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary)
+        return if (isActive) requireContext().getThemeColor(com.google.android.material.R.attr.colorOnSurface)
         else requireContext().getThemeColor(com.google.android.material.R.attr.colorOnSurfaceVariant)
     }
 

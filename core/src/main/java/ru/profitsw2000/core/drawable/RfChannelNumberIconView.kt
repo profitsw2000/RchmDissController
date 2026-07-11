@@ -14,7 +14,7 @@ class RfChannelNumberIconView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : androidx.appcompat.widget.AppCompatImageView(context, attrs, defStyleAttr) {
     private var rfChannelNumber: String = "0"
-    private var rfChannelIconColor: Int = Color.BLACK
+    var rfChannelIconColor: Int = Color.BLACK
     private var crossColor: Int = Color.RED // Цвет крестика по умолчанию
     private var showCross: Boolean = false   // Флаг отображения
 

@@ -1,16 +1,26 @@
 package ru.profitsw2000.mainscreen.presentation.view
 
+import android.content.Context
+import android.util.TypedValue
+import android.view.View
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.ViewModel
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import io.mockk.Matcher
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Description
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -20,9 +30,12 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import ru.profitsw2000.core.R
+import ru.profitsw2000.core.drawable.RfChannelNumberIconView
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissStateModel
+import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.presentation.viewmodel.MainViewModel
 import ru.profitsw2000.navigator.Navigator
+import kotlin.getValue
 
 class MainFragmentTest : KoinTest {
 
@@ -32,6 +45,17 @@ class MainFragmentTest : KoinTest {
     private val fakeRchmDissStateModelFlow = MutableStateFlow(RchmDissStateModel())
     private val fakeIsReceivedOutputControlPacket = MutableStateFlow(false)
     private val fakeClickActionSharedFlow = MutableSharedFlow<Int>(0)
+    private val context = ApplicationProvider.getApplicationContext<android.content.Context>().apply {
+        setTheme(R.style.Base_Theme_RchmDissController)
+    }
+
+    private val activeColor by lazy {
+        context.getThemeColor(com.google.android.material.R.attr.colorOnSurface)
+    }
+
+    private val inactiveColor by lazy {
+        context.getThemeColor(com.google.android.material.R.attr.colorOnSurfaceVariant)
+    }
 
     @Before
     fun setUp() {
@@ -50,6 +74,25 @@ class MainFragmentTest : KoinTest {
     @After
     fun tearDown() {
         stopKoin()
+    }
+
+    fun withIconColor(expectedColor: Int): BoundedMatcher<View, RfChannelNumberIconView> {
+        return object : BoundedMatcher<View, RfChannelNumberIconView>(RfChannelNumberIconView::class.java) {
+            override fun describeTo(description: Description) {
+                description.appendText("with icon color: $expectedColor")
+            }
+
+            override fun matchesSafely(item: RfChannelNumberIconView): Boolean {
+                return item.rfChannelIconColor == expectedColor
+            }
+        }
+    }
+
+    @ColorInt
+    fun Context.getThemeColor(@AttrRes attrRes: Int): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(attrRes, typedValue, true)
+        return typedValue.data
     }
 
     @Test
@@ -83,5 +126,53 @@ class MainFragmentTest : KoinTest {
 
         fakeClickActionSharedFlow.emit(3)
         verify(exactly = 1) {mockNavigator.navigateToSynthesizerSettingsDialog()}
+    }
+
+    @Test
+    fun активен_канал_3_передатчика(): Unit = runBlocking {
+        launchFragmentInContainer<MainFragment>(themeResId = R.style.Theme_RchmDissController)
+        val testState = RchmDissStateModel(
+            transmitterModuleState = TransmitterModuleState(enabledChannelNumber = 3)
+        )
+        fakeRchmDissStateModelFlow.emit(testState)
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_third_channel_icon_view))
+            .check(matches(withIconColor(activeColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_first_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_second_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_fourth_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_fifth_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+    }
+
+    @Test
+    fun неактивны_все_каналы_передатчика(): Unit = runBlocking {
+        launchFragmentInContainer<MainFragment>(themeResId = R.style.Theme_RchmDissController)
+        val testState = RchmDissStateModel(
+            transmitterModuleState = TransmitterModuleState(enabledChannelNumber = 0)
+        )
+        fakeRchmDissStateModelFlow.emit(testState)
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_third_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_first_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_second_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_fourth_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.tx_fifth_channel_icon_view))
+            .check(matches(withIconColor(inactiveColor)))
     }
 }
