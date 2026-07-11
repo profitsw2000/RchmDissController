@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -24,6 +25,7 @@ class BluetoothRepositoryImpl(
     override val bluetoothStateRepository = BluetoothStateRepositoryImpl(context, bluetoothAdapter)
     override val bluetoothConnectionRepository = BluetoothConnectionRepositoryImpl(context, bluetoothSocket, bluetoothAdapter)
     override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket)
+    @OptIn(ExperimentalCoroutinesApi::class)
     override val bluetoothBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
     .flatMapLatest { status ->
         if (status is BluetoothConnectionStatus.Connected) {

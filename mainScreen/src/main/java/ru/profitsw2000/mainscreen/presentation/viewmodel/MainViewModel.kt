@@ -54,7 +54,7 @@ class MainViewModel(
 
     private val _isReceivedOutputControlPacket: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isReceivedOutputControlPacket: StateFlow<Boolean> = _isReceivedOutputControlPacket.asStateFlow()
-    val clickActionSharedFlow: MutableSharedFlow<Int> = MutableSharedFlow<Int>(replay = 0)
+    val clickActionSharedFlow: MutableSharedFlow<Int> = MutableSharedFlow(replay = 0)
 
     init {
         monitorOutputControlPackets()

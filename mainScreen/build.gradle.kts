@@ -4,6 +4,19 @@ plugins {
 
 android {
     namespace = "ru.profitsw2000.mainscreen"
+
+    packaging {
+        resources {
+            // Исключаем дубликаты лицензий из сборки
+            excludes.add("META-INF/LICENSE.md")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/NOTICE.txt")
+            excludes.add("META-INF/LICENSE-notice.md")
+
+            // На всякий случай дублируем в pickFirsts
+            pickFirsts.add("META-INF/LICENSE.md")
+        }
+    }
 }
 
 dependencies {
