@@ -88,7 +88,7 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
                         is TransmitterUpdatingStatus.Idle -> setForms(state.transmitterModuleState, state.outputModuleState)
                         TransmitterUpdatingStatus.Success -> setStatusText(
                             resources.getColor(ru.profitsw2000.core.R.color.scarlet),
-                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
+                            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
                         )
                         TransmitterUpdatingStatus.Updating -> setProgressBar(true)
                     }
