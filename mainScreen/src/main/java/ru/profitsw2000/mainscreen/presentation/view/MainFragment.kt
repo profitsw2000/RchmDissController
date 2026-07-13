@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.view.MenuProvider
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import ru.profitsw2000.core.drawable.RfChannelNumberIconView
+import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RchmDissStateModel
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
@@ -127,6 +129,7 @@ class MainFragment : Fragment() {
         renderTransmitterData(rchmDissStateModel.transmitterModuleState)
         renderReceiverData(rchmDissStateModel.receiverModuleState)
         renderSynthesizerData(rchmDissStateModel.synthesizerModuleState)
+        renderOutputModuleStateData(rchmDissStateModel.outputModuleState)
     }
 
     private fun renderTransmitterData(
@@ -175,10 +178,17 @@ class MainFragment : Fragment() {
                 lowFrequency = synthesizerModuleStateModel.lowestLfmFrequency,
                 highFrequency = synthesizerModuleStateModel.highestLfmFrequency,
                 lfmPeriod = synthesizerModuleStateModel.lfmPeriod,
-                isSymmetricLfm = synthesizerModuleStateModel.isSymmetricLfm,
-                lfmExtTrigger = false
+                isSymmetricLfm = synthesizerModuleStateModel.isSymmetricLfm
             )
         }
+    }
+
+    private fun renderOutputModuleStateData(outputModuleState: OutputModuleState) = with(binding) {
+        transmitterStateIconView.setLabelColor(getIndicatorColor(outputModuleState.transmitterIsOn))
+        ImageViewCompat.setImageTintList(
+            lfmExternalTriggerStateImageView,
+            ColorStateList.valueOf(getIndicatorColor(outputModuleState.lfmExtTriggerIsOn))
+        )
     }
 
     private fun disableAllChannels(channelsList: List<RfChannelNumberIconView>) {
@@ -238,25 +248,23 @@ class MainFragment : Fragment() {
         lowFrequency: Long,
         highFrequency: Long,
         lfmPeriod: Double,
-        isSymmetricLfm: Boolean,
-        lfmExtTrigger: Boolean
+        isSymmetricLfm: Boolean
     ) = with(binding) {
         lfmExternalTriggerStateImageView.visibility = View.VISIBLE
-        lfmExternalTriggerStateImageView.imageTintList = ColorStateList.valueOf(getIndicatorColor(lfmExtTrigger))
         lfmSwingTypeIconView.visibility = View.VISIBLE
         lfmSwingTypeIconView.setLabelText(
             if (isSymmetricLfm) resources.getString(ru.profitsw2000.core.R.string.symmetric_lfm_icon_text)
-            else resources.getString(ru.profitsw2000.core.R.string.symmetric_lfm_icon_text)
+            else resources.getString(ru.profitsw2000.core.R.string.non_symmetric_lfm_icon_text)
         )
         periodValueTextView.visibility = View.VISIBLE
         periodValueTextView.text =
-            resources.getString(ru.profitsw2000.core.R.string.lfm_period_value_text, lfmPeriod)
+            resources.getString(ru.profitsw2000.core.R.string.lfm_period_value_text, lfmPeriod*1000)
         synthesizerModeIconView.setLabelText(resources.getString(ru.profitsw2000.core.R.string.lfm_synthesizer_mode_text))
         frequencyValueTextView.text = resources.getString(ru.profitsw2000.core.R.string.lfm_frequency_parameter_text, lowFrequency/1_000_000, highFrequency/1_000_000)
     }
 
     private fun getIndicatorColor(isActive: Boolean): Int {
-        return if (isActive) requireContext().getThemeColor(com.google.android.material.R.attr.colorOnPrimary)
+        return if (isActive) requireContext().getThemeColor(com.google.android.material.R.attr.colorOnSurface)
         else requireContext().getThemeColor(com.google.android.material.R.attr.colorOnSurfaceVariant)
     }
 

@@ -6,7 +6,7 @@ coreKtx = "1.18.0"
 ksp = "2.3.6"
 junit = "4.13.2"
 arch = "2.2.0"
-kotlinTest = "1.7.3"
+kotlinTest = "1.11.0"
 mockitoCore = "5.11.0"
 mockitoKotlin = "5.2.1"
 truth = "1.4.2"
@@ -60,6 +60,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
 io-mockk = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

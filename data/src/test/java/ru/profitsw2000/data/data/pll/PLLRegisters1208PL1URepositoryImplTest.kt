@@ -621,8 +621,7 @@ class PLLRegisters1208PL1URepositoryImplTest {
                 lfm3Register = listOf(0x500004, 0x00),
                 prwRegister = 0x700000,
                 praRegister = 0x900000,
-
-                )
+            )
         )
         val expectedParams = SynthesizerModuleStateModel().copy(
             radiationMode = RadiationMode.LFM,
