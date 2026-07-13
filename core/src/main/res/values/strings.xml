@@ -18,7 +18,7 @@
     <string name="lfm_synthesizer_mode_text">ЛЧМ</string>
     <string name="symmetric_lfm_icon_text">СИМ</string>
     <string name="non_symmetric_lfm_icon_text">НСМ</string>
-    <string name="lfm_period_value_text">%1$f мс</string>
+    <string name="lfm_period_value_text">%1$.1f мс</string>
     <string name="transmitter_switch_check_box_text">ВКЛ_ПРД</string>
     <string name="receiver_test_signal_switch_check_box_text">Вкл. пилот-сигнал</string>
     <string name="lfm_ext_trig_switch_check_box_text">Внешний запуск ЛЧМ</string>

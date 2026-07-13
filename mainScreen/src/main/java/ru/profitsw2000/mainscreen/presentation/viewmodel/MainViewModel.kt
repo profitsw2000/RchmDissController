@@ -42,6 +42,7 @@ class MainViewModel(
                     receiverModuleState = state.receiverModuleState,
                     transmitterModuleState = state.transmitterModuleState,
                     synthesizerModuleState = getSynthesizerParametersModel(state.synthesizerModuleState),
+                    outputModuleState = state.outputModuleState,
                     innerModuleTemperature = state.innerModuleTemperature,
                     readMemoryValue = state.readMemoryValue
                 )
