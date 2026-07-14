@@ -31,6 +31,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import ru.profitsw2000.core.R
+import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
+import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
 import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.presentation.view.bottomsheet.TransmitterBottomSheetDialogFragment
@@ -224,5 +226,50 @@ class TransmitterBottomSheetDialogFragmentTest : KoinTest {
 
         onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
             .check(matches(withText("Успешная отправка")))
+    }
+
+    @Test
+    fun ошибка_по_таймауту_получения_ответного_пакета(): Unit = runBlocking {
+        launchFragment<TransmitterBottomSheetDialogFragment>(themeResId = R.style.Theme_RchmDissController)
+
+        fakeStatusFlow.emit(TransmitterUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(isEnabled()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(isDisplayed()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withTextColor(expectedColor = scarletColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withText("Ошибка приёма ответного байта данных")))
+    }
+
+    @Test
+    fun неизвестная_ошибка(): Unit = runBlocking {
+        launchFragment<TransmitterBottomSheetDialogFragment>(themeResId = R.style.Theme_RchmDissController)
+
+        fakeStatusFlow.emit(TransmitterUpdatingStatus.Error(UNKNOWN_ERROR_CODE))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(isEnabled()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(isDisplayed()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withTextColor(expectedColor = scarletColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withText("Неизвестная ошибка")))
+
     }
 }
