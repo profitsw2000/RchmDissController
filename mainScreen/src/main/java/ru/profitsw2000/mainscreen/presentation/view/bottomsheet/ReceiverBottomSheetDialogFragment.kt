@@ -211,11 +211,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun setReceiverIncludedChannelsChips(receiverModuleState: ReceiverModuleState) = with(binding) {
         rxChannelSelectionChipGroup.clearCheck()
         when(receiverModuleState.enabledChannelNumber) {
-            TX_CHANNEL_1 -> firstChannelSelectionChip.isChecked = true
-            TX_CHANNEL_2 -> secondChannelSelectionChip.isChecked = true
-            TX_CHANNEL_3 -> thirdChannelSelectionChip.isChecked = true
-            TX_CHANNEL_4 -> fourthChannelSelectionChip.isChecked = true
-            TX_CHANNEL_5 -> fifthChannelSelectionChip.isChecked = true
+            1 -> firstChannelSelectionChip.isChecked = true
+            2 -> secondChannelSelectionChip.isChecked = true
+            3 -> thirdChannelSelectionChip.isChecked = true
+            4 -> fourthChannelSelectionChip.isChecked = true
+            5 -> fifthChannelSelectionChip.isChecked = true
             else -> rxChannelSelectionChipGroup.clearCheck()
         }
     }
