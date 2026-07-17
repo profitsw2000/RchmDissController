@@ -6,14 +6,18 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.testing.launchFragment
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.google.android.material.button.MaterialButton
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -34,6 +38,7 @@ import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.databinding.FragmentReceiverBottomSheetDialogBinding
 import ru.profitsw2000.mainscreen.presentation.view.bottomsheet.ReceiverBottomSheetDialogFragment
+import ru.profitsw2000.mainscreen.presentation.view.bottomsheet.TransmitterBottomSheetDialogFragment
 import ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs.ReceiverViewModel
 import ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs.TransmitterViewModel
 import ru.profitsw2000.mainscreen.state.ReceiverUpdatingStatus
@@ -308,5 +313,168 @@ class ReceiverBottomSheetDialogFragmentTest() : KoinTest {
 
         onView(withId(updatingStatusResultTextViewId))
             .check(matches(not(isDisplayed())))
+    }
+
+    @Test
+    fun нажата_кнопка_отправить_вкл_кан_4_прм_кан_3_4_5_заперты_вкл_атт_4_и_32_дБ_пс_выкл(): Unit = runBlocking {
+
+        val scenario = launchFragment<ReceiverBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var fourthChannelSelectionChipId = 0
+
+        var twoDecibelSelectionChipId = 0
+        var eightDecibelSelectionChipId = 0
+        var sixteenDecibelSelectionChipId = 0
+
+        var channel1LockSelectionChipId = 0
+        var channel2LockSelectionChipId = 0
+
+        var transmitterParamsSendButtonId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentReceiverBottomSheetDialogBinding.bind(fragment.requireView())
+
+            with(binding) {
+                fourthChannelSelectionChipId = fourthChannelSelectionChip.id
+
+                twoDecibelSelectionChipId = twoDecibelSelectionChip.id
+                eightDecibelSelectionChipId = eightDecibelSelectionChip.id
+                sixteenDecibelSelectionChipId = sixteenDecibelSelectionChip.id
+
+                channel1LockSelectionChipId = channel1LockSelectionChip.id
+                channel2LockSelectionChipId = channel2LockSelectionChip.id
+                transmitterParamsSendButtonId = transmitterParamsSendButton.id
+            }
+        }
+
+        Thread.sleep(400)
+
+        onView(withId(fourthChannelSelectionChipId))
+            .perform(click())
+
+        onView(withId(channel1LockSelectionChipId))
+            .perform(click())
+        onView(withId(channel2LockSelectionChipId))
+            .perform(click())
+
+        onView(withId(twoDecibelSelectionChipId))
+            .perform(click())
+        onView(withId(eightDecibelSelectionChipId))
+            .perform(click())
+        onView(withId(sixteenDecibelSelectionChipId))
+            .perform(click())
+
+        onView(withId(transmitterParamsSendButtonId))
+            .perform(click())
+
+        verify(exactly = 1) {
+            mockViewModel.updateReceiver(
+                byteArrayOf(0x76.toByte(), 0xF.toByte())
+            )
+        }
+    }
+
+    @Test
+    fun нажата_кнопка_отправить_все_кан_выкл_прм_кан_2_заперт_вкл_атт_8_и_16_дБ_пс_вкл(): Unit = runBlocking {
+
+        val scenario = launchFragment<ReceiverBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var firstChannelSelectionChipId = 0
+        var secondChannelSelectionChipId = 0
+        var thirdChannelSelectionChipId = 0
+        var fourthChannelSelectionChipId = 0
+        var fifthChannelSelectionChipId = 0
+
+        var twoDecibelSelectionChipId = 0
+        var fourDecibelSelectionChipId = 0
+        var eightDecibelSelectionChipId = 0
+        var sixteenDecibelSelectionChipId = 0
+        var thirtyTwoDecibelSelectionChipId = 0
+
+        var channel1LockSelectionChipId = 0
+        var channel2LockSelectionChipId = 0
+        var channel3LockSelectionChipId = 0
+        var channel4LockSelectionChipId = 0
+        var channel5LockSelectionChipId = 0
+
+        var receiverTestSignalSwitchCheckBoxId = 0
+        var transmitterParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentReceiverBottomSheetDialogBinding.bind(fragment.requireView())
+
+            with(binding) {
+                firstChannelSelectionChipId = firstChannelSelectionChip.id
+                secondChannelSelectionChipId = secondChannelSelectionChip.id
+                thirdChannelSelectionChipId = thirdChannelSelectionChip.id
+                fourthChannelSelectionChipId = fourthChannelSelectionChip.id
+                fifthChannelSelectionChipId = fifthChannelSelectionChip.id
+
+                twoDecibelSelectionChipId = twoDecibelSelectionChip.id
+                fourDecibelSelectionChipId = fourDecibelSelectionChip.id
+                eightDecibelSelectionChipId = eightDecibelSelectionChip.id
+                sixteenDecibelSelectionChipId = sixteenDecibelSelectionChip.id
+                thirtyTwoDecibelSelectionChipId = thirtyTwoDecibelChip.id
+
+                channel1LockSelectionChipId = channel1LockSelectionChip.id
+                channel2LockSelectionChipId = channel2LockSelectionChip.id
+                channel3LockSelectionChipId = channel3LockSelectionChip.id
+                channel4LockSelectionChipId = channel4LockSelectionChip.id
+                channel5LockSelectionChipId = channel5LockSelectionChip.id
+
+                receiverTestSignalSwitchCheckBoxId = receiverTestSignalSwitchCheckBox.id
+                transmitterParamsSendButtonId = transmitterParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        Thread.sleep(400)
+
+        onView(withId(channel1LockSelectionChipId))
+            .perform(click())
+        onView(withId(channel3LockSelectionChipId))
+            .perform(click())
+        onView(withId(channel4LockSelectionChipId))
+            .perform(click())
+        onView(withId(channel5LockSelectionChipId))
+            .perform(click())
+
+        onView(withId(twoDecibelSelectionChipId))
+            .perform(click())
+        onView(withId(fourDecibelSelectionChipId))
+            .perform(click())
+        onView(withId(thirtyTwoDecibelSelectionChipId))
+            .perform(click())
+
+        onView(withId(receiverTestSignalSwitchCheckBoxId))
+            .perform(click())
+
+        onView(withId(transmitterParamsSendButtonId))
+            .perform(click())
+
+        verify(exactly = 1) {
+            mockViewModel.updateReceiver(
+                byteArrayOf(0xFD.toByte(), 0x90.toByte())
+            )
+        }
+    }
+
+    @Test
+    fun кнопка_заблокирована_текст_статуса_очищен_в_состоянии_обновления(): Unit = runBlocking {
+        launchFragment<ReceiverBottomSheetDialogFragment>(themeResId = R.style.Theme_RchmDissController)
+
+        fakeStatusFlow.emit(ReceiverUpdatingStatus.Updating)
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(CoreMatchers.not(isEnabled())))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(withText("")))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(hasButtonIcon()))
     }
 }
