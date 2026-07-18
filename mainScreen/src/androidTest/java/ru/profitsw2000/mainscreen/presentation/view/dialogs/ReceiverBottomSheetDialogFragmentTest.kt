@@ -33,6 +33,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import ru.profitsw2000.core.R
+import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
+import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
 import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
@@ -484,7 +486,6 @@ class ReceiverBottomSheetDialogFragmentTest() : KoinTest {
         val scenario = launchFragment<ReceiverBottomSheetDialogFragment>(
             themeResId = R.style.Theme_RchmDissController
         )
-        fakeStatusFlow.emit(ReceiverUpdatingStatus.Success)
 
         var transmitterParamsSendButtonId = 0
         var updatingStatusResultTextViewId = 0
@@ -497,9 +498,11 @@ class ReceiverBottomSheetDialogFragmentTest() : KoinTest {
                 updatingStatusResultTextViewId = updatingStatusResultTextView.id
             }
         }
+        fakeStatusFlow.emit(ReceiverUpdatingStatus.Updating)
+        fakeStatusFlow.emit(ReceiverUpdatingStatus.Success)
 
         onView(withId(transmitterParamsSendButtonId))
-            .check(matches(isEnabled()))
+            .check(matches(not(isEnabled())))
 
         onView(withId(transmitterParamsSendButtonId))
             .check(matches(withText("ОТПРАВИТЬ")))
@@ -514,4 +517,78 @@ class ReceiverBottomSheetDialogFragmentTest() : KoinTest {
             .check(matches(withText("Успешная отправка")))
 
     }
+
+    @Test
+    fun ошибка_по_таймауту_получения_ответного_пакета(): Unit = runBlocking {
+        val scenario = launchFragment<ReceiverBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+
+        var transmitterParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentReceiverBottomSheetDialogBinding.bind(fragment.requireView())
+
+            with(binding) {
+                transmitterParamsSendButtonId = transmitterParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        fakeStatusFlow.emit(ReceiverUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE))
+
+        onView(withId(transmitterParamsSendButtonId))
+            .check(matches(isEnabled()))
+
+        onView(withId(transmitterParamsSendButtonId))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(isDisplayed()))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withTextColor(expectedColor = scarletColor)))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withText("Ошибка приёма ответного байта данных")))
+    }
+
+    @Test
+    fun неизвестная_ошибка(): Unit = runBlocking {
+        val scenario = launchFragment<ReceiverBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+
+        var transmitterParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentReceiverBottomSheetDialogBinding.bind(fragment.requireView())
+
+            with(binding) {
+                transmitterParamsSendButtonId = transmitterParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        fakeStatusFlow.emit(ReceiverUpdatingStatus.Error(UNKNOWN_ERROR_CODE))
+
+        onView(withId(transmitterParamsSendButtonId))
+            .check(matches(isEnabled()))
+
+        onView(withId(transmitterParamsSendButtonId))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(isDisplayed()))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withTextColor(expectedColor = scarletColor)))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withText("Неизвестная ошибка")))
+
+    }
+
 }

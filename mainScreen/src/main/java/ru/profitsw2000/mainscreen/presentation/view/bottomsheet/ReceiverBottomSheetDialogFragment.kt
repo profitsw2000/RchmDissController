@@ -15,6 +15,7 @@ import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import ru.profitsw2000.core.R
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_16_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_2_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_32_DECIBELS_BIT
@@ -98,10 +99,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     when(state) {
                         is ReceiverUpdatingStatus.Error -> handleError(state.errorCode)
                         is ReceiverUpdatingStatus.Idle -> setForms(state.receiverModuleState)
-                        is ReceiverUpdatingStatus.Success -> setStatusText(
-                            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
-                            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
-                        )
+                        is ReceiverUpdatingStatus.Success -> handleSuccess()
                         ReceiverUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
@@ -119,8 +117,12 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun handleSuccess() = with(binding) {
+        setProgressBar(false)
+        setStatusText(
+            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
+            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
+        )
         transmitterParamsSendButton.isEnabled = false
-
     }
 
     private fun setProgressBar(isUpdating: Boolean) = with(binding.transmitterParamsSendButton) {
