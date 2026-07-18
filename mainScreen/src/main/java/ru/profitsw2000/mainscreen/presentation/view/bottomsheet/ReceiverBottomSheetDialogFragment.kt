@@ -100,7 +100,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                         is ReceiverUpdatingStatus.Idle -> setForms(state.receiverModuleState)
                         is ReceiverUpdatingStatus.Success -> setStatusText(
                             resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
-                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
+                            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
                         )
                         ReceiverUpdatingStatus.Updating -> setProgressBar(true)
                     }
@@ -116,6 +116,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
         setProgressBar(false)
         setStatusText(resources.getColor(ru.profitsw2000.core.R.color.scarlet), statusText)
+    }
+
+    private fun handleSuccess() = with(binding) {
+        transmitterParamsSendButton.isEnabled = false
+
     }
 
     private fun setProgressBar(isUpdating: Boolean) = with(binding.transmitterParamsSendButton) {

@@ -477,4 +477,41 @@ class ReceiverBottomSheetDialogFragmentTest() : KoinTest {
         onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
             .check(matches(hasButtonIcon()))
     }
+
+    @Test
+    fun кнопка_заблокирована_текст_статуса_заполнен_в_состоянии_успешного_обновления(): Unit = runBlocking {
+
+        val scenario = launchFragment<ReceiverBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        fakeStatusFlow.emit(ReceiverUpdatingStatus.Success)
+
+        var transmitterParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentReceiverBottomSheetDialogBinding.bind(fragment.requireView())
+
+            with(binding) {
+                transmitterParamsSendButtonId = transmitterParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        onView(withId(transmitterParamsSendButtonId))
+            .check(matches(isEnabled()))
+
+        onView(withId(transmitterParamsSendButtonId))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(isDisplayed()))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withTextColor(expectedColor = eucaliptusColor)))
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withText("Успешная отправка")))
+
+    }
 }
