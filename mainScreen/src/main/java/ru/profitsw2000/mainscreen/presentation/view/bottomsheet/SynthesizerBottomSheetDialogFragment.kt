@@ -30,6 +30,7 @@ import ru.profitsw2000.core.drawable.utils.REGISTERS_CALCULATION_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.dpToPx
+import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
@@ -106,11 +107,9 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         synthesizerModeSelectionRadioGroup.setOnCheckedChangeListener { _, checkedId ->
             when(checkedId) {
                 R.id.cw_mode_radio_button -> {
-                    cwFrequencyTextInputLayout.visibility = View.VISIBLE
                     setLfmSettingsViewsVisibility(false)
                 }
                 R.id.lfm_mode_radio_button -> {
-                    cwFrequencyTextInputLayout.visibility = View.GONE
                     setLfmSettingsViewsVisibility(true)
                 }
             }
@@ -176,6 +175,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         val format = DecimalFormat("#.##", DecimalFormatSymbols(Locale.US))
 
         setProgressBar(false)
+        setLfmSettingsViewsVisibility(synthesizerModuleStateModel.radiationMode == RadiationMode.LFM)
         cwFrequencyTextInputEditText.setText((synthesizerModuleStateModel.cwFrequency/1_000_000).toString())
         lfmLowFrequencyTextInputEditText.setText((synthesizerModuleStateModel.lowestLfmFrequency/1_000_000).toString())
         lfmHighFrequencyTextInputEditText.setText((synthesizerModuleStateModel.highestLfmFrequency/1_000_000).toString())
@@ -284,12 +284,14 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun setLfmSettingsViewsVisibility(isVisible: Boolean) = with(binding) {
         if (isVisible) {
+            cwFrequencyTextInputLayout.visibility = View.GONE
             lfmLowFrequencyTextInputLayout.visibility = View.VISIBLE
             lfmHighFrequencyTextInputLayout.visibility = View.VISIBLE
             lfmPeriodTextInputLayout.visibility = View.VISIBLE
             lfmExtTriggerSwitchCheckBox.visibility = View.VISIBLE
             symmetricLfmCheckBox.visibility = View.VISIBLE
         } else {
+            cwFrequencyTextInputLayout.visibility = View.VISIBLE
             lfmLowFrequencyTextInputLayout.visibility = View.GONE
             lfmHighFrequencyTextInputLayout.visibility = View.GONE
             lfmPeriodTextInputLayout.visibility = View.GONE
