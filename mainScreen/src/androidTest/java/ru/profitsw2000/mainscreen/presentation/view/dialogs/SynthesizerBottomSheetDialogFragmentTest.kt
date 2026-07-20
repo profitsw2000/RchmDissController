@@ -7,6 +7,7 @@ import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragment
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.isChecked
@@ -16,6 +17,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.google.android.material.button.MaterialButton
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Description
@@ -438,5 +440,176 @@ class SynthesizerBottomSheetDialogFragmentTest : KoinTest {
 
         onView(withId(lfmExtTriggerSwitchCheckBoxId))
             .check(matches(isChecked()))
+    }
+
+    @Test
+    fun нажато_отправить_НГ_13285_МГц(): Unit = runBlocking {
+        val idleState = SynthesizerUpdatingStatus.Idle(
+            SynthesizerModuleStateModel(
+                radiationMode = RadiationMode.CW,
+                cwFrequency = 13_285_000_000
+            ),
+            OutputModuleState()
+        )
+        fakeStatusFlow.emit(idleState)
+
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+
+        var cwModeRadioButtonId = 0
+        var cwFrequencyTextInputLayoutId = 0
+        var cwFrequencyTextInputEditTextId = 0
+        var lfmModeRadioButtonId = 0
+        var lfmLowFrequencyTextInputLayoutId = 0
+        var lfmLowFrequencyTextInputEditTextId = 0
+        var lfmHighFrequencyTextInputLayoutId = 0
+        var lfmHighFrequencyTextInputEditTextId = 0
+        var lfmPeriodTextInputLayoutId = 0
+        var lfmPeriodTextInputEditTextId = 0
+        var symmetricLfmCheckBoxId = 0
+        var lfmExtTriggerSwitchCheckBoxId = 0
+        var synthesizerParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                cwModeRadioButtonId = cwModeRadioButton.id
+                cwFrequencyTextInputLayoutId = cwFrequencyTextInputLayout.id
+                cwFrequencyTextInputEditTextId = cwFrequencyTextInputEditText.id
+                lfmModeRadioButtonId = lfmModeRadioButton.id
+                lfmLowFrequencyTextInputLayoutId = lfmLowFrequencyTextInputLayout.id
+                lfmLowFrequencyTextInputEditTextId = lfmLowFrequencyTextInputEditText.id
+                lfmHighFrequencyTextInputLayoutId = lfmHighFrequencyTextInputLayout.id
+                lfmHighFrequencyTextInputEditTextId = lfmHighFrequencyTextInputEditText.id
+                lfmPeriodTextInputLayoutId = lfmPeriodTextInputLayout.id
+                lfmPeriodTextInputEditTextId = lfmPeriodTextInputEditText.id
+                symmetricLfmCheckBoxId = symmetricLfmCheckBox.id
+                lfmExtTriggerSwitchCheckBoxId = lfmExtTriggerSwitchCheckBox.id
+                synthesizerParamsSendButtonId = synthesizerParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        Thread.sleep(400)
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .perform(click())
+
+        verify(exactly = 1) { mockViewModel.updateSynthesizerCwMode(13_285) }
+    }
+
+    @Test
+    fun нажато_отправить_ЛЧМ_13285_13390_МГц_50_мс_СМ_внутр_зап(): Unit = runBlocking {
+        val idleState = SynthesizerUpdatingStatus.Idle(
+            SynthesizerModuleStateModel(
+                radiationMode = RadiationMode.LFM,
+                lowestLfmFrequency = 13_285_000_000,
+                highestLfmFrequency = 13_390_000_000,
+                lfmPeriod = 0.05,
+                isSymmetricLfm = true
+            ),
+            OutputModuleState()
+        )
+        fakeStatusFlow.emit(idleState)
+
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+
+        var cwModeRadioButtonId = 0
+        var cwFrequencyTextInputLayoutId = 0
+        var cwFrequencyTextInputEditTextId = 0
+        var lfmModeRadioButtonId = 0
+        var lfmLowFrequencyTextInputLayoutId = 0
+        var lfmLowFrequencyTextInputEditTextId = 0
+        var lfmHighFrequencyTextInputLayoutId = 0
+        var lfmHighFrequencyTextInputEditTextId = 0
+        var lfmPeriodTextInputLayoutId = 0
+        var lfmPeriodTextInputEditTextId = 0
+        var symmetricLfmCheckBoxId = 0
+        var lfmExtTriggerSwitchCheckBoxId = 0
+        var synthesizerParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                cwModeRadioButtonId = cwModeRadioButton.id
+                cwFrequencyTextInputLayoutId = cwFrequencyTextInputLayout.id
+                cwFrequencyTextInputEditTextId = cwFrequencyTextInputEditText.id
+                lfmModeRadioButtonId = lfmModeRadioButton.id
+                lfmLowFrequencyTextInputLayoutId = lfmLowFrequencyTextInputLayout.id
+                lfmLowFrequencyTextInputEditTextId = lfmLowFrequencyTextInputEditText.id
+                lfmHighFrequencyTextInputLayoutId = lfmHighFrequencyTextInputLayout.id
+                lfmHighFrequencyTextInputEditTextId = lfmHighFrequencyTextInputEditText.id
+                lfmPeriodTextInputLayoutId = lfmPeriodTextInputLayout.id
+                lfmPeriodTextInputEditTextId = lfmPeriodTextInputEditText.id
+                symmetricLfmCheckBoxId = symmetricLfmCheckBox.id
+                lfmExtTriggerSwitchCheckBoxId = lfmExtTriggerSwitchCheckBox.id
+                synthesizerParamsSendButtonId = synthesizerParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        Thread.sleep(400)
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .perform(click())
+
+        verify(exactly = 1) {
+            mockViewModel.updateSynthesizerLfmMode(
+                startFrequency = 13_285,
+                stopFrequency = 13_390,
+                lfmPeriod = 50.0,
+                isSymmetricLfm = true,
+                isExtTriggerLfm = false
+            )
+        }
+    }
+
+    @Test
+    fun нажато_отправить_ЛЧМ_13285_13315_МГц_1_мс_НСМ_внеш_зап(): Unit = runBlocking {
+        val idleState = SynthesizerUpdatingStatus.Idle(
+            SynthesizerModuleStateModel(
+                radiationMode = RadiationMode.LFM,
+                lowestLfmFrequency = 13_285_000_000,
+                highestLfmFrequency = 13_315_000_000,
+                lfmPeriod = 0.001,
+                isSymmetricLfm = false
+            ),
+            OutputModuleState(
+                lfmExtTriggerIsOn = true
+            )
+        )
+        fakeStatusFlow.emit(idleState)
+
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var synthesizerParamsSendButtonId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                synthesizerParamsSendButtonId = synthesizerParamsSendButton.id
+            }
+        }
+
+        Thread.sleep(400)
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .perform(click())
+
+        verify(exactly = 1) {
+            mockViewModel.updateSynthesizerLfmMode(
+                startFrequency = 13_285,
+                stopFrequency = 13_315,
+                lfmPeriod = 1.0,
+                isSymmetricLfm = false,
+                isExtTriggerLfm = true
+            )
+        }
     }
 }
