@@ -61,8 +61,9 @@ class SynthesizerViewModel(
                 val lfmParams = pllRegisters1208PL1URepository.getLfmParameters(
                         rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
                     )
-                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Idle(lfmParams)
-
+                val outputParams = rchmDissStateRepository.rchmDissState.value.outputModuleState
+                _synthesizerUpdatingStatusFlow.value =
+                    SynthesizerUpdatingStatus.Idle(lfmParams, outputParams)
             } catch (exc: Exception) {
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
             }
@@ -84,9 +85,10 @@ class SynthesizerViewModel(
 
                     _synthesizerUpdatingStatusFlow.value =
                         SynthesizerUpdatingStatus.Idle(
-                            pllRegisters1208PL1URepository.getLfmParameters(
+                            synthesizerModuleStateModel = pllRegisters1208PL1URepository.getLfmParameters(
                                 rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
-                            )
+                            ),
+                            outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
                         )
                 } catch (exc: TimeoutCancellationException) {
                     _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
@@ -132,9 +134,10 @@ class SynthesizerViewModel(
 
                     _synthesizerUpdatingStatusFlow.value =
                         SynthesizerUpdatingStatus.Idle(
-                            pllRegisters1208PL1URepository.getLfmParameters(
+                            synthesizerModuleStateModel = pllRegisters1208PL1URepository.getLfmParameters(
                                 rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
-                            )
+                            ),
+                            outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
                         )
                 } catch (exc: TimeoutCancellationException) {
                     _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
