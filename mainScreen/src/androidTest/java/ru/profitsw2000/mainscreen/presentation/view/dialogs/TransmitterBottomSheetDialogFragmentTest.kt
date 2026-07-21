@@ -1,18 +1,27 @@
 package ru.profitsw2000.mainscreen.presentation.view.dialogs
 
+import android.view.View
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.testing.launchFragment
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
+import com.google.android.material.button.MaterialButton
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.not
+import org.hamcrest.Description
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -22,6 +31,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import ru.profitsw2000.core.R
+import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
+import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
 import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.TransmitterModuleState
 import ru.profitsw2000.mainscreen.presentation.view.bottomsheet.TransmitterBottomSheetDialogFragment
@@ -37,6 +48,37 @@ class TransmitterBottomSheetDialogFragmentTest : KoinTest {
         outputModuleState = OutputModuleState(transmitterIsOn = false)
     )
     private val fakeStatusFlow = MutableStateFlow<TransmitterUpdatingStatus>(fakeInitialState)
+    private val scarletColor by lazy {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        ContextCompat.getColor(context, R.color.scarlet)
+    }
+    private val eucaliptusColor by lazy {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        ContextCompat.getColor(context, R.color.eucaliptus)
+    }
+
+    fun hasButtonIcon(): BoundedMatcher<View, MaterialButton> {
+        return object : BoundedMatcher<View, MaterialButton>(MaterialButton::class.java) {
+            override fun describeTo(description: Description) {
+                description.appendText("has a non-null icon drawable")
+            }
+
+            override fun matchesSafely(button: MaterialButton): Boolean {
+                return button.icon != null
+            }
+        }
+    }
+    fun withTextColor(expectedColor: Int): BoundedMatcher<View, TextView> {
+        return object : BoundedMatcher<View, TextView>(TextView::class.java) {
+            override fun describeTo(description: Description) {
+                description.appendText("with text color: $expectedColor")
+            }
+
+            override fun matchesSafely(textView: TextView): Boolean {
+                return textView.currentTextColor == expectedColor
+            }
+        }
+    }
 
     @Before
     fun setUp() {
@@ -146,6 +188,88 @@ class TransmitterBottomSheetDialogFragmentTest : KoinTest {
         verify(exactly = 1) {
             mockViewModel.updateTransmitter(0x02.toByte(), turnTransmitterOn = false)
         }
+    }
+
+    @Test
+    fun кнопка_заблокирована_текст_статуса_очищен_в_состоянии_обновления(): Unit = runBlocking {
+        launchFragment<TransmitterBottomSheetDialogFragment>(themeResId = R.style.Theme_RchmDissController)
+
+        fakeStatusFlow.emit(TransmitterUpdatingStatus.Updating)
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(not(isEnabled())))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(withText("")))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(hasButtonIcon()))
+    }
+
+    @Test
+    fun кнопка_разблокирована_текст_статуса_заполнен_в_состоянии_успешного_обновления(): Unit = runBlocking {
+        launchFragment<TransmitterBottomSheetDialogFragment>(themeResId = R.style.Theme_RchmDissController)
+
+        fakeStatusFlow.emit(TransmitterUpdatingStatus.Success)
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(isEnabled()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(isDisplayed()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withTextColor(expectedColor = eucaliptusColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withText("Успешная отправка")))
+    }
+
+    @Test
+    fun ошибка_по_таймауту_получения_ответного_пакета(): Unit = runBlocking {
+        launchFragment<TransmitterBottomSheetDialogFragment>(themeResId = R.style.Theme_RchmDissController)
+
+        fakeStatusFlow.emit(TransmitterUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(isEnabled()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(isDisplayed()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withTextColor(expectedColor = scarletColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withText("Ошибка приёма ответного байта данных")))
+    }
+
+    @Test
+    fun неизвестная_ошибка(): Unit = runBlocking {
+        launchFragment<TransmitterBottomSheetDialogFragment>(themeResId = R.style.Theme_RchmDissController)
+
+        fakeStatusFlow.emit(TransmitterUpdatingStatus.Error(UNKNOWN_ERROR_CODE))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(isEnabled()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.transmitter_params_send_button))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(isDisplayed()))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withTextColor(expectedColor = scarletColor)))
+
+        onView(withId(ru.profitsw2000.mainscreen.R.id.updating_status_result_text_view))
+            .check(matches(withText("Неизвестная ошибка")))
 
     }
 }

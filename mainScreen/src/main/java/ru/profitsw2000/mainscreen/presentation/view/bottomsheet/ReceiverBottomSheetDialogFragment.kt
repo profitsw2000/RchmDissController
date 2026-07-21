@@ -15,6 +15,7 @@ import com.google.android.material.progressindicator.IndeterminateDrawable
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import ru.profitsw2000.core.R
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_16_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_2_DECIBELS_BIT
 import ru.profitsw2000.core.drawable.utils.ATTENUATOR_32_DECIBELS_BIT
@@ -98,10 +99,7 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     when(state) {
                         is ReceiverUpdatingStatus.Error -> handleError(state.errorCode)
                         is ReceiverUpdatingStatus.Idle -> setForms(state.receiverModuleState)
-                        is ReceiverUpdatingStatus.Success -> setStatusText(
-                            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
-                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
-                        )
+                        is ReceiverUpdatingStatus.Success -> handleSuccess()
                         ReceiverUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
@@ -116,6 +114,15 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
         setProgressBar(false)
         setStatusText(resources.getColor(ru.profitsw2000.core.R.color.scarlet), statusText)
+    }
+
+    private fun handleSuccess() = with(binding) {
+        setProgressBar(false)
+        setStatusText(
+            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
+            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
+        )
+        transmitterParamsSendButton.isEnabled = false
     }
 
     private fun setProgressBar(isUpdating: Boolean) = with(binding.transmitterParamsSendButton) {
@@ -211,11 +218,11 @@ class ReceiverBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun setReceiverIncludedChannelsChips(receiverModuleState: ReceiverModuleState) = with(binding) {
         rxChannelSelectionChipGroup.clearCheck()
         when(receiverModuleState.enabledChannelNumber) {
-            TX_CHANNEL_1 -> firstChannelSelectionChip.isChecked = true
-            TX_CHANNEL_2 -> secondChannelSelectionChip.isChecked = true
-            TX_CHANNEL_3 -> thirdChannelSelectionChip.isChecked = true
-            TX_CHANNEL_4 -> fourthChannelSelectionChip.isChecked = true
-            TX_CHANNEL_5 -> fifthChannelSelectionChip.isChecked = true
+            1 -> firstChannelSelectionChip.isChecked = true
+            2 -> secondChannelSelectionChip.isChecked = true
+            3 -> thirdChannelSelectionChip.isChecked = true
+            4 -> fourthChannelSelectionChip.isChecked = true
+            5 -> fifthChannelSelectionChip.isChecked = true
             else -> rxChannelSelectionChipGroup.clearCheck()
         }
     }
