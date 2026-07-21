@@ -30,6 +30,8 @@ import ru.profitsw2000.core.drawable.utils.REGISTERS_CALCULATION_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.RESPONSE_PACKET_TIMEOUT_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.UNKNOWN_ERROR_CODE
 import ru.profitsw2000.core.drawable.utils.dpToPx
+import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
+import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.mainscreen.R
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
@@ -89,12 +91,10 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                     when(state) {
                         is SynthesizerUpdatingStatus.Error -> handleError(state.errorCode)
                         is SynthesizerUpdatingStatus.Idle -> setForms(
-                            state.synthesizerModuleStateModel
+                            state.synthesizerModuleStateModel,
+                            state.outputModuleState
                         )
-                        is SynthesizerUpdatingStatus.Success -> setStatusText(
-                            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
-                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
-                        )
+                        is SynthesizerUpdatingStatus.Success -> handleSuccess()
                         SynthesizerUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
@@ -106,11 +106,9 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         synthesizerModeSelectionRadioGroup.setOnCheckedChangeListener { _, checkedId ->
             when(checkedId) {
                 R.id.cw_mode_radio_button -> {
-                    cwFrequencyTextInputLayout.visibility = View.VISIBLE
                     setLfmSettingsViewsVisibility(false)
                 }
                 R.id.lfm_mode_radio_button -> {
-                    cwFrequencyTextInputLayout.visibility = View.GONE
                     setLfmSettingsViewsVisibility(true)
                 }
             }
@@ -146,6 +144,15 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
+    private fun handleSuccess() = with(binding) {
+        setProgressBar(false)
+        setStatusText(
+            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
+            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
+        )
+        synthesizerParamsSendButton.isEnabled = false
+    }
+
     private fun handleError(errorCode: Int) {
         setProgressBar(false)
 
@@ -172,15 +179,20 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             handlePacketSendingError(errorCode)
     }
 
-    private fun setForms(synthesizerModuleStateModel: SynthesizerModuleStateModel) = with(binding) {
+    private fun setForms(
+        synthesizerModuleStateModel: SynthesizerModuleStateModel,
+        outputModuleState: OutputModuleState
+    ) = with(binding) {
         val format = DecimalFormat("#.##", DecimalFormatSymbols(Locale.US))
 
         setProgressBar(false)
+        setLfmSettingsViewsVisibility(synthesizerModuleStateModel.radiationMode == RadiationMode.LFM)
         cwFrequencyTextInputEditText.setText((synthesizerModuleStateModel.cwFrequency/1_000_000).toString())
         lfmLowFrequencyTextInputEditText.setText((synthesizerModuleStateModel.lowestLfmFrequency/1_000_000).toString())
         lfmHighFrequencyTextInputEditText.setText((synthesizerModuleStateModel.highestLfmFrequency/1_000_000).toString())
         lfmPeriodTextInputEditText.setText(format.format(synthesizerModuleStateModel.lfmPeriod*1_000))
         symmetricLfmCheckBox.isChecked = synthesizerModuleStateModel.isSymmetricLfm
+        lfmExtTriggerSwitchCheckBox.isChecked = outputModuleState.lfmExtTriggerIsOn
     }
 
     private fun handleCwFrequencyInputError(errorCode: Int) = with(binding) {
@@ -284,12 +296,18 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun setLfmSettingsViewsVisibility(isVisible: Boolean) = with(binding) {
         if (isVisible) {
+            cwModeRadioButton.isChecked = false
+            lfmModeRadioButton.isChecked = true
+            cwFrequencyTextInputLayout.visibility = View.GONE
             lfmLowFrequencyTextInputLayout.visibility = View.VISIBLE
             lfmHighFrequencyTextInputLayout.visibility = View.VISIBLE
             lfmPeriodTextInputLayout.visibility = View.VISIBLE
             lfmExtTriggerSwitchCheckBox.visibility = View.VISIBLE
             symmetricLfmCheckBox.visibility = View.VISIBLE
         } else {
+            cwModeRadioButton.isChecked = true
+            lfmModeRadioButton.isChecked = false
+            cwFrequencyTextInputLayout.visibility = View.VISIBLE
             lfmLowFrequencyTextInputLayout.visibility = View.GONE
             lfmHighFrequencyTextInputLayout.visibility = View.GONE
             lfmPeriodTextInputLayout.visibility = View.GONE

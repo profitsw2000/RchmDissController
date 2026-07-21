@@ -87,8 +87,8 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
                         is TransmitterUpdatingStatus.Error -> handleError(state.errorCode)
                         is TransmitterUpdatingStatus.Idle -> setForms(state.transmitterModuleState, state.outputModuleState)
                         TransmitterUpdatingStatus.Success -> setStatusText(
-                            resources.getColor(ru.profitsw2000.core.R.color.scarlet),
-                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
+                            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
+                            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
                         )
                         TransmitterUpdatingStatus.Updating -> setProgressBar(true)
                     }
@@ -133,11 +133,11 @@ class TransmitterBottomSheetDialogFragment : BottomSheetDialogFragment() {
         setProgressBar(false)
         rxChannelSelectionChipGroup.clearCheck()
         when(transmitterModuleState.enabledChannelNumber) {
-            TX_CHANNEL_1 -> firstChannelSelectionChip.isChecked = true
-            TX_CHANNEL_2 -> secondChannelSelectionChip.isChecked = true
-            TX_CHANNEL_3 -> thirdChannelSelectionChip.isChecked = true
-            TX_CHANNEL_4 -> fourthChannelSelectionChip.isChecked = true
-            TX_CHANNEL_5 -> fifthChannelSelectionChip.isChecked = true
+            1 -> firstChannelSelectionChip.isChecked = true
+            2 -> secondChannelSelectionChip.isChecked = true
+            3 -> thirdChannelSelectionChip.isChecked = true
+            4 -> fourthChannelSelectionChip.isChecked = true
+            5 -> fifthChannelSelectionChip.isChecked = true
             else -> rxChannelSelectionChipGroup.clearCheck()
         }
         switchTransmitterOnCheckBox.isChecked = outputModuleState.transmitterIsOn

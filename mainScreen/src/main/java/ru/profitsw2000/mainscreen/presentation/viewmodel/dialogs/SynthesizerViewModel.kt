@@ -2,6 +2,7 @@ package ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
@@ -42,7 +43,8 @@ class SynthesizerViewModel(
     private val rchmDissStateRepository: RchmDissStateRepository,
     private val bluetoothRepository: BluetoothRepository,
     private val bluetoothPacketManager: BluetoothPacketManager,
-    private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository
+    private val pllRegisters1208PL1URepository: PLLRegisters1208PL1URepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
     private val _synthesizerUpdatingStatusFlow = MutableStateFlow<SynthesizerUpdatingStatus>(
         SynthesizerUpdatingStatus.Updating
@@ -56,13 +58,12 @@ class SynthesizerViewModel(
     private fun loadSynthesizerInitialParameters() {
         viewModelScope.launch {
             try {
-                val lfmParams = withContext(Dispatchers.IO) {
-                    pllRegisters1208PL1URepository.getLfmParameters(
+                val lfmParams = pllRegisters1208PL1URepository.getLfmParameters(
                         rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
                     )
-                }
-                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Idle(lfmParams)
-
+                val outputParams = rchmDissStateRepository.rchmDissState.value.outputModuleState
+                _synthesizerUpdatingStatusFlow.value =
+                    SynthesizerUpdatingStatus.Idle(lfmParams, outputParams)
             } catch (exc: Exception) {
                 _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
             }
@@ -77,8 +78,22 @@ class SynthesizerViewModel(
                 try {
                     val registersList = pllRegisters1208PL1URepository.getCwRegisters(frequency * 1_000_000)
                     updateSynthesizer(registersList)
-                } catch (e: Exception) {
-                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(REGISTERS_CALCULATION_ERROR_CODE)
+
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Success
+
+                    delay(500.milliseconds)
+
+                    _synthesizerUpdatingStatusFlow.value =
+                        SynthesizerUpdatingStatus.Idle(
+                            synthesizerModuleStateModel = pllRegisters1208PL1URepository.getLfmParameters(
+                                rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
+                            ),
+                            outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
+                        )
+                } catch (exc: TimeoutCancellationException) {
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
+                } catch (exc: Exception) {
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
                 }
             }
         }
@@ -106,52 +121,45 @@ class SynthesizerViewModel(
                 try {
                     val registersList = pllRegisters1208PL1URepository.getLfmRegisters(lfmParameters)
                     updateSynthesizer(registersList)
-
                     //Здесь отправляем пакет для установки сигнала Вкл_ЛЧМ
-                    launch {
-                        bluetoothRepository.bluetoothDataRepository.writeData(
-                            bluetoothPacketManager.getRchmDissOutputSetPacket(
-                                getOutputModuleStateByteArray(isExtTriggerLfm, lfmPeriod)
-                            )
+                    bluetoothRepository.bluetoothDataRepository.writeData(
+                        bluetoothPacketManager.getRchmDissOutputSetPacket(
+                            getOutputModuleStateByteArray(isExtTriggerLfm, lfmPeriod * 0.001)
                         )
-                    }
-                } catch (e: Exception) {
-                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(REGISTERS_CALCULATION_ERROR_CODE)
+                    )
+
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Success
+
+                    delay(500.milliseconds)
+
+                    _synthesizerUpdatingStatusFlow.value =
+                        SynthesizerUpdatingStatus.Idle(
+                            synthesizerModuleStateModel = pllRegisters1208PL1URepository.getLfmParameters(
+                                rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
+                            ),
+                            outputModuleState = rchmDissStateRepository.rchmDissState.value.outputModuleState
+                        )
+                } catch (exc: TimeoutCancellationException) {
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
+                } catch (exc: Exception) {
+                    _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
                 }
             }
         }
         else _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(errorCode)
     }
 
-    private fun updateSynthesizer(synthesizerRegisters: List<Int>) {
-        viewModelScope.launch {
-            try {
-                for (register in synthesizerRegisters) {
-                    bluetoothRepository.bluetoothDataRepository.writeData(
-                        bluetoothPacketManager.getWriteToSynthesizerPacket(
-                            register.toRegisterByteArray()
-                        )
-                    )
-                    withTimeout(5000L.milliseconds) {
-                        rchmDissStateRepository.lastPacket.first {
-                            it == RcdInputPacketType.SynthesizerStateInputPacket
-                        }
-                    }
+    private suspend fun updateSynthesizer(synthesizerRegisters: List<Int>) {
+        for (register in synthesizerRegisters) {
+            bluetoothRepository.bluetoothDataRepository.writeData(
+                bluetoothPacketManager.getWriteToSynthesizerPacket(
+                    register.toRegisterByteArray()
+                )
+            )
+            withTimeout(5000L.milliseconds) {
+                rchmDissStateRepository.lastPacket.first {
+                    it == RcdInputPacketType.SynthesizerStateInputPacket
                 }
-                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Success
-
-                delay(500.milliseconds)
-
-                _synthesizerUpdatingStatusFlow.value =
-                    SynthesizerUpdatingStatus.Idle(
-                        pllRegisters1208PL1URepository.getLfmParameters(
-                            rchmDissStateRepository.rchmDissState.value.synthesizerModuleState
-                        )
-                    )
-            } catch (exc: TimeoutCancellationException) {
-                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(RESPONSE_PACKET_TIMEOUT_ERROR_CODE)
-            } catch (exc: Exception) {
-                _synthesizerUpdatingStatusFlow.value = SynthesizerUpdatingStatus.Error(UNKNOWN_ERROR_CODE)
             }
         }
     }

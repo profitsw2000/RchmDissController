@@ -16,8 +16,8 @@ class RfStateIndicatorIconView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr){
 
-    private var rfStateText: String = ""
-    private var rfStateIconColor: Int = Color.BLACK
+    var rfStateText: String = ""
+    var rfStateIconColor: Int = Color.BLACK
     private var rfStateIconPadding: Float = 16f
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
