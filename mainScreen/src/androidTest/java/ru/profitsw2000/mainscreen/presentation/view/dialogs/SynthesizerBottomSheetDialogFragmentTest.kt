@@ -12,9 +12,11 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputLayout
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -31,11 +33,13 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import ru.profitsw2000.core.R
+import ru.profitsw2000.core.drawable.utils.CW_FREQUENCY_UNDER_INPUT_ERROR
 import ru.profitsw2000.data.model.bluetooth.state.rcd.OutputModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.RadiationMode
 import ru.profitsw2000.data.model.bluetooth.state.rcd.ReceiverModuleState
 import ru.profitsw2000.data.model.bluetooth.state.rcd.SynthesizerModuleStateModel
 import ru.profitsw2000.mainscreen.databinding.FragmentSynthesizerBottomSheetDialogBinding
+import ru.profitsw2000.mainscreen.presentation.view.bottomsheet.ReceiverBottomSheetDialogFragment
 import ru.profitsw2000.mainscreen.presentation.view.bottomsheet.SynthesizerBottomSheetDialogFragment
 import ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs.ReceiverViewModel
 import ru.profitsw2000.mainscreen.presentation.viewmodel.dialogs.SynthesizerViewModel
@@ -79,6 +83,19 @@ class SynthesizerBottomSheetDialogFragmentTest : KoinTest {
 
             override fun matchesSafely(textView: TextView): Boolean {
                 return textView.currentTextColor == expectedColor
+            }
+        }
+    }
+
+    fun hasTextInputLayoutError(expectedErrorText: String): BoundedMatcher<View, TextInputLayout> {
+        return object : BoundedMatcher<View, TextInputLayout>(TextInputLayout::class.java) {
+            override fun describeTo(description: Description) {
+                description.appendText("with error text: $expectedErrorText")
+            }
+
+            override fun matchesSafely(textInputLayout: TextInputLayout): Boolean {
+                val error = textInputLayout.error ?: return false
+                return error.contains(expectedErrorText)//expectedErrorText == error.toString()
             }
         }
     }
@@ -611,5 +628,195 @@ class SynthesizerBottomSheetDialogFragmentTest : KoinTest {
                 isExtTriggerLfm = true
             )
         }
+    }
+
+    @Test
+    fun тест_элементов_отображения_в_состоянии_обновления(): Unit = runBlocking {
+        val updateState = SynthesizerUpdatingStatus.Updating
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var synthesizerParamsSendButtonId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                synthesizerParamsSendButtonId = synthesizerParamsSendButton.id
+            }
+        }
+
+        fakeStatusFlow.emit(updateState)
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .check(matches(not(isEnabled())))
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .check(matches(withText("")))
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .check(matches(hasButtonIcon()))
+    }
+
+    @Test
+    fun успешное_обновление_синтезатора(): Unit = runBlocking {
+        val successState = SynthesizerUpdatingStatus.Success
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var synthesizerParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                synthesizerParamsSendButtonId = synthesizerParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        fakeStatusFlow.emit(successState)
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .check(matches(not(isEnabled())))
+        onView(withId(synthesizerParamsSendButtonId))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(isDisplayed()))
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withTextColor(eucaliptusColor)))
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withText("Успешная отправка")))
+    }
+
+    @Test
+    fun ошибка_ввода_в_поле_частоты_НГ(): Unit = runBlocking {
+        val errorState = SynthesizerUpdatingStatus.Error(CW_FREQUENCY_UNDER_INPUT_ERROR)
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var cwFrequencyTextInputLayoutId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                cwFrequencyTextInputLayoutId = ru.profitsw2000.mainscreen.R.id.cw_frequency_text_input_layout
+            }
+        }
+
+        fakeStatusFlow.emit(errorState)
+
+        onView(withId(cwFrequencyTextInputLayoutId))
+            .check(matches(hasTextInputLayoutError("Не менее 13250 МГц")))
+
+    }
+
+    @Test
+    fun ошибка_ввода_в_поле_нижн_и_верхн_частоты_ЛЧМ(): Unit = runBlocking {
+        val idleState = SynthesizerUpdatingStatus.Idle(
+            synthesizerModuleStateModel = SynthesizerModuleStateModel(
+                radiationMode = RadiationMode.LFM
+            ),
+            OutputModuleState()
+        )
+        val errorState = SynthesizerUpdatingStatus.Error(0xA)
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var lfmLowFrequencyTextInputLayoutId = 0
+        var lfmHighFrequencyTextInputLayoutId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                lfmLowFrequencyTextInputLayoutId = lfmLowFrequencyTextInputLayout.id
+                lfmHighFrequencyTextInputLayoutId = lfmHighFrequencyTextInputLayout.id
+            }
+        }
+
+        fakeStatusFlow.emit(idleState)
+        Thread.sleep(200)
+        fakeStatusFlow.emit(errorState)
+        Thread.sleep(200)
+
+        onView(withId(lfmLowFrequencyTextInputLayoutId))
+            .check(matches(hasTextInputLayoutError("Не более 13390 МГц")))
+        onView(withId(lfmHighFrequencyTextInputLayoutId))
+            .check(matches(hasTextInputLayoutError("Не менее 13260 МГц")))
+
+    }
+
+    @Test
+    fun ошибка_ввода_в_поле_нижн_верхн_частоты_периода_ЛЧМ(): Unit = runBlocking {
+        val idleState = SynthesizerUpdatingStatus.Idle(
+            synthesizerModuleStateModel = SynthesizerModuleStateModel(
+                radiationMode = RadiationMode.LFM
+            ),
+            OutputModuleState()
+        )
+        val errorState = SynthesizerUpdatingStatus.Error(0x31)
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var lfmLowFrequencyTextInputLayoutId = 0
+        var lfmHighFrequencyTextInputLayoutId = 0
+        var lfmPeriodTextInputLayoutId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                lfmLowFrequencyTextInputLayoutId = lfmLowFrequencyTextInputLayout.id
+                lfmHighFrequencyTextInputLayoutId = lfmHighFrequencyTextInputLayout.id
+                lfmPeriodTextInputLayoutId = lfmPeriodTextInputLayout.id
+            }
+        }
+
+        fakeStatusFlow.emit(idleState)
+        Thread.sleep(200)
+        fakeStatusFlow.emit(errorState)
+        Thread.sleep(200)
+
+        onView(withId(lfmLowFrequencyTextInputLayoutId))
+            .check(matches(hasTextInputLayoutError("Не менее 13250 МГц")))
+        onView(withId(lfmHighFrequencyTextInputLayoutId))
+            .check(matches(hasTextInputLayoutError("Не более 13400 МГц")))
+        onView(withId(lfmPeriodTextInputLayoutId))
+            .check(matches(hasTextInputLayoutError("Не более 100 мс")))
+
+    }
+
+    @Test
+    fun ошибка_таймаута_приёма_ответного_пакета(): Unit = runBlocking {
+
+        val errorState = SynthesizerUpdatingStatus.Error(0x80)
+        val scenario = launchFragment<SynthesizerBottomSheetDialogFragment>(
+            themeResId = R.style.Theme_RchmDissController
+        )
+        var synthesizerParamsSendButtonId = 0
+        var updatingStatusResultTextViewId = 0
+
+        scenario.onFragment { fragment ->
+            val binding = FragmentSynthesizerBottomSheetDialogBinding.bind(fragment.requireView())
+            with(binding) {
+                synthesizerParamsSendButtonId = synthesizerParamsSendButton.id
+                updatingStatusResultTextViewId = updatingStatusResultTextView.id
+            }
+        }
+
+        fakeStatusFlow.emit(errorState)
+
+        onView(withId(synthesizerParamsSendButtonId))
+            .check(matches(isEnabled()))
+        onView(withId(synthesizerParamsSendButtonId))
+            .check(matches(withText("ОТПРАВИТЬ")))
+
+
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(isDisplayed()))
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withTextColor(scarletColor)))
+        onView(withId(updatingStatusResultTextViewId))
+            .check(matches(withText("Ошибка приёма ответного байта данных")))
     }
 }

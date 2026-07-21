@@ -94,10 +94,7 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                             state.synthesizerModuleStateModel,
                             state.outputModuleState
                         )
-                        is SynthesizerUpdatingStatus.Success -> setStatusText(
-                            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
-                            ru.profitsw2000.core.R.string.packet_send_successfull_status_text.toString()
-                        )
+                        is SynthesizerUpdatingStatus.Success -> handleSuccess()
                         SynthesizerUpdatingStatus.Updating -> setProgressBar(true)
                     }
                 }
@@ -145,6 +142,15 @@ class SynthesizerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             text = resources.getString(ru.profitsw2000.core.R.string.send_button_text)
             isEnabled = true
         }
+    }
+
+    private fun handleSuccess() = with(binding) {
+        setProgressBar(false)
+        setStatusText(
+            resources.getColor(ru.profitsw2000.core.R.color.eucaliptus),
+            resources.getString(ru.profitsw2000.core.R.string.packet_send_successfull_status_text)
+        )
+        synthesizerParamsSendButton.isEnabled = false
     }
 
     private fun handleError(errorCode: Int) {
