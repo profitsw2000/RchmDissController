@@ -26,6 +26,7 @@ class BluetoothStateRepositoryImpl(
     private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter
 ) : BluetoothStateRepository, DefaultLifecycleObserver, OnBluetoothStateListener {
+    private var isReceiverRegistered = false
     private val _bluetoothIsEnabled = MutableStateFlow(false)
     override val bluetoothIsEnabled: StateFlow<Boolean>
         get() = _bluetoothIsEnabled
@@ -70,12 +71,24 @@ class BluetoothStateRepositoryImpl(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        context.registerReceiver(bluetoothStateBroadcastReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+        if (!isReceiverRegistered) {
+            context.registerReceiver(
+                bluetoothStateBroadcastReceiver,
+                IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            )
+            isReceiverRegistered = true
+        }
     }
 
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
-        context.unregisterReceiver(bluetoothStateBroadcastReceiver)
+        try {
+            context.unregisterReceiver(bluetoothStateBroadcastReceiver)
+        } catch (e: Exception) {
+            e.stackTrace
+        } finally {
+            isReceiverRegistered = false
+        }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
