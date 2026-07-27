@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/base_tx_icon"
+        android:width="54dp"
+        android:height="48dp"
+        android:drawable="@drawable/tx_icon"/>
+
+    <item
+        android:id="@+id/number_layer"
+        android:gravity="center_vertical|right"
+        android:right="8dp"
+        android:width="20dp"
+        android:height="20dp">
+        <shape android:shape = "rectangle">
+            <solid android:color="@android:color/transparent"/>
+        </shape>
+    </item>
+
+</layer-list>

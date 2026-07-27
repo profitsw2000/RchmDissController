@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/main"
+        android:icon="@drawable/home_icon"
+        android:title="Главная"/>
+
+    <item
+        android:id="@+id/registers"
+        android:icon="@drawable/registers_icon"
+        android:title="Регистры"/>
+
+    <item
+        android:id="@+id/history"
+        android:icon="@drawable/logs_icon"
+        android:title="История"/>
+
+</menu>

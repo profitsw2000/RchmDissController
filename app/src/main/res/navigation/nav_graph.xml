@@ -3,26 +3,57 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/main">
 
     <fragment
-        android:id="@+id/FirstFragment"
+        android:id="@+id/main"
+        android:name="ru.profitsw2000.mainscreen.presentation.view.MainFragment"
+        tools:layout="@layout/fragment_main">
+
+        <action
+            android:id="@+id/action_main_to_transmitter_settings_dialog_fragment"
+            app:destination="@+id/transmitter_settings_bottom_sheet"/>
+
+        <action
+            android:id="@+id/action_main_to_receiver_settings_dialog_fragment"
+            app:destination="@+id/receiver_settings_bottom_sheet"/>
+
+        <action
+            android:id="@+id/action_main_to_synthesizer_settings_dialog_fragment"
+            app:destination="@+id/synthesizer_settings_bottom_sheet"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/registers"
         android:name="ru.profitsw2000.rchmdisscontroller.FirstFragment"
-        android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_first">
-
-        <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
     </fragment>
+
     <fragment
-        android:id="@+id/SecondFragment"
+        android:id="@+id/history"
         android:name="ru.profitsw2000.rchmdisscontroller.SecondFragment"
-        android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_second">
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
     </fragment>
+
+    <dialog
+        android:id="@+id/transmitter_settings_bottom_sheet"
+        android:name="ru.profitsw2000.mainscreen.presentation.view.bottomsheet.TransmitterBottomSheetDialogFragment"
+        android:label="@string/transmitter_part_title_text"
+        tools:layout="@layout/fragment_transmitter_bottom_sheet_dialog">
+    </dialog>
+
+    <dialog
+        android:id="@+id/receiver_settings_bottom_sheet"
+        android:name="ru.profitsw2000.mainscreen.presentation.view.bottomsheet.ReceiverBottomSheetDialogFragment"
+        android:label="@string/receiver_part_title_text"
+        tools:layout="@layout/fragment_receiver_bottom_sheet_dialog">
+    </dialog>
+
+    <dialog
+        android:id="@+id/synthesizer_settings_bottom_sheet"
+        android:name="ru.profitsw2000.mainscreen.presentation.view.bottomsheet.SynthesizerBottomSheetDialogFragment"
+        android:label="@string/synthesizer_part_title_text"
+        tools:layout="@layout/fragment_synthesizer_bottom_sheet_dialog">
+    </dialog>
+
 </navigation>
