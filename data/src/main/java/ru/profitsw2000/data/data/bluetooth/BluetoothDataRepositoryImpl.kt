@@ -1,5 +1,6 @@
 package ru.profitsw2000.data.data.bluetooth
 
+import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothSocket
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import java.io.OutputStream
 
 class BluetoothDataRepositoryImpl(
     private val socket: BluetoothSocket?,
+    private val bluetoothGattCharacteristic: BluetoothGattCharacteristic?,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BluetoothDataRepository {
 

@@ -34,7 +34,7 @@ class BluetoothRepositoryImpl(
         bluetoothGatt,
         bluetoothGattCharacteristic
     )
-    override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket)
+    override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket, bluetoothGattCharacteristic)
     @OptIn(ExperimentalCoroutinesApi::class)
     override val bluetoothBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
         .flatMapLatest { status ->
