@@ -6,10 +6,12 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.IntentFilter
+import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -157,11 +159,13 @@ class BluetoothConnectionRepositoryImpl(
                         bluetoothGattCharacteristic = service?.getCharacteristic(BLE_CHARACTERISTIC_UUID)
 
                         if (bluetoothGattCharacteristic != null) {
+                            enableNotifications(gatt = gatt, bluetoothGattCharacteristic!!)
                             if (continuation.isActive) continuation.resume(true) {
                                 bluetoothGatt?.disconnect()
                                 bluetoothGatt?.close()
                                 bluetoothGatt = null
                             }
+
                         } else {
                             if (continuation.isActive) continuation.resume(false) {}
                         }
@@ -205,6 +209,25 @@ class BluetoothConnectionRepositoryImpl(
         } catch (ioException: IOException) {
             bluetoothSocket?.close()
             false
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun enableNotifications(gatt: BluetoothGatt,
+                                    characteristic: BluetoothGattCharacteristic) {
+        gatt.setCharacteristicNotification(characteristic, true)
+
+        val configUuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+        val descriptor = characteristic.getDescriptor(configUuid)
+        if (descriptor != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+            } else {
+                @Suppress("DEPRECATION")
+                descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                @Suppress("DEPRECATION")
+                gatt.writeDescriptor(descriptor)
+            }
         }
     }
 
