@@ -10,6 +10,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.transform
 import ru.profitsw2000.data.domain.bluetooth.BluetoothDataRepository
@@ -36,11 +37,13 @@ class BluetoothRepositoryImpl(
     )
     override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket, bluetoothGattCharacteristic)
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val bluetoothBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
+    private val bluetoothClassicBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
         .flatMapLatest { status ->
             if (status is BluetoothConnectionStatus.Connected) {
                 bluetoothSocket?.inputStream?.let {bluetoothDataRepository.readData(it)} ?: emptyFlow()
             } else emptyFlow()
         }
+    private val bluetoothLowEnergyBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothLowEnergyDataFlow
+    override val bluetoothBytesDataFlow: Flow<ByteArray> = merge(bluetoothClassicBytesDataFlow, bluetoothLowEnergyBytesDataFlow)
     override val bluetoothIsEnabled = bluetoothStateRepository.bluetoothIsEnabled
 }

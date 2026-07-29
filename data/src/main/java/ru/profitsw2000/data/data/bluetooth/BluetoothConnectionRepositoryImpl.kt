@@ -54,7 +54,7 @@ class BluetoothConnectionRepositoryImpl(
         extraBufferCapacity = 64,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-    val bluetoothLowEnergyDataFlow: Flow<ByteArray> by this::_bluetoothLowEnergyDataFlow
+    val bluetoothLowEnergyDataFlow: Flow<ByteArray> = _bluetoothLowEnergyDataFlow
 
     private val _bluetoothConnectionStatusFlow =
             MutableStateFlow<BluetoothConnectionStatus>(BluetoothConnectionStatus.Disconnected)
