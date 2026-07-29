@@ -14,6 +14,9 @@ import androidx.annotation.RequiresPermission
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -24,6 +27,7 @@ import ru.profitsw2000.data.domain.bluetooth.BluetoothConnectionRepository
 import ru.profitsw2000.data.model.bluetooth.BluetoothDeviceModel
 import ru.profitsw2000.data.model.bluetooth.status.BluetoothConnectionStatus
 import java.io.IOException
+import java.nio.Buffer
 import java.util.UUID
 
 class BluetoothConnectionRepositoryImpl(
@@ -44,6 +48,13 @@ class BluetoothConnectionRepositoryImpl(
     private val filter = IntentFilter().apply {
         addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
     }
+
+    private val _bluetoothLowEnergyDataFlow = MutableSharedFlow<ByteArray>(
+        replay = 0,
+        extraBufferCapacity = 64,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val bluetoothLowEnergyDataFlow: Flow<ByteArray> by this::_bluetoothLowEnergyDataFlow
 
     private val _bluetoothConnectionStatusFlow =
             MutableStateFlow<BluetoothConnectionStatus>(BluetoothConnectionStatus.Disconnected)
@@ -157,6 +168,22 @@ class BluetoothConnectionRepositoryImpl(
                     } else {
                         if (continuation.isActive) continuation.resume(false) {}
                     }
+                }
+
+                override fun onCharacteristicChanged(
+                    gatt: BluetoothGatt,
+                    characteristic: BluetoothGattCharacteristic,
+                    value: ByteArray
+                ) {
+                    _bluetoothLowEnergyDataFlow.tryEmit(value)
+                }
+
+                @Suppress("DEPRECATION")
+                override fun onCharacteristicChanged(
+                    gatt: BluetoothGatt?,
+                    characteristic: BluetoothGattCharacteristic
+                ) {
+                    _bluetoothLowEnergyDataFlow.tryEmit(characteristic.value)
                 }
             }
 
