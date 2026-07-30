@@ -35,9 +35,7 @@ import java.util.UUID
 class BluetoothConnectionRepositoryImpl(
     private val context: Context,
     private var bluetoothSocket: BluetoothSocket?,
-    private val bluetoothAdapter: BluetoothAdapter,
-    private var bluetoothGatt: BluetoothGatt?,
-    private var bluetoothGattCharacteristic: BluetoothGattCharacteristic?
+    private val bluetoothAdapter: BluetoothAdapter
 ) : BluetoothConnectionRepository, OnBluetoothConnectionListener, DefaultLifecycleObserver {
 
     private val BLE_SERVICE_UUID = UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb")
@@ -50,8 +48,10 @@ class BluetoothConnectionRepositoryImpl(
     private val filter = IntentFilter().apply {
         addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
     }
+    private var bluetoothGatt: BluetoothGatt? = null
+    private var bluetoothGattCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val _bluetoothLowEnergyDataFlow = MutableSharedFlow<ByteArray>(
+    val _bluetoothLowEnergyDataFlow = MutableSharedFlow<ByteArray>(
         replay = 0,
         extraBufferCapacity = 64,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -89,14 +89,6 @@ class BluetoothConnectionRepositoryImpl(
             } else {
                 _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
             }
-/*            try {
-                bluetoothSocket = bluetoothAdapter.getRemoteDevice(address).createRfcommSocketToServiceRecord(uuid)
-                bluetoothSocket?.connect()
-                _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connected
-            } catch (ioException: IOException) {
-                bluetoothSocket?.close()
-                _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
-            }*/
         }
     }
 
@@ -135,6 +127,9 @@ class BluetoothConnectionRepositoryImpl(
         context.unregisterReceiver(bluetoothConnectionBroadcastReceiver)
         bluetoothGatt?.close()
     }
+
+    fun getActiveCharacteristic(): BluetoothGattCharacteristic? = bluetoothGattCharacteristic
+    fun getActiveGatt(): BluetoothGatt? = bluetoothGatt
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private suspend fun lowEnergyBluetoothConnect(device: BluetoothDevice): Boolean {
