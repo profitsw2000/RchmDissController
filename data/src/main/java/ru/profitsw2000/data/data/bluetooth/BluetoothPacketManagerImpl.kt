@@ -47,6 +47,10 @@ class BluetoothPacketManagerImpl(
     override var packetSize = 0
     override var packetCheckSum = 0
 
+    init {
+        observeBluetoothDataBytesFlow()
+    }
+
     override fun observeBluetoothDataBytesFlow() {
         coroutineScope.launch {
             bluetoothRepository.bluetoothBytesDataFlow.collect { bytes ->

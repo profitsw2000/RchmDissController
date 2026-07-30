@@ -30,13 +30,13 @@ class BluetoothDataRepositoryImpl(
             val bluetoothGatt = bluetoothConnectionRepositoryImpl.getActiveGatt()
             if (bluetoothGattCharacteristic != null && bluetoothGatt != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    bluetoothGatt!!.writeCharacteristic(bluetoothGattCharacteristic!!, byteArray, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                    bluetoothGatt.writeCharacteristic(bluetoothGattCharacteristic, byteArray, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
                 } else {
                     @Suppress("DEPRECATION")
-                    bluetoothGattCharacteristic!!.value = byteArray
+                    bluetoothGattCharacteristic.value = byteArray
                     @Suppress("DEPRECATION")
-                    bluetoothGattCharacteristic!!.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                    bluetoothGatt!!.writeCharacteristic(bluetoothGattCharacteristic!!)
+                    bluetoothGattCharacteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    bluetoothGatt.writeCharacteristic(bluetoothGattCharacteristic)
                 }
                 return@withContext
             }
