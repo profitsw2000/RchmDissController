@@ -44,14 +44,13 @@ class BluetoothConnectionRepositoryImpl(
     // UUID для Classic SPP (Старый HC-05)
     private val CLASSIC_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
-    private val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     private val filter = IntentFilter().apply {
         addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
     }
-    private var bluetoothGatt: BluetoothGatt? = null
-    private var bluetoothGattCharacteristic: BluetoothGattCharacteristic? = null
+    override var bluetoothGatt: BluetoothGatt? = null
+    override var bluetoothGattCharacteristic: BluetoothGattCharacteristic? = null
 
-    val _bluetoothLowEnergyDataFlow = MutableSharedFlow<ByteArray>(
+    private val _bluetoothLowEnergyDataFlow = MutableSharedFlow<ByteArray>(
         replay = 0,
         extraBufferCapacity = 64,
         onBufferOverflow = BufferOverflow.DROP_OLDEST

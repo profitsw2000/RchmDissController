@@ -19,10 +19,6 @@ interface BluetoothRepository {
 
     var bluetoothSocket: BluetoothSocket?
 
-    var bluetoothGatt: BluetoothGatt?
-
-    var bluetoothGattCharacteristic: BluetoothGattCharacteristic?
-
     val bluetoothStateRepository: BluetoothStateRepository
 
     val bluetoothConnectionRepository: BluetoothConnectionRepository

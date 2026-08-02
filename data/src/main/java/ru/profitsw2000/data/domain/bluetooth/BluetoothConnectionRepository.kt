@@ -1,5 +1,7 @@
 package ru.profitsw2000.data.domain.bluetooth
 
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.StateFlow
 import ru.profitsw2000.core.drawable.utils.bluetooth.BluetoothConnectionBroadcastReceiver
@@ -9,6 +11,8 @@ interface BluetoothConnectionRepository {
 
     val bluetoothConnectionStatusFlow: StateFlow<BluetoothConnectionStatus>
     val bluetoothConnectionBroadcastReceiver: BluetoothConnectionBroadcastReceiver
+    var bluetoothGatt: BluetoothGatt?
+    var bluetoothGattCharacteristic: BluetoothGattCharacteristic?
 
     suspend fun initConnection(bluetoothIsEnabled: Boolean)
 

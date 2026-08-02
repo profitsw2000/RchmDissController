@@ -29,15 +29,17 @@ class BluetoothRepositoryImpl(
     private val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
     override val bluetoothAdapter: BluetoothAdapter = bluetoothManager.adapter
     override var bluetoothSocket: BluetoothSocket? = null
-    override var bluetoothGatt: BluetoothGatt? = null
-    override var bluetoothGattCharacteristic: BluetoothGattCharacteristic? = null
     override val bluetoothStateRepository = BluetoothStateRepositoryImpl(context, bluetoothAdapter)
     override val bluetoothConnectionRepository = BluetoothConnectionRepositoryImpl(
         context,
         bluetoothSocket,
         bluetoothAdapter
     )
-    override val bluetoothDataRepository = BluetoothDataRepositoryImpl(bluetoothSocket, bluetoothConnectionRepository)
+    override val bluetoothDataRepository = BluetoothDataRepositoryImpl(
+        socketValueProvider = { bluetoothSocket },
+        bluetoothGattValueProvider = { bluetoothConnectionRepository.bluetoothGatt },
+        bluetoothGattCharacteristicValueProvider = { bluetoothConnectionRepository.bluetoothGattCharacteristic }
+    )
     @OptIn(ExperimentalCoroutinesApi::class)
     private val bluetoothClassicBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothConnectionStatusFlow
         .flatMapLatest { status ->
@@ -45,20 +47,7 @@ class BluetoothRepositoryImpl(
                 bluetoothSocket?.inputStream?.let {bluetoothDataRepository.readData(it)} ?: emptyFlow()
             } else emptyFlow()
         }
-    private val bluetoothLowEnergyBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository._bluetoothLowEnergyDataFlow
-    override val bluetoothBytesDataFlow: Flow<ByteArray> = bluetoothLowEnergyBytesDataFlow
+    private val bluetoothLowEnergyBytesDataFlow: Flow<ByteArray> = bluetoothConnectionRepository.bluetoothLowEnergyDataFlow
+    override val bluetoothBytesDataFlow: Flow<ByteArray> = merge(bluetoothClassicBytesDataFlow, bluetoothLowEnergyBytesDataFlow)
     override val bluetoothIsEnabled = bluetoothStateRepository.bluetoothIsEnabled
-
-    init {
-        collectData()
-    }
-
-    fun collectData() {
-        val coroutineScope = CoroutineScope(Dispatchers.IO)
-        coroutineScope.launch {
-            bluetoothBytesDataFlow.collect { bytes ->
-                Log.d("VVV", "collectData: $bytes")
-            }
-        }
-    }
 }

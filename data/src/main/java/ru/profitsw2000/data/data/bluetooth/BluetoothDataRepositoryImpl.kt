@@ -17,8 +17,9 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class BluetoothDataRepositoryImpl(
-    private val socket: BluetoothSocket?,
-    private var bluetoothConnectionRepositoryImpl: BluetoothConnectionRepositoryImpl,
+    private val socketValueProvider: () -> BluetoothSocket?,
+    private val bluetoothGattValueProvider: () -> BluetoothGatt?,
+    private var bluetoothGattCharacteristicValueProvider: () -> BluetoothGattCharacteristic?,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : BluetoothDataRepository {
 
@@ -26,8 +27,8 @@ class BluetoothDataRepositoryImpl(
     override suspend fun writeData(byteArray: ByteArray) {
         withContext(ioDispatcher) {
 
-            val bluetoothGattCharacteristic = bluetoothConnectionRepositoryImpl.getActiveCharacteristic()
-            val bluetoothGatt = bluetoothConnectionRepositoryImpl.getActiveGatt()
+            val bluetoothGattCharacteristic = bluetoothGattCharacteristicValueProvider()
+            val bluetoothGatt = bluetoothGattValueProvider()
             if (bluetoothGattCharacteristic != null && bluetoothGatt != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     bluetoothGatt.writeCharacteristic(bluetoothGattCharacteristic, byteArray, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
@@ -41,6 +42,7 @@ class BluetoothDataRepositoryImpl(
                 return@withContext
             }
 
+            val socket = socketValueProvider()
             socket?.let {
                 if (it.isConnected) {
                     writeByteArray(socket.outputStream, byteArray)
@@ -51,8 +53,10 @@ class BluetoothDataRepositoryImpl(
 
     private suspend fun writeByteArray(outputStream: OutputStream, byteArray: ByteArray): Boolean {
         return try {
-            outputStream.write(byteArray)
-            outputStream.flush()
+            withContext(Dispatchers.IO) {
+                outputStream.write(byteArray)
+                outputStream.flush()
+            }
             true
         } catch (exception: Exception) {
             false
