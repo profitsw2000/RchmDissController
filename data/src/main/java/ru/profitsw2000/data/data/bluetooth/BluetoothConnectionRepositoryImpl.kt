@@ -76,17 +76,10 @@ class BluetoothConnectionRepositoryImpl(
         _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connecting
         withContext(Dispatchers.IO) {
             val device = bluetoothAdapter.getRemoteDevice(address)
-            val lowEnergyBluetoothConnectionSuccess = lowEnergyBluetoothConnect(device)
-            if (lowEnergyBluetoothConnectionSuccess) {
-                _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connected
-                return@withContext
-            }
-
-            val classicBluetoothConnection = classicBluetoothConnect(device)
-            if (classicBluetoothConnection) {
-                _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connected
-            } else {
-                _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
+            val deviceType = device.type
+            when(deviceType) {
+                BluetoothDevice.DEVICE_TYPE_LE -> lowEnergyBluetoothConnect(device)
+                BluetoothDevice.DEVICE_TYPE_CLASSIC -> classicBluetoothConnect(device)
             }
         }
     }
@@ -95,9 +88,7 @@ class BluetoothConnectionRepositoryImpl(
     override suspend fun disconnectBluetoothDevice() {
         withContext(Dispatchers.IO) {
             try {
-                bluetoothGatt?.close()
-                bluetoothGatt = null
-                bluetoothGattCharacteristic = null
+                bluetoothGattDisconnectAndClose()
                 bluetoothSocket?.close()
                 bluetoothSocket = null
                 _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Disconnected
@@ -117,92 +108,104 @@ class BluetoothConnectionRepositoryImpl(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        context.registerReceiver(bluetoothConnectionBroadcastReceiver, filter)
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        context.unregisterReceiver(bluetoothConnectionBroadcastReceiver)
-        bluetoothGatt?.close()
-    }
-
-    fun getActiveCharacteristic(): BluetoothGattCharacteristic? = bluetoothGattCharacteristic
-    fun getActiveGatt(): BluetoothGatt? = bluetoothGatt
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private suspend fun lowEnergyBluetoothConnect(device: BluetoothDevice): Boolean {
-        if (device.type == BluetoothDevice.DEVICE_TYPE_CLASSIC) return false
-
-        return suspendCancellableCoroutine { continuation ->
-            val gattCallback = object : BluetoothGattCallback() {
-                @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-                override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-                    if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
-                        gatt.discoverServices()
-                    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                        bluetoothDeviceDisconnected()
-                        if (continuation.isActive) continuation.resume(false) { cause, _, _ -> }
-                    }
-                }
-
-                @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-                override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-                    if (status == BluetoothGatt.GATT_SUCCESS) {
-                        val service = gatt.getService(BLE_SERVICE_UUID)
-                        bluetoothGattCharacteristic = service?.getCharacteristic(BLE_CHARACTERISTIC_UUID)
-
-                        if (bluetoothGattCharacteristic != null) {
-                            enableNotifications(gatt = gatt, bluetoothGattCharacteristic!!)
-                            if (continuation.isActive) continuation.resume(true) {
-                                bluetoothGatt?.disconnect()
-                                bluetoothGatt?.close()
-                                bluetoothGatt = null
-                            }
-
-                        } else {
-                            if (continuation.isActive) continuation.resume(false) {}
-                        }
-                    } else {
-                        if (continuation.isActive) continuation.resume(false) {}
-                    }
-                }
-
-                override fun onCharacteristicChanged(
-                    gatt: BluetoothGatt,
-                    characteristic: BluetoothGattCharacteristic,
-                    value: ByteArray
-                ) {
-                    _bluetoothLowEnergyDataFlow.tryEmit(value)
-                }
-
-                @Suppress("DEPRECATION")
-                override fun onCharacteristicChanged(
-                    gatt: BluetoothGatt?,
-                    characteristic: BluetoothGattCharacteristic
-                ) {
-                    _bluetoothLowEnergyDataFlow.tryEmit(characteristic.value)
-                }
-            }
-
-            bluetoothGatt = device.connectGatt(context, false, gattCallback)
-
-            continuation.invokeOnCancellation {
-                bluetoothGatt?.disconnect()
-                bluetoothGatt?.close()
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            context.registerReceiver(
+                bluetoothConnectionBroadcastReceiver,
+                filter,
+                Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            context.registerReceiver(bluetoothConnectionBroadcastReceiver, filter)
         }
     }
 
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        context.unregisterReceiver(bluetoothConnectionBroadcastReceiver)
+    }
+
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun classicBluetoothConnect(device: BluetoothDevice): Boolean {
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        bluetoothGattDisconnectAndClose()
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun lowEnergyBluetoothConnect(device: BluetoothDevice) {
+        val gattCallback = object : BluetoothGattCallback() {
+            @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+            override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                    bluetoothGattDisconnectAndClose()
+                    _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
+                    bluetoothDeviceDisconnected()
+                    return
+                }
+
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    gatt.discoverServices()
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    bluetoothGattDisconnectAndClose()
+                    _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Disconnected
+                    bluetoothDeviceDisconnected()
+                }
+            }
+
+            @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+            override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    val service = gatt.getService(BLE_SERVICE_UUID)
+                    bluetoothGattCharacteristic = service?.getCharacteristic(BLE_CHARACTERISTIC_UUID)
+
+                    if (bluetoothGattCharacteristic != null) {
+                        enableNotifications(gatt = gatt, bluetoothGattCharacteristic!!)
+                        _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connected
+                    } else {
+                        bluetoothGattDisconnectAndClose()
+                        _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
+                    }
+                } else {
+                    bluetoothGattDisconnectAndClose()
+                    _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
+                }
+            }
+
+            override fun onCharacteristicChanged(
+                gatt: BluetoothGatt,
+                characteristic: BluetoothGattCharacteristic,
+                value: ByteArray
+            ) {
+                _bluetoothLowEnergyDataFlow.tryEmit(value)
+            }
+
+            @Suppress("DEPRECATION")
+            override fun onCharacteristicChanged(
+                gatt: BluetoothGatt?,
+                characteristic: BluetoothGattCharacteristic
+            ) {
+                _bluetoothLowEnergyDataFlow.tryEmit(characteristic.value)
+            }
+        }
+
+        bluetoothGatt = device.connectGatt(context, false, gattCallback)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun bluetoothGattDisconnectAndClose() {
+        bluetoothGatt?.disconnect()
+        bluetoothGatt?.close()
+        bluetoothGatt = null
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun classicBluetoothConnect(device: BluetoothDevice) {
         return try {
             bluetoothSocket = device.createRfcommSocketToServiceRecord(CLASSIC_UUID)
             bluetoothSocket?.connect()
-            true
+            _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Connected
         } catch (ioException: IOException) {
             bluetoothSocket?.close()
-            false
+            _bluetoothConnectionStatusFlow.value = BluetoothConnectionStatus.Failed
         }
     }
 

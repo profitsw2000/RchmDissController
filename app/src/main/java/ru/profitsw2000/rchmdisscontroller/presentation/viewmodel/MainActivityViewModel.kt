@@ -1,5 +1,6 @@
 package ru.profitsw2000.rchmdisscontroller.presentation.viewmodel
 
+import android.util.Log
 import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
